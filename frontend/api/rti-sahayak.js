@@ -1,3 +1,5 @@
+const MAX_OUTPUT_TOKENS = 1200
+
 const SENSITIVE_PATTERNS = [
   /\b[A-Z]{5}[0-9]{4}[A-Z]\b/i,
   /\b(?:\d{4}[ -]?){3}\d{4}\b/,
@@ -14,8 +16,8 @@ const RTI_KNOWLEDGE = [
   "- This portal is for Central Government Ministries, Departments, and listed Central Public Authorities only. It does not accept State Public Authorities, including NCT of Delhi.",
   "- A user account is not mandatory to file an RTI request. The request form accepts 3,000 characters; a longer application can be attached as a PDF through the Supporting Document field.",
   "- Non-BPL applicants pay the prescribed fee through SBI internet banking, SBI debit card, Master/Visa credit or debit cards, or UPI. BPL applicants do not pay the RTI fee but attach their BPL certificate in the official form.",
-  "- If payment is deducted but no registration number is generated, use Payment Reconciliation. Do not pay again; wait 24–48 working hours before using the help email.",
-  "- A First Appeal is filed through Submit First Appeal using the original online application’s registration number and email ID. No fee is paid for a First Appeal. An online First Appeal is only for an RTI originally filed online.",
+  "- If payment is deducted but no registration number is generated, use Payment Reconciliation. Do not pay again; wait 24-48 working hours before using the help email.",
+  "- A First Appeal is filed through Submit First Appeal using the original online application's registration number and email ID. No fee is paid for a First Appeal. An online First Appeal is only for an RTI originally filed online.",
   "- View Status displays the status or reply for an online RTI application or First Appeal. The secure journey protects personal information with OTP validation.",
   "- If a supporting document is requested, View Status shows the upload option. The helpline is only for problems using this Central Government RTI Online portal.",
 ].join("\n")
@@ -28,7 +30,8 @@ const INSTRUCTIONS = [
   "- If the user gives or asks to give any sensitive or account-specific information, state that you cannot receive it and direct them to the relevant secure portal journey, such as View Status or Submit First Appeal.",
   "- Never request an upload, attachment, or payment information in chat.",
   "- Do not repeat sensitive information even if it appears in the input.",
-  "If the answer is not covered by the supplied knowledge, say that you cannot confirm it and direct the user to the official FAQs or support desk. Do not invent rules, deadlines, fees, links, or government contacts.",
+  "When Public Authority candidates are provided, treat them as directory reference data only. Explain why one may be relevant, list no more than three candidates, and say that the applicant must confirm which authority holds the information. Do not claim the match is legally final.",
+  "If the answer is not covered by the supplied knowledge, say that you cannot confirm it and direct the user to the official FAQs or Public Authorities directory. Do not invent rules, deadlines, fees, links, offices, or government contacts.",
   RTI_KNOWLEDGE,
 ].join("\n\n")
 
@@ -52,6 +55,50 @@ function safeMessage(value) {
   return value.trim().slice(0, 700)
 }
 
+function safeDirectoryText(value, maxLength = 180) {
+  if (typeof value !== "string") {
+    return ""
+  }
+
+  return value
+    .replace(/[^A-Za-z0-9&(),.'\-/\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength)
+}
+
+function getAuthoritySuggestions(value) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .slice(0, 3)
+    .map((item) => ({
+      authorityName: safeDirectoryText(item?.authorityName),
+      ministryName: safeDirectoryText(item?.ministryName),
+      relatedOffices: Array.isArray(item?.relatedOffices)
+        ? item.relatedOffices.slice(0, 3).map((office) => safeDirectoryText(office, 140)).filter(Boolean)
+        : [],
+    }))
+    .filter((item) => item.authorityName)
+}
+
+function buildAuthorityContext(suggestions) {
+  if (!suggestions.length) {
+    return ""
+  }
+
+  return [
+    "Official directory candidates for the user's general issue:",
+    ...suggestions.map((suggestion, index) => [
+      (index + 1) + ". Public Authority: " + suggestion.authorityName,
+      suggestion.ministryName ? "Ministry: " + suggestion.ministryName : "",
+      suggestion.relatedOffices.length ? "Related offices: " + suggestion.relatedOffices.join("; ") : "",
+    ].filter(Boolean).join("\n")),
+  ].join("\n")
+}
+
 function extractOutput(payload) {
   if (typeof payload.output_text === "string") {
     return payload.output_text.trim()
@@ -64,26 +111,54 @@ function extractOutput(payload) {
     .trim()
 }
 
+function getUsage(usage) {
+  if (
+    !usage ||
+    typeof usage.input_tokens !== "number" ||
+    typeof usage.output_tokens !== "number" ||
+    typeof usage.total_tokens !== "number"
+  ) {
+    return undefined
+  }
+
+  return {
+    inputTokens: usage.input_tokens,
+    outputTokens: usage.output_tokens,
+    totalTokens: usage.total_tokens,
+  }
+}
+
+function sendJson(response, statusCode, payload) {
+  if (typeof response.status === "function") {
+    return response.status(statusCode).json(payload)
+  }
+
+  response.statusCode = statusCode
+  response.setHeader("Content-Type", "application/json; charset=utf-8")
+  response.end(JSON.stringify(payload))
+  return undefined
+}
+
 export default async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST")
-    return response.status(405).json({ error: "Method not allowed" })
+    return sendJson(response, 405, { error: "Method not allowed" })
   }
 
   let body
   try {
     body = getBody(request)
   } catch {
-    return response.status(400).json({ error: "Invalid request body" })
+    return sendJson(response, 400, { error: "Invalid request body" })
   }
 
   const message = safeMessage(body.message)
   if (!message) {
-    return response.status(400).json({ error: "A message is required" })
+    return sendJson(response, 400, { error: "A message is required" })
   }
 
   if (containsSensitiveData(message)) {
-    return response.status(400).json({
+    return sendJson(response, 400, {
       error: "Sensitive information must not be submitted to RTI Sahayak.",
     })
   }
@@ -97,6 +172,7 @@ export default async function handler(request, response) {
         }))
         .filter((item) => item.content && !containsSensitiveData(item.content))
     : []
+  const authorityContext = buildAuthorityContext(getAuthoritySuggestions(body.authoritySuggestions))
   const safetyIdentifier =
     typeof body.safetyIdentifier === "string" &&
     /^rti-sahayak-[a-f0-9-]{36}$/i.test(body.safetyIdentifier)
@@ -105,7 +181,7 @@ export default async function handler(request, response) {
   const apiKey = process.env.OPENAI_API_KEY
 
   if (!apiKey) {
-    return response.status(503).json({ error: "RTI Sahayak is not configured" })
+    return sendJson(response, 503, { error: "RTI Sahayak is not configured" })
   }
 
   try {
@@ -117,9 +193,9 @@ export default async function handler(request, response) {
       },
       body: JSON.stringify({
         model: "gpt-5.6-luna",
-        instructions: INSTRUCTIONS,
+        instructions: authorityContext ? INSTRUCTIONS + "\n\n" + authorityContext : INSTRUCTIONS,
         input: [...history, { role: "user", content: message }],
-        max_output_tokens: 320,
+        max_output_tokens: MAX_OUTPUT_TOKENS,
         reasoning: { effort: "low" },
         text: { verbosity: "low" },
         safety_identifier: safetyIdentifier,
@@ -128,17 +204,22 @@ export default async function handler(request, response) {
     })
 
     if (!openAiResponse.ok) {
-      return response.status(502).json({ error: "RTI Sahayak could not prepare an answer" })
+      return sendJson(response, 502, { error: "RTI Sahayak could not prepare an answer" })
     }
 
     const payload = await openAiResponse.json()
     const reply = extractOutput(payload)
     if (!reply) {
-      return response.status(502).json({ error: "RTI Sahayak returned an empty answer" })
+      return sendJson(response, 502, { error: "RTI Sahayak returned an empty answer" })
     }
 
-    return response.status(200).json({ reply })
+    const usage = getUsage(payload.usage)
+    if (usage) {
+      console.info("[RTI Sahayak] GPT-5.6 Luna token usage", usage)
+    }
+
+    return sendJson(response, 200, { reply, usage })
   } catch {
-    return response.status(502).json({ error: "RTI Sahayak is temporarily unavailable" })
+    return sendJson(response, 502, { error: "RTI Sahayak is temporarily unavailable" })
   }
 }

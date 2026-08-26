@@ -1,3 +1,8 @@
+import {
+  findAuthoritySuggestions,
+  type AuthoritySuggestion,
+} from "@/services/authority-recommendations"
+
 export type ChatRole = "assistant" | "user"
 
 export type ChatHistoryMessage = {
@@ -5,9 +10,17 @@ export type ChatHistoryMessage = {
   content: string
 }
 
+export type TokenUsage = {
+  inputTokens: number
+  outputTokens: number
+  totalTokens: number
+}
+
 export type RtiSahayakReply = {
   reply: string
   source: "gpt-5.6-luna" | "local"
+  authoritySuggestions: AuthoritySuggestion[]
+  usage?: TokenUsage
 }
 
 const sensitivePatterns = [
@@ -25,19 +38,23 @@ export function containsSensitiveData(text: string) {
   return sensitivePatterns.some((pattern) => pattern.test(text))
 }
 
-function getLocalReply(message: string): string {
+function getLocalReply(message: string, suggestions: AuthoritySuggestion[]): string {
   const query = message.toLowerCase()
 
+  if (suggestions.length) {
+    return "Based on your description, I found possible Central Public Authorities below. Please open the directory to confirm the authority that holds the information before filing. These are suggestions, not a final legal determination."
+  }
+
   if (/(first appeal|1st appeal)/.test(query)) {
-    return "To file a First Appeal, choose “Submit First Appeal” and enter the registration number and email ID used for the original online RTI application. No fee is required for a First Appeal. Please use the secure appeal form for those details—do not share them here."
+    return "To file a First Appeal, choose Submit First Appeal and enter the registration number and email ID used for the original online RTI application. No fee is required for a First Appeal. Please use the secure appeal form for those details - do not share them here."
   }
 
   if (/(second appeal|2nd appeal)/.test(query)) {
-    return "A Second Appeal is for cases where you are dissatisfied with the First Appellate Authority’s decision. RTI Sahayak can explain the process, but please use the official appeal form for case-specific details."
+    return "A Second Appeal is for cases where you are dissatisfied with the First Appellate Authority's decision. RTI Sahayak can explain the process, but please use the official appeal form for case-specific details."
   }
 
   if (/(fee|payment|upi|debit|credit|bpl|money|deducted)/.test(query)) {
-    return "A non-BPL applicant pays the prescribed RTI fee after completing the request form. The portal supports SBI internet banking, SBI debit card, Master/Visa cards, and UPI. BPL applicants do not pay the RTI fee, but must attach the required BPL certificate in the official form. If money was deducted but no registration number was generated, use Payment Reconciliation and wait 24–48 working hours before escalating."
+    return "A non-BPL applicant pays the prescribed RTI fee after completing the request form. The portal supports SBI internet banking, SBI debit card, Master/Visa cards, and UPI. BPL applicants do not pay the RTI fee, but must attach the required BPL certificate in the official form. If money was deducted but no registration number was generated, use Payment Reconciliation and wait 24-48 working hours before escalating."
   }
 
   if (/(status|track|reply|registration)/.test(query)) {
@@ -56,7 +73,28 @@ function getLocalReply(message: string): string {
     return "If a Public Authority asks for supporting documents, open View Status through the secure portal. The application status will show the option to upload the requested document. Please do not upload or paste documents in chat."
   }
 
-  return "I can help with RTI filing, fees, First or Second Appeals, Public Authorities, and using View Status. Please ask a general question and do not share any personal details, registration numbers, OTPs, payment details, or documents."
+  return "I can help with RTI filing, fees, First or Second Appeals, selecting a Central Public Authority, and using View Status. Describe the issue in general terms and I will suggest possible departments. Do not share personal details, registration numbers, OTPs, payment details, or documents."
+}
+
+function toTokenUsage(value: unknown): TokenUsage | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined
+  }
+
+  const usage = value as Record<string, unknown>
+  const inputTokens = usage.inputTokens
+  const outputTokens = usage.outputTokens
+  const totalTokens = usage.totalTokens
+
+  if (
+    typeof inputTokens !== "number" ||
+    typeof outputTokens !== "number" ||
+    typeof totalTokens !== "number"
+  ) {
+    return undefined
+  }
+
+  return { inputTokens, outputTokens, totalTokens }
 }
 
 export async function askRtiSahayak({
@@ -73,27 +111,47 @@ export async function askRtiSahayak({
       reply:
         "For your privacy, I have not sent that message. Please do not share personal details, registration numbers, OTPs, payment details, passwords, or documents here. Use the secure portal journey for account- or application-specific help.",
       source: "local",
+      authoritySuggestions: [],
     }
   }
+
+  const authoritySuggestions = await findAuthoritySuggestions(message).catch(() => [])
 
   try {
     const response = await fetch("/api/rti-sahayak", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, history, safetyIdentifier }),
+      body: JSON.stringify({
+        message,
+        history,
+        safetyIdentifier,
+        authoritySuggestions,
+      }),
     })
 
     if (!response.ok) {
       throw new Error("RTI Sahayak service is unavailable")
     }
 
-    const data = (await response.json()) as { reply?: unknown }
+    const data = (await response.json()) as {
+      reply?: unknown
+      usage?: unknown
+    }
     if (typeof data.reply !== "string" || !data.reply.trim()) {
       throw new Error("RTI Sahayak returned an empty response")
     }
 
-    return { reply: data.reply.trim(), source: "gpt-5.6-luna" }
+    return {
+      reply: data.reply.trim(),
+      source: "gpt-5.6-luna",
+      authoritySuggestions,
+      usage: toTokenUsage(data.usage),
+    }
   } catch {
-    return { reply: getLocalReply(message), source: "local" }
+    return {
+      reply: getLocalReply(message, authoritySuggestions),
+      source: "local",
+      authoritySuggestions,
+    }
   }
 }

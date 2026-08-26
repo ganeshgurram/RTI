@@ -2,14 +2,17 @@ import { useRef, useState } from "react"
 import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
+import type { AuthoritySuggestion } from "@/services/authority-recommendations"
 import {
   askRtiSahayak,
   containsSensitiveData,
   type ChatHistoryMessage,
+  type TokenUsage,
 } from "@/services/rti-sahayak"
 
 type ChatMessage = ChatHistoryMessage & {
   id: string
+  authoritySuggestions?: AuthoritySuggestion[]
   source?: "gpt-5.6-luna" | "local"
 }
 
@@ -17,12 +20,12 @@ const welcomeMessage: ChatMessage = {
   id: "welcome",
   role: "assistant",
   content:
-    "Namaste! I’m RTI Sahayak. I can answer general questions about filing an RTI, fees, appeals, Public Authorities, and using View Status.",
+    "Namaste! I am RTI Sahayak. I can answer general questions about filing an RTI, fees, appeals, Public Authorities, and using View Status.",
   source: "local",
 }
 
 const suggestions = [
-  "How do I file an RTI request?",
+  "Which department handles a passport issue?",
   "What is the RTI fee?",
   "How do I file a First Appeal?",
   "How can I check my status?",
@@ -36,12 +39,44 @@ function createSafetyIdentifier() {
   return "rti-sahayak-" + crypto.randomUUID()
 }
 
+function AuthorityMatches({ suggestions }: { suggestions: AuthoritySuggestion[] }) {
+  if (!suggestions.length) {
+    return null
+  }
+
+  return (
+    <section className="mt-3 border-t border-border pt-3">
+      <p className="mb-2 text-xs font-semibold text-foreground">Possible filing targets</p>
+      <div className="space-y-2">
+        {suggestions.map((suggestion) => (
+          <div className="rounded-lg border border-border bg-muted/40 p-2.5" key={suggestion.authorityId}>
+            <p className="text-xs font-semibold leading-5 text-foreground">{suggestion.authorityName}</p>
+            {suggestion.ministryName && (
+              <p className="mt-1 text-xs leading-4 text-muted-foreground">{suggestion.ministryName}</p>
+            )}
+            {suggestion.relatedOffices.length > 0 && (
+              <p className="mt-1.5 text-xs leading-4 text-muted-foreground">
+                Related offices: {suggestion.relatedOffices.join("; ")}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+      <Link className="mt-2 inline-flex text-xs font-semibold text-primary hover:underline" to="/public-authorities">
+        Confirm in Public Authorities
+        <span aria-hidden="true" className="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
+      </Link>
+    </section>
+  )
+}
+
 export function RtiSahayak() {
   const [isOpen, setIsOpen] = useState(false)
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage])
   const [privacyNotice, setPrivacyNotice] = useState("")
+  const [tokenUsage, setTokenUsage] = useState<TokenUsage | null>(null)
   const safetyIdentifier = useRef(createSafetyIdentifier())
 
   const sendMessage = async (rawMessage: string) => {
@@ -80,12 +115,22 @@ export function RtiSahayak() {
       safetyIdentifier: safetyIdentifier.current,
     })
 
+    const usage = response.usage
+    if (usage) {
+      setTokenUsage((currentUsage) => ({
+        inputTokens: (currentUsage?.inputTokens ?? 0) + usage.inputTokens,
+        outputTokens: (currentUsage?.outputTokens ?? 0) + usage.outputTokens,
+        totalTokens: (currentUsage?.totalTokens ?? 0) + usage.totalTokens,
+      }))
+    }
+
     setMessages((currentMessages) => [
       ...currentMessages,
       {
         id: createMessageId(),
         role: "assistant",
         content: response.reply,
+        authoritySuggestions: response.authoritySuggestions,
         source: response.source,
       },
     ])
@@ -96,6 +141,7 @@ export function RtiSahayak() {
     setMessages([welcomeMessage])
     setDraft("")
     setPrivacyNotice("")
+    setTokenUsage(null)
     safetyIdentifier.current = createSafetyIdentifier()
   }
 
@@ -112,7 +158,7 @@ export function RtiSahayak() {
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-headline-md text-base font-semibold">RTI Sahayak</h2>
-              <p className="text-xs text-primary-foreground/75">General RTI guidance · No personal data</p>
+              <p className="text-xs text-primary-foreground/75">General RTI guidance - no personal data</p>
             </div>
             <Button
               aria-label="Close RTI Sahayak"
@@ -137,12 +183,15 @@ export function RtiSahayak() {
                 key={message.id}
               >
                 {message.content}
+                {message.role === "assistant" && message.authoritySuggestions && (
+                  <AuthorityMatches suggestions={message.authoritySuggestions} />
+                )}
               </div>
             ))}
             {isSending && (
               <div className="mr-5 flex w-fit items-center gap-2 rounded-2xl rounded-bl-sm border border-border bg-background px-3 py-2 text-sm text-muted-foreground shadow-sm">
                 <span aria-hidden="true" className="material-symbols-outlined animate-pulse text-base">more_horiz</span>
-                RTI Sahayak is preparing an answer…
+                RTI Sahayak is preparing an answer...
               </div>
             )}
           </div>
@@ -184,7 +233,7 @@ export function RtiSahayak() {
                 id="rti-sahayak-message"
                 maxLength={700}
                 onChange={(event) => setDraft(event.target.value)}
-                placeholder="Ask a general RTI question…"
+                placeholder="Describe the issue in general terms..."
                 rows={1}
                 value={draft}
               />
@@ -197,6 +246,14 @@ export function RtiSahayak() {
               <Link className="font-medium text-foreground hover:underline" to="/faq">Browse official FAQs</Link>
               <button className="hover:text-foreground hover:underline" onClick={clearConversation} type="button">Clear chat</button>
             </div>
+
+            <p className="mt-2 border-t border-border pt-2 text-[11px] leading-4 text-muted-foreground">
+              {tokenUsage
+                ? "Luna session tokens - in: " + tokenUsage.inputTokens + " | out: " + tokenUsage.outputTokens + " | total: " + tokenUsage.totalTokens
+                : "Luna usage appears here after a live AI response."}
+              <br />
+              Response cap: 1,200 tokens per Luna request.
+            </p>
           </div>
         </section>
       )}
