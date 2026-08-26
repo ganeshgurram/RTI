@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom"
 
+import { RtiSahayak } from "@/components/RtiSahayak"
 import { RequestGuidelinesDialogProvider } from "@/request-guidelines/RequestGuidelinesDialog"
 import { StitchFooter, StitchTopNav } from "@/routes/stitch-shell"
 
@@ -12,6 +13,7 @@ export function AppLayout() {
           <Outlet />
         </main>
         <StitchFooter />
+        <RtiSahayak />
       </div>
     </RequestGuidelinesDialogProvider>
   )

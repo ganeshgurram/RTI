@@ -61,3 +61,8 @@ npm run preview  # Preview production build
 - Do not commit `.env`, `node_modules/`, or `dist/`.
 - The app is an independent prototype and should not be presented as an official government service.
 - Use mock/sample data only. Do not enter real personal, OTP, or payment details.
+## RTI Sahayak chatbot
+
+RTI Sahayak is available on every page and answers general questions about using the RTI portal. It blocks likely sensitive data in the browser before sending a message and repeats that validation in the server route. Chat history stays in memory only and can be cleared at any time.
+
+The project includes a serverless handler at frontend/api/rti-sahayak.js configured for the OpenAI Responses API with gpt-5.6-luna. To activate live AI answers, deploy with frontend as the project root and set OPENAI_API_KEY in the host's server-side environment variables. Never use VITE_OPENAI_API_KEY or put the key in browser code. Without a configured server route, the widget safely falls back to local guidance for the demo.
