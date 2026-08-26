@@ -1,5 +1,9 @@
-import { Link, useLocation } from "react-router-dom"
+import { useEffect, useRef, useState } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
+import { useAuth } from "@/auth/AuthContext"
+import { Button } from "@/components/ui/button"
+import { mockNotifications, unreadNotificationCount as initialUnreadNotificationCount } from "@/data/mock-notifications"
 import {
   Sheet,
   SheetClose,
@@ -12,19 +16,61 @@ import {
 
 const emblemUrl =
   "/assets/indian-emblem.png"
-
 function MaterialIcon({ children, className = "" }: { children: string; className?: string }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
 function StitchTopNav() {
   const location = useLocation()
-  const isProfile = location.pathname === "/profile"
+  const navigate = useNavigate()
+  const { logout, user } = useAuth()
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(initialUnreadNotificationCount)
+  const profileMenuRef = useRef<HTMLDetailsElement>(null)
+  const notificationMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const updateScrollState = () => setIsScrolled(window.scrollY > 0)
+
+    updateScrollState()
+    window.addEventListener("scroll", updateScrollState, { passive: true })
+
+    return () => window.removeEventListener("scroll", updateScrollState)
+  }, [])
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return
+
+    const closeProfileMenu = (event: PointerEvent) => {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("pointerdown", closeProfileMenu)
+    return () => document.removeEventListener("pointerdown", closeProfileMenu)
+  }, [isProfileMenuOpen])
+
+  useEffect(() => {
+    if (!isNotificationMenuOpen) return
+
+    const closeNotificationMenu = (event: PointerEvent) => {
+      if (!notificationMenuRef.current?.contains(event.target as Node)) {
+        setIsNotificationMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("pointerdown", closeNotificationMenu)
+    return () => document.removeEventListener("pointerdown", closeNotificationMenu)
+  }, [isNotificationMenuOpen])
+
   const links = [
     { label: "Home", path: "/" },
     { label: "Submit Request", path: "/login" },
     { label: "Submit First Appeal", path: "/profile" },
-    { label: "View Status", path: "/profile" },
+    { label: "View Status", path: user ? "/request-history" : "/status" },
   ]
 
   const drawerLinks = [
@@ -39,12 +85,17 @@ function StitchTopNav() {
       return location.pathname === "/"
     }
 
-    return location.pathname.startsWith(path)
+    return location.pathname === path
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate("/", { replace: true })
   }
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b border-outline-variant bg-primary text-on-primary shadow-sm">
+      <nav className={`sticky top-0 z-50 w-full bg-primary text-on-primary transition-shadow duration-200 ${isScrolled ? "shadow-md" : "shadow-none"}`}>
         <div className="mx-auto flex h-16 w-full max-w-container-max items-center gap-4 px-3 md:px-margin-desktop">
           <div className="flex items-center gap-2 md:mr-0">
             <Sheet>
@@ -112,14 +163,6 @@ function StitchTopNav() {
                 {link.label}
               </Link>
             ))}
-            {location.pathname === "/faq" && (
-              <Link
-                className="flex h-full items-center border-b-2 border-secondary-fixed pb-1 text-on-primary transition-transform active:scale-95"
-                to="/faq"
-              >
-                FAQs
-              </Link>
-            )}
           </div>
           <div className="ml-auto flex items-center gap-4">
             <div className="mr-4 hidden gap-2 text-label-sm opacity-80 lg:flex">
@@ -131,38 +174,53 @@ function StitchTopNav() {
               <span className="opacity-50">|</span>
               <button className="transition-colors hover:text-secondary-fixed">Hindi</button>
             </div>
-            {isProfile ? (
+            {user ? (
               <>
-                <div className="group relative">
-                  <button className="rounded-full p-2 text-on-primary transition-colors hover:bg-on-primary/10">
+                <div className="group relative" ref={notificationMenuRef}>
+                  <Button aria-expanded={isNotificationMenuOpen} aria-label={`Notifications${unreadNotificationCount ? ` (${unreadNotificationCount} new)` : ""}`} className="relative overflow-visible rounded-full text-on-primary hover:bg-on-primary/10 hover:text-on-primary" onClick={() => setIsNotificationMenuOpen((isOpen) => !isOpen)} size="icon-lg" type="button" variant="ghost">
                     <MaterialIcon>notifications</MaterialIcon>
-                  </button>
-                  <div className="absolute right-0 z-50 mt-2 hidden w-72 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm group-hover:block">
-                    <div className="border-b border-outline-variant bg-surface-container-low p-4">
+                    {unreadNotificationCount ? <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] leading-4 font-bold text-black">{unreadNotificationCount}</span> : null}
+                  </Button>
+                  <div className={`absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm ${isNotificationMenuOpen ? "block" : "hidden"}`}>
+                    <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low p-4">
                       <h3 className="text-[14px] font-bold uppercase tracking-wider text-primary-container">Recent Notifications</h3>
+                      <Button className="text-primary hover:text-primary" disabled={!unreadNotificationCount} onClick={() => setUnreadNotificationCount(0)} size="sm" type="button" variant="ghost">Mark all as read</Button>
                     </div>
                     <div className="divide-y divide-outline-variant/50">
-                      <div className="cursor-pointer p-4 transition-colors hover:bg-surface-container-low"><p className="text-[14px] font-medium text-on-surface">RTI-2024-0105 is <span className="text-muted-foreground">Processing</span></p><p className="mt-1 text-[12px] text-on-surface-variant">2 hours ago</p></div>
-                      <div className="cursor-pointer p-4 transition-colors hover:bg-surface-container-low"><p className="text-[14px] font-medium text-on-surface">RTI-2023-8942 is <span className="text-muted-foreground">Satisfied</span></p><p className="mt-1 text-[12px] text-on-surface-variant">Yesterday</p></div>
-                      <div className="cursor-pointer p-4 transition-colors hover:bg-surface-container-low"><p className="text-[14px] font-medium text-on-surface">RTI-2023-5521 is <span className="text-error">Not Satisfied</span></p><p className="mt-1 text-[12px] text-on-surface-variant">3 days ago</p></div>
+                      {mockNotifications.slice(0, 3).map((notification) => (
+                        <div className="cursor-pointer p-4 transition-colors hover:bg-surface-container-low" key={notification.id}>
+                          <p className="text-[14px] font-medium text-on-surface">{notification.title}</p>
+                          <p className="mt-1 text-[12px] text-on-surface-variant">{notification.requestId} · {notification.time}</p>
+                        </div>
+                      ))}
                     </div>
-                    <div className="border-t border-outline-variant p-3 text-center"><button className="text-[12px] font-semibold text-surface-tint hover:underline">View All Notifications</button></div>
+                    <div className="border-t border-outline-variant p-3 text-center"><button className="text-[12px] font-semibold text-surface-tint hover:underline" onClick={() => { setIsNotificationMenuOpen(false); navigate("/notifications") }} type="button">View All Notifications</button></div>
                   </div>
                 </div>
-                <details className="group relative">
+                <details className="group relative" onToggle={(event) => setIsProfileMenuOpen(event.currentTarget.open)} open={isProfileMenuOpen} ref={profileMenuRef}>
                   <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full bg-on-primary/10 px-3 py-1.5 transition-colors hover:bg-on-primary/20">
                     <MaterialIcon className="text-[20px]">account_circle</MaterialIcon>
-                    <span className="hidden text-[14px] font-medium sm:block">Profile</span>
+                    <span className="hidden text-[14px] font-medium sm:block">{user.fullName}</span>
                     <MaterialIcon className="text-[18px] transition-transform group-open:rotate-180">expand_more</MaterialIcon>
                   </summary>
-                  <div className="absolute right-0 z-50 mt-2 w-40 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm">
-                    <Link
+                  <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest py-1 shadow-sm">
+                    <Link className="flex items-center gap-3 px-4 py-3 text-[14px] font-medium text-on-surface transition-colors hover:bg-surface-container-low" onClick={() => setIsProfileMenuOpen(false)} to="/profile">
+                      <MaterialIcon className="text-[18px] text-muted-foreground">person</MaterialIcon>
+                      <span><span className="block">Profile</span><span className="block text-xs font-normal text-muted-foreground">Personal and contact details</span></span>
+                    </Link>
+                    <Link className="flex items-center gap-3 px-4 py-3 text-[14px] font-medium text-on-surface transition-colors hover:bg-surface-container-low" onClick={() => setIsProfileMenuOpen(false)} to="/request-history">
+                      <MaterialIcon className="text-[18px] text-muted-foreground">description</MaterialIcon>
+                      <span><span className="block">RTI Request History</span><span className="block text-xs font-normal text-muted-foreground">Track your submitted applications</span></span>
+                    </Link>
+                    <div className="my-1 border-t border-outline-variant/50" />
+                    <button
                       className="flex w-full items-center gap-2 px-4 py-3 text-[14px] font-medium text-on-surface transition-colors hover:bg-surface-container-low"
-                      to="/login"
+                      onClick={handleLogout}
+                      type="button"
                     >
                       <MaterialIcon className="text-[18px] text-muted-foreground">logout</MaterialIcon>
                       Logout
-                    </Link>
+                    </button>
                   </div>
                 </details>
               </>
@@ -192,6 +250,9 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
           © 2024 RTI Online. All Rights Reserved.
         </div>
         <div className="flex flex-wrap justify-center gap-6">
+          <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/public-authorities">
+            Public Authorities
+          </Link>
           <Link
             className={
               isFaqActive
@@ -205,9 +266,9 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
           <a className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" href="#">
             User Manual
           </a>
-          <a className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" href="#">
+          <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/contact-us">
             Contact Us
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

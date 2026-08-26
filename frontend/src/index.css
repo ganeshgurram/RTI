@@ -252,3 +252,26 @@
     @apply font-sans;
     }
 }
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-request-details,
+  .print-request-details * {
+    visibility: visible !important;
+  }
+
+  .print-request-details {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    margin: 0 !important;
+    padding: 24px !important;
+  }
+
+  .print-request-details .print-hidden {
+    display: none !important;
+  }
+}

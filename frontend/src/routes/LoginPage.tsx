@@ -1,63 +1,135 @@
+import { type FormEvent, useState } from "react"
+import { Navigate, useLocation, useNavigate } from "react-router-dom"
+
+import { useAuth } from "@/auth/AuthContext"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { demoCredentials } from "@/data/mock-profile"
 import { emblemUrl, MaterialIcon } from "@/routes/stitch-shell"
 
-const captchaUrl =
-  "/assets/captcha-texture.jpg"
+const captchaUrl = "/assets/captcha-texture.jpg"
+const captchaCodes = ["A7X9B", "K4M2Q", "P9T6R"]
 
 export function LoginPage() {
+  const { isAuthenticated, login } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [captcha, setCaptcha] = useState("")
+  const [captchaIndex, setCaptchaIndex] = useState(0)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [error, setError] = useState("")
+
+  const redirectTo = location.state?.from ?? "/profile"
+  const activeCaptcha = captchaCodes[captchaIndex]
+
+  if (isAuthenticated) return <Navigate replace to="/profile" />
+
+  const refreshCaptcha = () => {
+    setCaptchaIndex((current) => (current + 1) % captchaCodes.length)
+    setCaptcha("")
+    setError("")
+  }
+
+  const completeLogin = (nextUsername: string, nextPassword: string) => {
+    const loginError = login(nextUsername, nextPassword)
+
+    if (loginError) {
+      setError(loginError)
+      return
+    }
+
+    navigate(redirectTo, { replace: true })
+  }
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (captcha.replaceAll(" ", "").toUpperCase() !== activeCaptcha) {
+      setError("The security check does not match. Please try again.")
+      return
+    }
+
+    completeLogin(username, password)
+  }
+
+  const handleDigiLockerSignIn = () => completeLogin(demoCredentials.username, demoCredentials.password)
+
   return (
-      <section className="mx-auto flex min-h-[calc(100svh-12rem)] w-full max-w-container-max items-center justify-center p-margin-mobile md:p-margin-desktop">
-        <div className="w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-lowest p-stack-lg shadow-sm">
-          <div className="mb-stack-lg text-center">
-            <div className="mb-stack-sm flex items-center justify-center gap-2">
-              <img alt="RTI Logo" className="h-12 w-auto" src={emblemUrl} />
-              <h2 className="font-headline-lg text-headline-lg text-primary">RTI Online | Sign In</h2>
-            </div>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              Access your RTI account to submit requests, file appeals, and track status.
-            </p>
-          </div>
-          <form className="space-y-stack-md">
-            <div>
-              <label className="mb-base block font-label-lg text-label-lg text-on-surface" htmlFor="username">Username</label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><MaterialIcon className="text-outline">person</MaterialIcon></div>
-                <input className="w-full rounded-DEFAULT border border-outline-variant py-2 pl-10 pr-4 font-body-md text-body-md text-on-surface focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary" id="username" placeholder="Enter your username" type="text" />
-              </div>
-            </div>
-            <div>
-              <div className="mb-base flex items-center justify-between">
-                <label className="block font-label-lg text-label-lg text-on-surface" htmlFor="password">Password</label>
-                <a className="font-label-sm text-label-sm text-surface-tint hover:underline" href="#">Forgot Password?</a>
-              </div>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"><MaterialIcon className="text-outline">key</MaterialIcon></div>
-                <input className="w-full rounded-DEFAULT border border-outline-variant py-2 pl-10 pr-10 font-body-md text-body-md text-on-surface focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary" id="password" placeholder="Enter your password" type="password" />
-                <button className="absolute inset-y-0 right-0 flex items-center pr-3 text-outline hover:text-on-surface" type="button"><MaterialIcon>visibility</MaterialIcon></button>
-              </div>
-            </div>
-            <div>
-              <label className="mb-base block font-label-lg text-label-lg text-on-surface" htmlFor="captcha">Security Check</label>
-              <div className="mb-3 flex items-center space-x-4">
-                <div className="relative flex h-10 w-32 items-center justify-center overflow-hidden rounded-DEFAULT border border-outline-variant bg-surface-container-high">
-                  <img alt="" className="h-full w-full object-cover opacity-60 mix-blend-multiply" src={captchaUrl} />
-                  <div className="absolute inset-0 flex items-center justify-center font-bold tracking-widest text-primary mix-blend-difference">A 7 X 9 B</div>
-                </div>
-                <button className="text-surface-tint transition-colors hover:text-primary" type="button"><MaterialIcon>refresh</MaterialIcon></button>
-              </div>
-              <input className="w-full rounded-DEFAULT border border-outline-variant px-4 py-2 font-body-md text-body-md text-on-surface focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary" id="captcha" placeholder="Enter characters from image" type="text" />
-            </div>
-            <button className="flex w-full items-center justify-center rounded-DEFAULT bg-primary py-3 font-label-lg text-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit">
-              Sign In <MaterialIcon className="ml-2 text-sm">login</MaterialIcon>
-            </button>
-          </form>
-          <div className="mt-stack-lg border-t border-outline-variant pt-stack-md text-center">
-            <p className="font-body-md text-body-md text-on-surface-variant">Don't have an account? <a className="ml-1 font-label-lg text-label-lg text-primary hover:underline" href="#">Register Here</a></p>
-          </div>
-          <div className="mt-stack-md flex items-center justify-center text-sm text-outline">
-            <MaterialIcon className="mr-1 text-base">verified_user</MaterialIcon>
-            <span className="font-label-sm text-label-sm">Secure connection</span>
-          </div>
+    <section className="mx-auto flex min-h-[calc(100svh-12rem)] w-full max-w-container-max items-center justify-center p-margin-mobile md:p-margin-desktop">
+      <div className="flex w-full max-w-md flex-col gap-4">
+        <div className="flex items-center justify-center gap-2 text-center">
+          <img alt="RTI Online" className="h-10 w-auto" src={emblemUrl} />
+          <span className="font-headline-md text-xl font-bold text-primary">RTI Online</span>
         </div>
-      </section>
+
+        <Card className="border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl text-primary">Welcome back</CardTitle>
+            <CardDescription>Sign in to submit requests, file appeals, and track your RTI applications.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 rounded-md border border-primary/20 bg-primary-fixed/40 p-3 text-sm text-on-surface">
+              <p className="font-semibold text-primary">Demo account</p>
+              <p className="mt-1 text-on-surface-variant">Username: <span className="font-medium text-on-surface">{demoCredentials.username}</span></p>
+              <p className="text-on-surface-variant">Password: <span className="font-medium text-on-surface">{demoCredentials.password}</span></p>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <FieldGroup className="gap-3">
+                <Field>
+                  <FieldLabel htmlFor="username">Username</FieldLabel>
+                  <Input autoComplete="username" id="username" onChange={(event) => { setUsername(event.target.value); setError("") }} placeholder="Enter your username" required value={username} />
+                </Field>
+
+                <Field>
+                  <div className="flex items-center">
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <button className="ml-auto text-sm text-surface-tint underline-offset-4 hover:underline" type="button">Forgot password?</button>
+                  </div>
+                  <div className="relative">
+                    <Input autoComplete="current-password" className={password ? "pr-10" : undefined} id="password" onChange={(event) => { setPassword(event.target.value); setError("") }} placeholder="Enter your password" required type={isPasswordVisible ? "text" : "password"} value={password} />
+                    {password ? <button aria-label={isPasswordVisible ? "Hide password" : "Show password"} className="absolute inset-y-0 right-0 flex items-center px-3 text-outline transition-colors hover:text-on-surface" onClick={() => setIsPasswordVisible((visible) => !visible)} type="button"><MaterialIcon className="text-[18px]">{isPasswordVisible ? "visibility_off" : "visibility"}</MaterialIcon></button> : null}
+                  </div>
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="captcha">Security Check</FieldLabel>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex h-10 w-32 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-outline-variant bg-surface-container-high">
+                      <img alt="" className="h-full w-full object-cover opacity-60 mix-blend-multiply" src={captchaUrl} />
+                      <span className="absolute inset-0 flex items-center justify-center font-mono text-sm font-bold tracking-widest text-primary mix-blend-difference">{activeCaptcha.split("").join(" ")}</span>
+                    </div>
+                    <Button aria-label="Refresh security check" onClick={refreshCaptcha} size="icon-lg" type="button" variant="ghost"><MaterialIcon>refresh</MaterialIcon></Button>
+                    <Input aria-invalid={Boolean(error && captcha)} className="h-10" id="captcha" onChange={(event) => { setCaptcha(event.target.value); setError("") }} placeholder="Enter captcha" required value={captcha} />
+                  </div>
+                </Field>
+
+                {error ? <p className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">{error}</p> : null}
+
+                <Field>
+                  <Button className="h-10 w-full" type="submit">Sign In</Button>
+                </Field>
+
+                <FieldSeparator className="my-3 *:data-[slot=field-separator-content]:bg-card">Or continue with</FieldSeparator>
+
+                <Field>
+                  <Button className="h-10 w-full !border-black !bg-black !text-white hover:!border-neutral-900 hover:!bg-neutral-900 hover:!text-white" onClick={handleDigiLockerSignIn} type="button" variant="outline">
+                    <img alt="" aria-hidden="true" className="block h-5 w-5 shrink-0 object-contain brightness-0 invert" height={20} src="/assets/digilocker.svg" width={20} />
+                    Sign in with DigiLocker
+                  </Button>
+                </Field>
+              </FieldGroup>
+            </form>
+          </CardContent>
+        </Card>
+
+        <FieldDescription className="px-4 text-center">This prototype uses mock account data only.</FieldDescription>
+        <div className="flex items-center justify-center text-sm text-outline"><MaterialIcon className="mr-1 text-base">verified_user</MaterialIcon><span>Secure demo session</span></div>
+      </div>
+    </section>
   )
 }
