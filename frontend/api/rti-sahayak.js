@@ -100,31 +100,35 @@ function buildAuthorityContext(suggestions) {
 }
 
 function extractOutput(payload) {
-  if (typeof payload.output_text === "string") {
-    return payload.output_text.trim()
+  const content = payload?.choices?.[0]?.message?.content
+
+  if (typeof content === "string") {
+    return content.trim()
   }
 
-  return (payload.output ?? [])
-    .flatMap((item) => item.content ?? [])
-    .map((item) => item.text ?? "")
+  return (Array.isArray(content) ? content : [])
+    .map((item) => item?.text ?? "")
     .join("")
     .trim()
 }
 
 function getUsage(usage) {
+  const inputTokens = usage?.prompt_tokens ?? usage?.input_tokens
+  const outputTokens = usage?.completion_tokens ?? usage?.output_tokens
+  const totalTokens = usage?.total_tokens
+
   if (
-    !usage ||
-    typeof usage.input_tokens !== "number" ||
-    typeof usage.output_tokens !== "number" ||
-    typeof usage.total_tokens !== "number"
+    typeof inputTokens !== "number" ||
+    typeof outputTokens !== "number" ||
+    typeof totalTokens !== "number"
   ) {
     return undefined
   }
 
   return {
-    inputTokens: usage.input_tokens,
-    outputTokens: usage.output_tokens,
-    totalTokens: usage.total_tokens,
+    inputTokens,
+    outputTokens,
+    totalTokens,
   }
 }
 
@@ -178,36 +182,57 @@ export default async function handler(request, response) {
     /^rti-sahayak-[a-f0-9-]{36}$/i.test(body.safetyIdentifier)
       ? body.safetyIdentifier
       : "rti-sahayak-anonymous"
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = process.env.OPENROUTER_API_KEY ?? process.env.OPENAI_API_KEY
 
   if (!apiKey) {
     return sendJson(response, 503, { error: "RTI Sahayak is not configured" })
   }
 
   try {
-    const openAiResponse = await fetch("https://api.openai.com/v1/responses", {
+    const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + apiKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-5.6-luna",
-        instructions: authorityContext ? INSTRUCTIONS + "\n\n" + authorityContext : INSTRUCTIONS,
-        input: [...history, { role: "user", content: message }],
-        max_output_tokens: MAX_OUTPUT_TOKENS,
+        model: "openai/gpt-5.6-luna",
+        messages: [
+          {
+            role: "system",
+            content: authorityContext ? INSTRUCTIONS + "\n\n" + authorityContext : INSTRUCTIONS,
+          },
+          ...history,
+          { role: "user", content: message },
+        ],
+        max_completion_tokens: MAX_OUTPUT_TOKENS,
         reasoning: { effort: "low" },
-        text: { verbosity: "low" },
-        safety_identifier: safetyIdentifier,
-        store: false,
+        user: safetyIdentifier,
+        provider: { data_collection: "deny", zdr: true },
       }),
     })
 
-    if (!openAiResponse.ok) {
-      return sendJson(response, 502, { error: "RTI Sahayak could not prepare an answer" })
-    }
+    const payload = await openRouterResponse.json().catch(() => undefined)
+    const upstreamCode = payload?.error?.code
+    const upstreamStatus =
+      typeof upstreamCode === "number" && upstreamCode >= 400 && upstreamCode < 600
+        ? upstreamCode
+        : openRouterResponse.status
+    const isRateLimited = upstreamStatus === 429 || upstreamCode === "rate_limit_exceeded"
 
-    const payload = await openAiResponse.json()
+    if (!openRouterResponse.ok || payload?.error) {
+      console.warn("[RTI Sahayak] OpenRouter request failed", {
+        status: upstreamStatus,
+        requestId: openRouterResponse.headers.get("x-request-id"),
+        type: payload?.error?.type,
+        code: upstreamCode,
+      })
+      return sendJson(response, isRateLimited ? 429 : 502, {
+        error: isRateLimited
+          ? "RTI Sahayak is busy. Please try again shortly."
+          : "RTI Sahayak could not prepare an answer",
+      })
+    }
     const reply = extractOutput(payload)
     if (!reply) {
       return sendJson(response, 502, { error: "RTI Sahayak returned an empty answer" })

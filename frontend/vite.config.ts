@@ -46,13 +46,15 @@ function rtiSahayakDevRoute(): Plugin {
 export default defineConfig(({ mode }) => {
   const frontendEnv = loadEnv(mode, ".", "")
   const workspaceEnv = loadEnv(mode, path.resolve(import.meta.dirname, ".."), "")
-  const apiKey =
-    process.env.OPENAI_API_KEY ??
-    frontendEnv.OPENAI_API_KEY ??
-    workspaceEnv.OPENAI_API_KEY
+  for (const variableName of ["OPENROUTER_API_KEY", "OPENAI_API_KEY"]) {
+    const apiKey =
+      process.env[variableName] ??
+      frontendEnv[variableName] ??
+      workspaceEnv[variableName]
 
-  if (apiKey) {
-    process.env.OPENAI_API_KEY = apiKey
+    if (apiKey) {
+      process.env[variableName] = apiKey
+    }
   }
 
   return {
