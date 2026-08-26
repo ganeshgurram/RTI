@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sheet"
 
 const emblemUrl =
-  "https://lh3.googleusercontent.com/aida/AEtjO1U4EGkZp9UsMwSsgatteezFLWIHZ-nQs3WOt2GyF_xDSo6ZTSgVTEIczch4tita5Y72Ao4lbPgCbp38ZAyNVxaLojZAkrNdrvqI636xQ8nHtdAALVJaIhqm8GMqnfZPWsYcKRbZexmDwCjcg_vBKkPxG_ouUBwDRv32z1v0Jzo2FNB3nUxWT67kRwnHSG-EXMEdHBj4NwUs4TB2JQI5ZZiAaukUhlOt_mUP6DFduV8d39DFDOJIgsBdux2-"
+  "/assets/indian-emblem.png"
 
 function MaterialIcon({ children, className = "" }: { children: string; className?: string }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>

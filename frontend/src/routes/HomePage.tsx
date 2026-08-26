@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const lifecycleImage =
-  "https://lh3.googleusercontent.com/aida/AEtjO1XPWtnb1Mt9gIdZnJ9xW7aDk5fXFpzSTTK7QdqtXw1cdoHNjyZnxggOUe5VoeZPfAR4Y1z3ECEQngY8lFQVOHyZ1qD8LzGVZc-IF90rEzNzQfnpAWniQRyUyjQ1qsEWcjWpnqIewL4qo6fTyxomu8FbT6ftTCJ938ZKkN6fk8bXf6zzJ-I7vIYtyZimWN5wSF2HbUTg8d7TQ2AAIoDBQbz5okjxHePjetklCUdvpU0RfMyz2WBxEna0L1aY"
+  "/assets/rti-lifecycle.jpg"
 
 const actionCards = [
   ["description", "Submit Request", "File a new RTI application online to seek information from Ministries/Departments of the Government of India.", "Start Application", "bg-primary-fixed/30 text-primary"],

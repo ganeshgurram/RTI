@@ -1,7 +1,7 @@
 import { emblemUrl, MaterialIcon } from "@/routes/stitch-shell"
 
 const captchaUrl =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDfnN978lDFwMOYkchWHfzF6__YkN2JYbBbNvJOnxxSj5E5R8V7xBsV3aVg1DXyOntmtDWhCm7h00geKLEyAYUedqgpr8WMrsLHATmAPHaN6m5vW-eC6gOTLjECg0dn-jyIv2Ri1xHL5Ry_7G6sCio62lo6sjP7l1cb6sALIZdvg_gxBWj24t6hWYX3zmiclW5L8m6UNBApf-TfnVkE19ABmnvBc7d7MHtbEkL7czw7bSHLViX_rrWaWA"
+  "/assets/captcha-texture.jpg"
 
 export function LoginPage() {
   return (
