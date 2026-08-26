@@ -39,6 +39,8 @@ const topicRules = [
   { pattern: /\b(aadhaar|aadhar|uidai|digital identity)\b/i, terms: ["unique identification", "uidai", "electronics"] },
   { pattern: /\b(epfo|provident fund|labour|labor|employment)\b/i, terms: ["employees provident", "labour", "labor", "employment"] },
   { pattern: /\b(telecom|telephone|mobile network|sim card|broadband)\b/i, terms: ["telecommunications", "telecom", "communications"] },
+  { pattern: /\b(river|water|watershed|irrigation|ganga|flood|dam|groundwater|ground water)\b/i, terms: ["water resources", "river development", "ganga rejuvenation", "central water commission", "river management board", "river board", "national water development", "ground water"] },
+  { pattern: /\b(across\s+states|inter[-\s]?state|interstate|shared river)\b/i, terms: ["central water commission", "river management board", "water resources", "water disputes"] },
   { pattern: /\b(road|highway|toll|nhai|transport)\b/i, terms: ["national highways", "road transport", "highways", "transport"] },
   { pattern: /\b(bank|banking|rbi|financial service)\b/i, terms: ["reserve bank", "banking", "financial services"] },
   { pattern: /\b(school|college|university|cbse|ugc|education|exam)\b/i, terms: ["secondary education", "university grants", "education"] },
@@ -52,18 +54,26 @@ const topicRules = [
 
 const stopWords = new Set([
   "about",
+  "across",
   "application",
+  "authority",
   "department",
+  "directorate",
+  "division",
   "file",
   "for",
   "help",
   "information",
   "ministry",
   "need",
+  "office",
+  "offices",
   "please",
   "problem",
   "request",
   "rti",
+  "state",
+  "states",
   "the",
   "to",
   "which",
@@ -97,19 +107,21 @@ function getQueryTerms(query: string) {
 function getMinistryName(authority: Authority, authorityById: Map<string, Authority>) {
   const seen = new Set<string>()
   let current: Authority | undefined = authority
+  let topLevelAuthority: Authority | undefined
 
   while (current.parentId && !seen.has(current.parentId)) {
     seen.add(current.parentId)
     const parent = authorityById.get(current.parentId)
 
     if (!parent) {
-      return ministryNames[current.parentId]
+      return ministryNames[current.parentId] ?? topLevelAuthority?.name
     }
 
+    topLevelAuthority = parent
     current = parent
   }
 
-  return undefined
+  return topLevelAuthority?.name
 }
 
 function getRelatedOffices(authority: Authority, childrenByParent: Map<string, Authority[]>) {
