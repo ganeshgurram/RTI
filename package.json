@@ -1,0 +1,16 @@
+{
+  "name": "rti-online-redesign",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend-only RTI Online redesign prototype built with Vite, React, React Router, Tailwind CSS, and shadcn/ui.",
+  "scripts": {
+    "setup": "npm --prefix frontend install",
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "preview": "npm --prefix frontend run preview"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
