@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,96 @@ function createMessageId() {
 
 function createSafetyIdentifier() {
   return "rti-sahayak-" + crypto.randomUUID()
+}
+
+/**
+ * The model answers in Markdown, so a reply rendered as plain text shows its own asterisks.
+ * This turns the little of it that actually appears - bold, bullets, numbered steps, stray
+ * heading marks - into elements. Built as React nodes rather than injected HTML, so a reply
+ * can never smuggle markup into the page.
+ */
+function renderInline(text: string, keyPrefix: string) {
+  const nodes: ReactNode[] = []
+  const pattern = /\*\*(.+?)\*\*|__(.+?)__/g
+  let lastIndex = 0
+  let match = pattern.exec(text)
+
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index))
+    }
+
+    nodes.push(
+      <strong className="font-semibold" key={`${keyPrefix}-${match.index}`}>
+        {match[1] ?? match[2]}
+      </strong>
+    )
+    lastIndex = match.index + match[0].length
+    match = pattern.exec(text)
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex))
+  }
+
+  return nodes.length ? nodes : [text]
+}
+
+function FormattedMessage({ content }: { content: string }) {
+  const blocks: ReactNode[] = []
+  let paragraph: string[] = []
+  let listItems: string[] = []
+  let listIsOrdered = false
+
+  const flushParagraph = () => {
+    if (!paragraph.length) return
+    const text = paragraph.join(" ")
+    blocks.push(<p key={`p-${blocks.length}`}>{renderInline(text, `p${blocks.length}`)}</p>)
+    paragraph = []
+  }
+
+  const flushList = () => {
+    if (!listItems.length) return
+    const items = listItems.map((item, index) => (
+      <li key={`li-${index}`}>{renderInline(item, `l${blocks.length}-${index}`)}</li>
+    ))
+    blocks.push(
+      listIsOrdered
+        ? <ol className="list-decimal space-y-1 pl-5" key={`ol-${blocks.length}`}>{items}</ol>
+        : <ul className="list-disc space-y-1 pl-5" key={`ul-${blocks.length}`}>{items}</ul>
+    )
+    listItems = []
+  }
+
+  content.split("\n").forEach((line) => {
+    const trimmed = line.trim()
+
+    if (!trimmed) {
+      flushList()
+      flushParagraph()
+      return
+    }
+
+    const bullet = /^[-*•]\s+(.*)$/.exec(trimmed)
+    const numbered = /^\d+[.)]\s+(.*)$/.exec(trimmed)
+
+    if (bullet ?? numbered) {
+      flushParagraph()
+      if (!listItems.length) {
+        listIsOrdered = Boolean(numbered)
+      }
+      listItems.push((numbered ?? bullet)![1])
+      return
+    }
+
+    flushList()
+    paragraph.push(trimmed.replace(/^#{1,6}\s+/, ""))
+  })
+
+  flushList()
+  flushParagraph()
+
+  return <div className="space-y-2">{blocks}</div>
 }
 
 function AuthorityMatches({ suggestions }: { suggestions: AuthoritySuggestion[] }) {
@@ -78,6 +168,28 @@ export function RtiSahayak() {
   const [privacyNotice, setPrivacyNotice] = useState("")
   const [tokenUsage, setTokenUsage] = useState<TokenUsage | null>(null)
   const safetyIdentifier = useRef(createSafetyIdentifier())
+  const messageListRef = useRef<HTMLDivElement>(null)
+  const draftRef = useRef<HTMLTextAreaElement>(null)
+
+  // Grow the box to fit what has been typed instead of making the user scroll inside it.
+  // Height is cleared first so the box also shrinks back when text is deleted.
+  useLayoutEffect(() => {
+    const field = draftRef.current
+    if (!field) {
+      return
+    }
+
+    field.style.height = "auto"
+    field.style.height = `${field.scrollHeight}px`
+  }, [draft, isOpen])
+
+  // Keep the newest message in view: on send, on reply, and when the panel is reopened.
+  useEffect(() => {
+    const list = messageListRef.current
+    if (list) {
+      list.scrollTop = list.scrollHeight
+    }
+  }, [messages, isSending, isOpen])
 
   const sendMessage = async (rawMessage: string) => {
     const message = rawMessage.trim()
@@ -146,7 +258,9 @@ export function RtiSahayak() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50">
+    // items-end keeps the launcher pinned to the right edge; without it the button drifts
+    // left to the start of the container once the much wider panel opens above it.
+    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
       {isOpen && (
         <section
           aria-label="RTI Sahayak chat"
@@ -176,13 +290,15 @@ export function RtiSahayak() {
             Never share contact details, IDs, application numbers, OTPs, passwords, payment details, or documents.
           </div>
 
-          <div aria-live="polite" className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-4">
+          <div aria-live="polite" className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-4" ref={messageListRef}>
             {messages.map((message) => (
               <div
-                className={message.role === "user" ? "ml-9 whitespace-pre-wrap rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-sm leading-5 text-primary-foreground" : "mr-5 whitespace-pre-wrap rounded-2xl rounded-bl-sm border border-border bg-background px-3 py-2 text-sm leading-5 text-foreground shadow-sm"}
+                className={message.role === "user" ? "ml-9 whitespace-pre-wrap rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-sm leading-5 text-primary-foreground" : "mr-5 rounded-2xl rounded-bl-sm border border-border bg-background px-3 py-2 text-sm leading-5 text-foreground shadow-sm"}
                 key={message.id}
               >
-                {message.content}
+                {message.role === "assistant"
+                  ? <FormattedMessage content={message.content} />
+                  : message.content}
                 {message.role === "assistant" && message.authoritySuggestions && (
                   <AuthorityMatches suggestions={message.authoritySuggestions} />
                 )}
@@ -228,12 +344,23 @@ export function RtiSahayak() {
             >
               <label className="sr-only" htmlFor="rti-sahayak-message">Ask RTI Sahayak</label>
               <textarea
-                className="max-h-24 min-h-10 flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm leading-5 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+                className="max-h-32 min-h-10 flex-1 resize-none overflow-y-auto rounded-lg border border-input bg-background px-3 py-2 text-sm leading-5 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
                 disabled={isSending}
                 id="rti-sahayak-message"
                 maxLength={700}
                 onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  // Enter sends, Shift+Enter starts a new line. isComposing guards Indic and
+                  // other IME input, where Enter is how a candidate word gets committed.
+                  if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
+                    return
+                  }
+
+                  event.preventDefault()
+                  void sendMessage(draft)
+                }}
                 placeholder="Describe the issue in general terms..."
+                ref={draftRef}
                 rows={1}
                 value={draft}
               />

@@ -1,4 +1,37 @@
-const MAX_OUTPUT_TOKENS = 1200
+const MAX_OUTPUT_TOKENS = 1000
+
+const OPENROUTER_MODEL = "openai/gpt-5.6-luna"
+/**
+ * One retry only. A 429 from a burst clears in a second, but a 429 from an exhausted
+ * quota does not - and retrying into that just spends more of the allowance.
+ */
+const MAX_RETRIES = 1
+const BASE_RETRY_DELAY_MS = 600
+/** Longer than this and we answer now rather than hold the request open. */
+const RETRY_DELAY_CAP_MS = 2000
+
+const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
+
+/** Milliseconds to wait before retrying, or null when we should not retry at all. */
+function getRetryDelay(response, attempt) {
+  const retryAfter = response.headers.get("retry-after")
+
+  if (retryAfter) {
+    const seconds = Number(retryAfter)
+    const waitMs = Number.isFinite(seconds)
+      ? seconds * 1000
+      : Math.max(Date.parse(retryAfter) - Date.now(), 0)
+
+    if (!Number.isFinite(waitMs)) {
+      return BASE_RETRY_DELAY_MS
+    }
+
+    // OpenRouter asking for a long wait means a real cap, not a burst.
+    return waitMs <= RETRY_DELAY_CAP_MS ? waitMs : null
+  }
+
+  return Math.min(BASE_RETRY_DELAY_MS * 2 ** attempt, RETRY_DELAY_CAP_MS)
+}
 
 const SENSITIVE_PATTERNS = [
   /\b[A-Z]{5}[0-9]{4}[A-Z]\b/i,
@@ -30,7 +63,8 @@ const INSTRUCTIONS = [
   "- If the user gives or asks to give any sensitive or account-specific information, state that you cannot receive it and direct them to the relevant secure portal journey, such as View Status or Submit First Appeal.",
   "- Never request an upload, attachment, or payment information in chat.",
   "- Do not repeat sensitive information even if it appears in the input.",
-  "When Public Authority candidates are provided, treat them as directory reference data only. Explain why one may be relevant, list no more than three candidates, and say that the applicant must confirm which authority holds the information. Do not claim the match is legally final.",
+  "When Public Authority candidates are provided, treat them as directory reference data only. They are ordered most relevant first and each lists the subject it covers. Explain in one line why a candidate fits the user's issue, list no more than three, and say that the applicant must confirm which authority holds the information. Do not claim the match is legally final.",
+  "Name only the Public Authority candidates supplied to you. If none are supplied, do not guess an office or ministry - point the user to the Public Authorities directory to search for the subject instead.",
   "If the answer is not covered by the supplied knowledge, say that you cannot confirm it and direct the user to the official FAQs or Public Authorities directory. Do not invent rules, deadlines, fees, links, offices, or government contacts.",
   RTI_KNOWLEDGE,
 ].join("\n\n")
@@ -77,6 +111,7 @@ function getAuthoritySuggestions(value) {
     .map((item) => ({
       authorityName: safeDirectoryText(item?.authorityName),
       ministryName: safeDirectoryText(item?.ministryName),
+      matchReason: safeDirectoryText(item?.matchReason, 120),
       relatedOffices: Array.isArray(item?.relatedOffices)
         ? item.relatedOffices.slice(0, 3).map((office) => safeDirectoryText(office, 140)).filter(Boolean)
         : [],
@@ -90,10 +125,11 @@ function buildAuthorityContext(suggestions) {
   }
 
   return [
-    "Official directory candidates for the user's general issue:",
+    "Official directory candidates for the user's general issue, most relevant first:",
     ...suggestions.map((suggestion, index) => [
       (index + 1) + ". Public Authority: " + suggestion.authorityName,
       suggestion.ministryName ? "Ministry: " + suggestion.ministryName : "",
+      suggestion.matchReason ? "Best matching ministry for the subject: " + suggestion.matchReason : "",
       suggestion.relatedOffices.length ? "Related offices: " + suggestion.relatedOffices.join("; ") : "",
     ].filter(Boolean).join("\n")),
   ].join("\n")
@@ -188,45 +224,80 @@ export default async function handler(request, response) {
     return sendJson(response, 503, { error: "RTI Sahayak is not configured" })
   }
 
-  try {
-    const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + apiKey,
-        "Content-Type": "application/json",
+  const requestBody = JSON.stringify({
+    model: OPENROUTER_MODEL,
+    messages: [
+      {
+        role: "system",
+        content: authorityContext ? INSTRUCTIONS + "\n\n" + authorityContext : INSTRUCTIONS,
       },
-      body: JSON.stringify({
-        model: "openai/gpt-5.6-luna",
-        messages: [
-          {
-            role: "system",
-            content: authorityContext ? INSTRUCTIONS + "\n\n" + authorityContext : INSTRUCTIONS,
-          },
-          ...history,
-          { role: "user", content: message },
-        ],
-        max_completion_tokens: MAX_OUTPUT_TOKENS,
-        reasoning: { effort: "low" },
-        user: safetyIdentifier,
-        provider: { data_collection: "deny", zdr: true },
-      }),
-    })
+      ...history,
+      { role: "user", content: message },
+    ],
+    max_completion_tokens: MAX_OUTPUT_TOKENS,
+    reasoning: { effort: "low" },
+    user: safetyIdentifier,
+    // data_collection "deny" keeps the provider from training on these questions. Zero data
+    // retention (zdr) is deliberately not requested: it restricts routing to a small pool of
+    // certified endpoints that is saturated, which failed every request with a 429.
+    provider: { data_collection: "deny" },
+  })
 
-    const payload = await openRouterResponse.json().catch(() => undefined)
-    const upstreamCode = payload?.error?.code
-    const upstreamStatus =
-      typeof upstreamCode === "number" && upstreamCode >= 400 && upstreamCode < 600
-        ? upstreamCode
-        : openRouterResponse.status
-    const isRateLimited = upstreamStatus === 429 || upstreamCode === "rate_limit_exceeded"
+  try {
+    let openRouterResponse
+    let payload
+    let upstreamStatus
+    let isRateLimited
+
+    for (let attempt = 0; ; attempt += 1) {
+      openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + apiKey,
+          "Content-Type": "application/json",
+        },
+        body: requestBody,
+      })
+
+      payload = await openRouterResponse.json().catch(() => undefined)
+      const upstreamCode = payload?.error?.code
+      upstreamStatus =
+        typeof upstreamCode === "number" && upstreamCode >= 400 && upstreamCode < 600
+          ? upstreamCode
+          : openRouterResponse.status
+      isRateLimited = upstreamStatus === 429 || upstreamCode === "rate_limit_exceeded"
+
+      if (!isRateLimited || attempt >= MAX_RETRIES) {
+        break
+      }
+
+      const delay = getRetryDelay(openRouterResponse, attempt)
+      if (delay === null) {
+        break
+      }
+
+      console.warn("[RTI Sahayak] Rate limited, retrying once", { delayMs: delay })
+      await sleep(delay)
+    }
 
     if (!openRouterResponse.ok || payload?.error) {
       console.warn("[RTI Sahayak] OpenRouter request failed", {
         status: upstreamStatus,
+        // OpenRouter puts the reason here; type/requestId are often absent on 429.
+        message: payload?.error?.message ?? "(no message returned)",
+        retryAfter: openRouterResponse.headers.get("retry-after"),
         requestId: openRouterResponse.headers.get("x-request-id"),
-        type: payload?.error?.type,
-        code: upstreamCode,
       })
+
+      if (isRateLimited) {
+        console.warn(
+          "[RTI Sahayak] Falling back to local guidance. These models are shared across " +
+            "OpenRouter users, so this is usually upstream saturation rather than a credit " +
+            "problem. Connecting your own provider key at " +
+            "https://openrouter.ai/settings/integrations gives this app its own rate limit."
+        )
+      }
+
       return sendJson(response, isRateLimited ? 429 : 502, {
         error: isRateLimited
           ? "RTI Sahayak is busy. Please try again shortly."
@@ -240,7 +311,8 @@ export default async function handler(request, response) {
 
     const usage = getUsage(payload.usage)
     if (usage) {
-      console.info("[RTI Sahayak] GPT-5.6 Luna token usage", usage)
+      // model is logged too, so a fallback to the sibling model is visible in the terminal.
+      console.info("[RTI Sahayak] token usage", { model: payload.model ?? OPENROUTER_MODEL, ...usage })
     }
 
     return sendJson(response, 200, { reply, usage })

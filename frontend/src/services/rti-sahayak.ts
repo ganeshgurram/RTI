@@ -42,7 +42,10 @@ function getLocalReply(message: string, suggestions: AuthoritySuggestion[]): str
   const query = message.toLowerCase()
 
   if (suggestions.length) {
-    return "Based on your description, I found possible Central Public Authorities below. Please open the directory to confirm the authority that holds the information before filing. These are suggestions, not a final legal determination."
+    const subject = suggestions[0].matchReason
+
+    return (subject ? "Your question looks closest to " + subject + ". " : "") +
+      "The Central Public Authorities below are the ones that handle that subject. Please open the directory to confirm which office holds the information before filing. These are suggestions, not a final legal determination."
   }
 
   if (/(first appeal|1st appeal)/.test(query)) {
