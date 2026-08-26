@@ -115,10 +115,10 @@ function StitchTopNav() {
                 side="left"
               >
                 <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
-                    <img alt="Indian Emblem" className="h-10 w-auto opacity-90" src={emblemUrl} />
-                    <span className="h-7 border-l border-border" aria-hidden="true" />
-                    <span className="whitespace-nowrap font-headline-md text-headline-md font-bold">
+                  <SheetTitle className="flex items-center gap-2.5">
+                    <img alt="Indian Emblem" className="h-9 w-auto shrink-0 opacity-90" src={emblemUrl} />
+                    <span className="h-9 w-px shrink-0 bg-border" aria-hidden="true" />
+                    <span className="whitespace-nowrap font-headline-md text-headline-md font-bold leading-none">
                       RTI Online
                     </span>
                   </SheetTitle>
@@ -141,12 +141,12 @@ function StitchTopNav() {
                 </nav>
               </SheetContent>
             </Sheet>
-            <Link className="flex items-center gap-2" to="/">
-              <img alt="Indian Emblem" className="h-10 w-auto opacity-90" src={emblemUrl} />
-              <span className="h-7 border-l border-on-primary/30" aria-hidden="true" />
-              <div className="whitespace-nowrap font-headline-md text-headline-md font-bold text-on-primary">
+            <Link className="flex items-center gap-2.5" to="/">
+              <img alt="Indian Emblem" className="h-9 w-auto shrink-0 opacity-90" src={emblemUrl} />
+              <span className="h-9 w-px shrink-0 bg-on-primary/30" aria-hidden="true" />
+              <span className="whitespace-nowrap font-headline-md text-headline-md font-bold leading-none text-on-primary">
                 RTI Online
-              </div>
+              </span>
             </Link>
           </div>
           <div className="ml-8 hidden h-full items-center gap-4 md:flex">

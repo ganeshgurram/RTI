@@ -61,9 +61,10 @@ export function LoginPage() {
   return (
     <section className="mx-auto flex min-h-[calc(100svh-12rem)] w-full max-w-container-max items-center justify-center p-margin-mobile md:p-margin-desktop">
       <div className="flex w-full max-w-md flex-col gap-4">
-        <div className="flex items-center justify-center gap-2 text-center">
-          <img alt="RTI Online" className="h-10 w-auto" src={emblemUrl} />
-          <span className="font-headline-md text-xl font-bold text-primary">RTI Online</span>
+        <div className="flex items-center justify-center gap-2.5">
+          <img alt="RTI Online" className="h-9 w-auto shrink-0" src={emblemUrl} />
+          <span className="h-9 w-px shrink-0 bg-outline-variant" aria-hidden="true" />
+          <span className="whitespace-nowrap font-headline-md text-headline-md font-bold leading-none text-primary">RTI Online</span>
         </div>
 
         <Card className="border border-outline-variant bg-surface-container-lowest shadow-sm">
