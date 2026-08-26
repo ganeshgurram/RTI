@@ -78,7 +78,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
 
   const handleSubmit = () => {
     closeDialog()
-    navigate("/login")
+    navigate("/submit-request")
   }
 
   return (

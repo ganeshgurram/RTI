@@ -70,8 +70,8 @@ function StitchTopNav() {
 
   const links = [
     { label: "Home", path: "/" },
-    { label: "Submit Request", path: "/login", opensGuidelines: true },
-    { label: "Submit First Appeal", path: "/profile" },
+    { label: "Submit Request", path: "/submit-request", opensGuidelines: false },
+    { label: "Submit First Appeal", path: "/submit-first-appeal" },
     { label: "View Status", path: user ? "/request-history" : "/status" },
   ]
 
@@ -85,6 +85,14 @@ function StitchTopNav() {
   const isActive = (path: string) => {
     if (path === "/") {
       return location.pathname === "/"
+    }
+
+    if (path === "/submit-request") {
+      return ["/submit-request", "/request-submission-success"].includes(location.pathname)
+    }
+
+    if (path === "/submit-first-appeal") {
+      return ["/submit-first-appeal", "/first-appeal-form", "/appeal-submission-success"].includes(location.pathname)
     }
 
     return location.pathname === path

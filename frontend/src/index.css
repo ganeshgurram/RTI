@@ -259,11 +259,14 @@
   }
 
   .print-request-details,
-  .print-request-details * {
+  .print-request-details *,
+  .print-submission-details,
+  .print-submission-details * {
     visibility: visible !important;
   }
 
-  .print-request-details {
+  .print-request-details,
+  .print-submission-details {
     position: absolute;
     inset: 0 auto auto 0;
     width: 100%;
@@ -271,7 +274,8 @@
     padding: 24px !important;
   }
 
-  .print-request-details .print-hidden {
+  .print-request-details .print-hidden,
+  .print-submission-details .print-hidden {
     display: none !important;
   }
 }

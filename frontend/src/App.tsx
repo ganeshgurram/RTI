@@ -11,6 +11,10 @@ import { NotFoundPage } from "@/routes/NotFoundPage"
 import { NotificationsPage } from "@/routes/NotificationsPage"
 import { ProfilePage } from "@/routes/ProfilePage"
 import { PublicAuthoritiesPage } from "@/routes/PublicAuthoritiesPage"
+import { FirstAppealFormPage } from "@/routes/FirstAppealFormPage"
+import { RequestFormPage } from "@/routes/RequestFormPage"
+import { SubmitFirstAppealPage } from "@/routes/SubmitFirstAppealPage"
+import { AppealSubmissionSuccessPage, RequestSubmissionSuccessPage } from "@/routes/SubmissionSuccessPages"
 import { RequestHistoryPage } from "@/routes/RequestHistoryPage"
 import { StatusPage } from "@/routes/StatusPage"
 
@@ -24,6 +28,11 @@ const router = createBrowserRouter([
       { path: "faq", element: <FaqPage /> },
       { path: "contact-us", element: <ContactUsPage /> },
       { path: "public-authorities", element: <PublicAuthoritiesPage /> },
+      { path: "submit-request", element: <RequestFormPage /> },
+      { path: "request-submission-success", element: <RequestSubmissionSuccessPage /> },
+      { path: "submit-first-appeal", element: <SubmitFirstAppealPage /> },
+      { path: "first-appeal-form", element: <FirstAppealFormPage /> },
+      { path: "appeal-submission-success", element: <AppealSubmissionSuccessPage /> },
       { path: "profile", element: <ProtectedProfile /> },
       { path: "request-history", element: <ProtectedRequestHistory /> },
       { path: "notifications", element: <ProtectedNotifications /> },
