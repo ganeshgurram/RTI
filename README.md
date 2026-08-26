@@ -69,8 +69,8 @@ The project includes a serverless handler at frontend/api/rti-sahayak.js configu
 
 ### Running Luna locally
 
-1. Create frontend/.env.local from frontend/.env.example.
-2. Add a newly created OPENAI_API_KEY to frontend/.env.local. Do not use a VITE_ prefix.
+1. Create frontend/.env.local from frontend/.env.example (recommended), or add the key to the repository root .env.
+2. Add a newly created OPENAI_API_KEY. Do not use a VITE_ prefix.
 3. Run npm run dev from the repository root.
 
 The Vite development server invokes the same secure API handler as the deployed serverless route. Each live Luna reply shows input, output, and total tokens in the chat widget, while the terminal records numeric usage only. The response cap is 1,200 tokens per request.
