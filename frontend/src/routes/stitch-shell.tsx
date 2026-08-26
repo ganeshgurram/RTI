@@ -282,7 +282,7 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
     <footer className="mt-auto bg-on-surface text-surface-container-lowest">
       <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-6 px-margin-mobile py-stack-lg md:flex-row md:px-margin-desktop">
         <div className="text-center font-headline-md text-headline-md md:text-left">
-          © 2024 RTI Online. All Rights Reserved.
+          © {new Date().getFullYear()} RTI Online. All Rights Reserved.
         </div>
         <div className="flex flex-wrap justify-center gap-6">
           <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/public-authorities">
