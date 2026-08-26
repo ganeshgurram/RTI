@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/auth/AuthContext"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const actionCards = [
@@ -84,6 +85,7 @@ function FlowEdge({ path, arrow = true }: { path: string; arrow?: boolean }) {
 
 export function HomePage() {
   const { user } = useAuth()
+  const { openRequestGuidelines } = useRequestGuidelines()
   const flowchartFrameRef = useRef<HTMLDivElement>(null)
   const stepperFrameRef = useRef<HTMLDivElement>(null)
   const [flowchartScale, setFlowchartScale] = useState(1)
@@ -138,9 +140,9 @@ export function HomePage() {
               An initiative of Department of Personnel & Training, Government of India, empowering citizens to seek information and promote transparency in governance.
             </p>
             <div className="mx-auto flex w-full max-w-md flex-col justify-center gap-4 sm:flex-row">
-              <Link className="flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-8 py-3 font-label-lg text-label-lg text-on-secondary shadow-md transition-colors hover:bg-secondary/90 sm:w-auto" to="/login">
+              <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-8 py-3 font-label-lg text-label-lg text-on-secondary shadow-md transition-colors hover:bg-secondary/90 sm:w-auto" onClick={openRequestGuidelines} type="button">
                 Submit a Request <MaterialIcon className="text-sm">arrow_forward</MaterialIcon>
-              </Link>
+              </button>
               <Link className="w-full rounded-lg border border-surface-container-highest/30 bg-surface-container/10 px-8 py-3 font-label-lg text-label-lg text-on-primary backdrop-blur-sm transition-colors hover:bg-surface-container/20 sm:w-auto" to={viewStatusPath}>
                 View Status
               </Link>

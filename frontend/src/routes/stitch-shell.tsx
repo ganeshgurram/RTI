@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "@/auth/AuthContext"
 import { Button } from "@/components/ui/button"
 import { mockNotifications, unreadNotificationCount as initialUnreadNotificationCount } from "@/data/mock-notifications"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
 import {
   Sheet,
   SheetClose,
@@ -24,6 +25,7 @@ function StitchTopNav() {
   const location = useLocation()
   const navigate = useNavigate()
   const { logout, user } = useAuth()
+  const { openRequestGuidelines } = useRequestGuidelines()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
@@ -68,7 +70,7 @@ function StitchTopNav() {
 
   const links = [
     { label: "Home", path: "/" },
-    { label: "Submit Request", path: "/login" },
+    { label: "Submit Request", path: "/login", opensGuidelines: true },
     { label: "Submit First Appeal", path: "/profile" },
     { label: "View Status", path: user ? "/request-history" : "/status" },
   ]
@@ -125,19 +127,38 @@ function StitchTopNav() {
                   <SheetDescription className="sr-only">Navigation</SheetDescription>
                 </SheetHeader>
                 <nav className="flex flex-col px-4">
-                  {drawerLinks.map((link) => (
-                    <SheetClose
-                      key={link.label}
-                      render={
+                  {drawerLinks.map((link) => {
+                    if (link.opensGuidelines) {
+                      return (
+                        <SheetClose
+                          key={link.label}
+                          render={
+                            <button
+                              className="rounded-md px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                              onClick={openRequestGuidelines}
+                              type="button"
+                            />
+                          }
+                        >
+                          {link.label}
+                        </SheetClose>
+                      )
+                    }
+
+                    return (
+                      <SheetClose
+                        key={link.label}
+                        render={
                         <Link
                           className="rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                           to={link.path}
                         />
-                      }
-                    >
-                      {link.label}
-                    </SheetClose>
-                  ))}
+                        }
+                      >
+                        {link.label}
+                      </SheetClose>
+                    )
+                  })}
                 </nav>
               </SheetContent>
             </Sheet>
@@ -150,19 +171,25 @@ function StitchTopNav() {
             </Link>
           </div>
           <div className="ml-8 hidden h-full items-center gap-4 md:flex">
-            {links.map((link) => (
-              <Link
-                className={
-                  isActive(link.path)
-                    ? "flex h-full items-center border-b-2 border-secondary-fixed pb-1 text-on-primary transition-transform active:scale-95"
-                    : "flex h-full items-center px-2 text-on-primary/80 transition-transform hover:bg-primary-fixed-dim/10 hover:text-on-primary active:scale-95"
-                }
-                key={link.label}
-                to={link.path}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {links.map((link) => {
+              const className = isActive(link.path)
+                ? "flex h-full items-center border-b-2 border-secondary-fixed pb-1 text-on-primary transition-transform active:scale-95"
+                : "flex h-full items-center px-2 text-on-primary/80 transition-transform hover:bg-primary-fixed-dim/10 hover:text-on-primary active:scale-95"
+
+              if (link.opensGuidelines) {
+                return (
+                  <button className={className} key={link.label} onClick={openRequestGuidelines} type="button">
+                    {link.label}
+                  </button>
+                )
+              }
+
+              return (
+                <Link className={className} key={link.label} to={link.path}>
+                  {link.label}
+                </Link>
+              )
+            })}
           </div>
           <div className="ml-auto flex items-center gap-4">
             <div className="mr-4 hidden gap-2 text-label-sm opacity-80 lg:flex">
