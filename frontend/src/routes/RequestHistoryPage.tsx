@@ -1,5 +1,4 @@
 import { useAuth } from "@/auth/AuthContext"
-import { Button } from "@/components/ui/button"
 import { RequestHistoryTable } from "@/components/RequestHistoryTable"
 import { mockProfile } from "@/data/mock-profile"
 import { useRequests } from "@/requests/RequestContext"
@@ -27,7 +26,6 @@ export function RequestHistoryPage() {
             <p className="mt-2 text-xs text-on-surface-variant">Citizen ID: {accountProfile.id} · {requests.length} total requests</p>
           </div>
         </div>
-        <Button size="lg" type="button" variant="outline"><MaterialIcon>download</MaterialIcon>Download Report</Button>
       </header>
 
       <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-4">

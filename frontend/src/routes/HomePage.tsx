@@ -131,10 +131,9 @@ export function HomePage() {
 
   return (
     <>
-        <section className="relative overflow-hidden bg-primary-container py-24 text-on-primary md:py-32">
+        <section className="relative overflow-hidden bg-primary-container pb-24 pt-16 text-on-primary md:pb-32 md:pt-24">
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(var(--primary-foreground)_1px,transparent_1px)] [background-size:24px_24px]" />
           <div className="relative z-10 mx-auto flex max-w-container-max flex-col items-center px-margin-mobile text-center md:px-margin-desktop">
-            <span className="mb-6 inline-block rounded-full border border-secondary/30 bg-secondary/20 px-3 py-1 font-label-sm text-label-sm text-secondary-fixed">Version 2.0</span>
             <h1 className="mb-4 max-w-4xl font-display-lg text-headline-lg-mobile font-bold tracking-tight text-shadow md:text-display-lg">Right to Information Online</h1>
             <p className="mx-auto mb-10 max-w-2xl font-body-lg text-body-lg text-on-primary-container opacity-90 md:text-xl">
               An initiative of Department of Personnel & Training, Government of India, empowering citizens to seek information and promote transparency in governance.
@@ -160,17 +159,21 @@ export function HomePage() {
               const cardContent = (
                 <>
                   <div className="absolute left-0 top-0 h-1 w-full origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
-                  <div className={`mb-6 flex size-14 items-center justify-center rounded-full ${iconClass}`}>
-                    <MaterialIcon className="text-3xl">{icon}</MaterialIcon>
+                  {/* Icon beside the title rather than stacked above it: the glyph renders at 24px,
+                      so a 56px badge on its own row was costing ~80px of height per card. */}
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className={`flex size-14 shrink-0 items-center justify-center rounded-full ${iconClass}`}>
+                      <MaterialIcon className="text-3xl">{icon}</MaterialIcon>
+                    </div>
+                    <h3 className="font-headline-md text-headline-md text-primary">{title}</h3>
                   </div>
-                  <h3 className="mb-3 font-headline-md text-headline-md text-primary">{title}</h3>
-                  <p className="mb-6 flex-grow font-body-md text-body-md text-on-surface-variant">{body}</p>
+                  <p className="mb-4 flex-grow font-body-md text-body-md text-on-surface-variant">{body}</p>
                   <div className="flex items-center gap-1 font-label-lg text-label-lg text-foreground transition-all group-hover:gap-2">
                     {cta} <MaterialIcon className="text-sm">arrow_right_alt</MaterialIcon>
                   </div>
                 </>
               )
-              const cardClassName = "group relative flex h-full flex-col overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest p-8 shadow-sm transition-shadow hover:shadow-md"
+              const cardClassName = "group relative flex h-full flex-col overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest p-6 shadow-sm transition-shadow hover:shadow-md"
 
               return destination ? (
                 <Link className={`${cardClassName} cursor-pointer`} key={title} to={destination}>

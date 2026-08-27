@@ -65,7 +65,6 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
   const captchaCode = captchaCodes[captchaIndex]
   const applicantProfile = user?.profile ?? null
   const profileMobile = applicantProfile?.mobile.replace(/\D/g, "")
-  const profileAlternatePhone = applicantProfile?.alternateMobile.replace(/\D/g, "")
 
   const submitRequest = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -195,10 +194,6 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
               {['Literate', 'Illiterate'].map((status) => <label className="inline-flex items-center text-body-md" key={status}><input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.educationalStatus === status} name="request-education" type="radio" value={status} /><span className="ml-2">{status}</span></label>)}
             </div>
           </fieldset>
-          <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-phone">Phone Number</label>
-            <input className={inputClassName} defaultValue={profileAlternatePhone} id="request-phone" placeholder="Enter Phone Number with STD code" type="tel" />
-          </div>
         </div>
       </FormSection>
 
@@ -245,12 +240,14 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
       <section className="space-y-6 rounded-lg border border-surface-variant bg-surface-container-lowest p-6">
         <div className="max-w-md space-y-2">
           <label className={labelClassName} htmlFor="request-captcha">Enter security code<Required /></label>
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <div className="flex flex-col items-center">
-              <div className="rounded border border-outline-variant bg-surface-variant px-6 py-2 font-mono text-headline-md tracking-[0.2em] text-on-surface-variant">{captchaCode}</div>
-              <button className="mt-1 flex items-center gap-1 text-label-sm text-surface-tint hover:underline" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} type="button"><MaterialIcon className="text-[14px]">refresh</MaterialIcon>Refresh</button>
-            </div>
+          <div className="flex items-center gap-3">
             <input className={`${inputClassName} h-12 flex-1`} id="request-captcha" name="captcha" placeholder="Enter code" required type="text" />
+            <div className="flex shrink-0 items-center">
+              <button aria-label="Refresh security code" className="flex size-12 cursor-pointer items-center justify-center rounded-l border border-r-0 border-primary bg-primary text-on-primary transition-colors hover:bg-primary/85 active:translate-y-px" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title="Refresh security code" type="button">
+                <MaterialIcon className="text-lg!">refresh</MaterialIcon>
+              </button>
+              <div className="flex h-12 items-center rounded-r border border-outline-variant bg-surface-variant px-4 font-mono text-headline-md font-bold tracking-[0.2em] text-on-surface sm:px-6">{captchaCode}</div>
+            </div>
           </div>
         </div>
         {paymentMessage ? <p className="rounded-md border border-primary-fixed-dim bg-primary-fixed/30 p-3 text-sm font-medium text-primary" role="status">{paymentMessage}</p> : null}

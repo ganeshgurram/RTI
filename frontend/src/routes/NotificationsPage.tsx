@@ -52,12 +52,10 @@ export function NotificationsPage() {
               </Button>
             ))}
           </div>
-          {unreadCount ? (
-            <Button onClick={markAllAsRead} size="sm" type="button">
-              <MaterialIcon>done_all</MaterialIcon>
-              Mark all as read
-            </Button>
-          ) : null}
+          <Button className={unreadCount ? "" : "invisible"} onClick={markAllAsRead} size="sm" type="button">
+            <MaterialIcon>done_all</MaterialIcon>
+            Mark all as read
+          </Button>
         </div>
 
         <div className="space-y-3">

@@ -216,10 +216,10 @@ function StitchTopNav() {
                     <MaterialIcon>notifications</MaterialIcon>
                     {unreadCount ? <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] leading-4 font-bold text-black">{unreadCount}</span> : null}
                   </Button>
-                  <div className={`absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm ${isNotificationMenuOpen ? "block" : "hidden"}`}>
+                  <div className={`fixed left-3 right-3 top-[4.5rem] z-50 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72 ${isNotificationMenuOpen ? "block" : "hidden"}`}>
                     <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low p-4">
                       <h3 className="text-[14px] font-bold uppercase tracking-wider text-primary-container">Recent Notifications</h3>
-                      <Button disabled={!unreadCount} onClick={markAllAsRead} size="sm" type="button">Mark all as read</Button>
+                      <Button className={unreadCount ? "" : "invisible"} onClick={markAllAsRead} size="sm" type="button">Mark all as read</Button>
                     </div>
                     <div className="divide-y divide-outline-variant/50">
                       {notifications.slice(0, 3).map((notification) => (
