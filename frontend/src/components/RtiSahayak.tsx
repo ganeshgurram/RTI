@@ -168,6 +168,7 @@ export function RtiSahayak() {
   const [privacyNotice, setPrivacyNotice] = useState("")
   const [tokenUsage, setTokenUsage] = useState<TokenUsage | null>(null)
   const safetyIdentifier = useRef(createSafetyIdentifier())
+  const launcherRef = useRef<HTMLDivElement>(null)
   const messageListRef = useRef<HTMLDivElement>(null)
   const draftRef = useRef<HTMLTextAreaElement>(null)
 
@@ -190,6 +191,28 @@ export function RtiSahayak() {
       list.scrollTop = list.scrollHeight
     }
   }, [messages, isSending, isOpen])
+
+  // Keep the launcher clear of the site footer as it enters the viewport.
+  useEffect(() => {
+    const updateFooterOffset = () => {
+      const footer = document.querySelector<HTMLElement>("[data-site-footer]")
+      const offset = footer ? Math.max(0, Math.round(window.innerHeight - footer.getBoundingClientRect().top)) : 0
+      const launcher = launcherRef.current
+
+      if (launcher) {
+        launcher.style.bottom = `calc(1.25rem + ${offset}px)`
+      }
+    }
+
+    updateFooterOffset()
+    window.addEventListener("scroll", updateFooterOffset, { passive: true })
+    window.addEventListener("resize", updateFooterOffset)
+
+    return () => {
+      window.removeEventListener("scroll", updateFooterOffset)
+      window.removeEventListener("resize", updateFooterOffset)
+    }
+  }, [])
 
   const sendMessage = async (rawMessage: string) => {
     const message = rawMessage.trim()
@@ -260,7 +283,7 @@ export function RtiSahayak() {
   return (
     // items-end keeps the launcher pinned to the right edge; without it the button drifts
     // left to the start of the container once the much wider panel opens above it.
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end" ref={launcherRef}>
       {isOpen && (
         <section
           aria-label="RTI Sahayak chat"
@@ -388,7 +411,9 @@ export function RtiSahayak() {
       <Button
         aria-expanded={isOpen}
         aria-label={isOpen ? "Close RTI Sahayak" : "Open RTI Sahayak"}
-        className="h-12 rounded-full px-4 shadow-lg"
+        className={isOpen
+          ? "h-12 rounded-full bg-primary px-4 text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary"
+          : "h-12 rounded-full border-primary-foreground/25 bg-primary/55 px-4 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:supports-backdrop-filter:backdrop-blur-sm"}
         onClick={() => setIsOpen((open) => !open)}
         size="lg"
       >

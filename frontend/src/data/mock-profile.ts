@@ -37,6 +37,40 @@ export const mockProfile = {
   },
 }
 
+export const digiLockerMockProfile = {
+  id: "CIT-2026-008731",
+  username: "ananya.nair",
+  initials: "AN",
+  fullName: "Ananya Nair",
+  guardianName: "Suresh Nair",
+  dateOfBirth: "09 November 1992",
+  gender: "Female",
+  citizenship: "Indian",
+  email: "ananya.nair@example.in",
+  mobile: "+91 98470 11223",
+  alternateMobile: "+91 98472 66781",
+  country: "India",
+  countryName: "",
+  areaType: "Urban",
+  educationalStatus: "Literate",
+  addressText: "14, Coconut Grove, Vyttila, Ernakulam, Kerala",
+  preferredLanguage: "English",
+  address: {
+    line1: "14, Coconut Grove",
+    line2: "Vyttila, Ernakulam",
+    city: "Kochi",
+    district: "Ernakulam",
+    state: "Kerala",
+    pincode: "682019",
+  },
+  account: {
+    status: "Verified",
+    memberSince: "27 August 2026",
+    lastLogin: "27 August 2026, via DigiLocker",
+    loginMethod: "DigiLocker",
+  },
+}
+
 export const mockProfileMetrics = [
   { label: "Total requests", value: "12", icon: "description" },
   { label: "Pending", value: "3", icon: "hourglass_top" },

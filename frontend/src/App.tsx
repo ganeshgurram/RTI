@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "@/auth/AuthContext"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AppLayout } from "@/routes/AppLayout"
 import { ContactUsPage } from "@/routes/ContactUsPage"
+import { DigiLockerAuthorizationPage } from "@/routes/DigiLockerAuthorizationPage"
 import { FaqPage } from "@/routes/FaqPage"
 import { HomePage } from "@/routes/HomePage"
 import { LoginPage } from "@/routes/LoginPage"
@@ -19,6 +20,7 @@ import { AppealSubmissionSuccessPage, RequestSubmissionSuccessPage } from "@/rou
 import { RequestHistoryPage } from "@/routes/RequestHistoryPage"
 import { StatusPage } from "@/routes/StatusPage"
 import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
+import { RequestProvider } from "@/requests/RequestContext"
 
 const router = createBrowserRouter([
   {
@@ -27,6 +29,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
+      { path: "digilocker-authorize", element: <DigiLockerAuthorizationPage /> },
       { path: "faq", element: <FaqPage /> },
       { path: "contact-us", element: <ContactUsPage /> },
       { path: "public-authorities", element: <PublicAuthoritiesPage /> },
@@ -106,9 +109,11 @@ function ProtectedNotifications() {
 function App() {
   return (
     <AuthProvider>
-      <TooltipProvider>
-        <RouterProvider router={router} />
-      </TooltipProvider>
+      <RequestProvider>
+        <TooltipProvider>
+          <RouterProvider router={router} />
+        </TooltipProvider>
+      </RequestProvider>
     </AuthProvider>
   )
 }

@@ -1,9 +1,19 @@
 import { Button } from "@/components/ui/button"
 import { RequestHistoryTable } from "@/components/RequestHistoryTable"
-import { mockProfile, mockProfileMetrics, mockRequests } from "@/data/mock-profile"
+import { mockProfile } from "@/data/mock-profile"
+import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 export function RequestHistoryPage() {
+  const { requests } = useRequests()
+  const metrics = [
+    { label: "Total requests", value: String(requests.length), icon: "description" },
+    { label: "Pending", value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
+    { label: "Replies received", value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
+    { label: "Appeals", value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
+  ]
+  const mockRequests = requests
+
   return (
     <div className="mx-auto flex w-full max-w-container-max flex-col gap-6 px-margin-mobile py-8 md:px-margin-desktop md:py-10">
       <header className="flex flex-col justify-between gap-5 rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm sm:flex-row sm:items-center md:p-6">
@@ -19,7 +29,7 @@ export function RequestHistoryPage() {
       </header>
 
       <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {mockProfileMetrics.map((metric) => (
+        {metrics.map((metric) => (
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm" key={metric.label}>
             <div className="flex items-center justify-between"><span className="text-sm text-on-surface-variant">{metric.label}</span><MaterialIcon className="text-primary">{metric.icon}</MaterialIcon></div>
             <p className="mt-3 text-3xl font-bold text-primary">{metric.value}</p>

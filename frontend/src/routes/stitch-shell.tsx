@@ -264,7 +264,7 @@ function StitchTopNav() {
                 className="rounded bg-secondary px-6 py-2 font-label-lg text-label-lg text-on-secondary shadow-sm transition-colors hover:bg-secondary/90"
                 to="/login"
               >
-                {location.pathname === "/login" ? "Login" : "Signin/Signup"}
+                {location.pathname === "/login" ? "Sign up" : "Signin/Signup"}
               </Link>
             )}
           </div>
@@ -279,7 +279,7 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
   const isFaqActive = activeFaq || location.pathname === "/faq"
 
   return (
-    <footer className="mt-auto bg-on-surface text-surface-container-lowest">
+    <footer className="mt-auto bg-on-surface text-surface-container-lowest" data-site-footer>
       <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-6 px-margin-mobile py-stack-lg md:flex-row md:px-margin-desktop">
         <div className="text-center font-headline-md text-headline-md md:text-left">
           © {new Date().getFullYear()} RTI Online. All Rights Reserved.

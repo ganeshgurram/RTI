@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { mockProfile, mockRequests } from "@/data/mock-profile"
+import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const captchaCodes = ["7KQ2P", "M4N8R", "T6B3X"]
@@ -29,6 +29,7 @@ function Detail({ label, value }: { label: string; value: string }) {
 
 export function StatusPage() {
   const { isAuthenticated } = useAuth()
+  const { requests } = useRequests()
   const [registrationNumber, setRegistrationNumber] = useState("")
   const [email, setEmail] = useState("")
   const [captcha, setCaptcha] = useState("")
@@ -38,7 +39,7 @@ export function StatusPage() {
   const requestDetailsRef = useRef<HTMLElement>(null)
 
   const activeCaptcha = captchaCodes[captchaIndex]
-  const request = mockRequests.find((item) => item.id === requestId)
+  const request = requests.find((item) => item.id === requestId)
 
   useEffect(() => {
     if (request) requestDetailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -55,13 +56,13 @@ export function StatusPage() {
   const checkStatus = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextErrors: LookupErrors = {}
-    const matchingRequest = mockRequests.find((item) => item.id.toLowerCase() === registrationNumber.trim().toLowerCase())
+    const matchingRequest = requests.find((item) => item.id.toLowerCase() === registrationNumber.trim().toLowerCase())
 
     if (!registrationNumber.trim()) nextErrors.registrationNumber = "Enter your registration number."
     if (!/^\S+@\S+\.\S+$/.test(email)) nextErrors.email = "Enter the email address used for this request."
     if (captcha.trim().toUpperCase() !== activeCaptcha) nextErrors.captcha = "Captcha does not match. Please try again."
     if (!nextErrors.registrationNumber && !nextErrors.email && !nextErrors.captcha) {
-      if (!matchingRequest || email.trim().toLowerCase() !== mockProfile.email.toLowerCase()) {
+      if (!matchingRequest || email.trim().toLowerCase() !== matchingRequest.applicantEmail.toLowerCase()) {
         nextErrors.lookup = "No request matches those details. Check the registration number and email address."
       }
     }
@@ -134,8 +135,8 @@ export function StatusPage() {
                   <Badge className={request.statusClass} variant="outline">{request.status}</Badge>
                 </div>
                 <dl className="grid gap-x-8 gap-y-5 py-6 sm:grid-cols-2">
-                  <Detail label="Applicant" value={mockProfile.fullName} />
-                  <Detail label="Email Address" value={mockProfile.email} />
+                  <Detail label="Applicant" value={request.applicantName} />
+                  <Detail label="Email Address" value={request.applicantEmail} />
                   <Detail label="Public Authority" value={request.authority} />
                   <Detail label="Date Submitted" value={request.submittedOn} />
                   <div className="sm:col-span-2"><Detail label="Information Requested" value={request.subject} /></div>

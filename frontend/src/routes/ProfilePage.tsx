@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { mockProfile, mockProfileMetrics } from "@/data/mock-profile"
+import { useAuth } from "@/auth/AuthContext"
+import { mockProfile } from "@/data/mock-profile"
+import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const indianStatesAndTerritories = [
@@ -39,20 +41,22 @@ type FormErrors = Partial<Record<FieldName, string>>
 
 const digitsOnly = (value: string) => value.replace(/\D/g, "").slice(-10)
 
-const initialApplicant: ApplicantForm = {
-  fullName: mockProfile.fullName,
-  email: mockProfile.email,
-  confirmEmail: "",
-  mobile: digitsOnly(mockProfile.mobile),
-  gender: mockProfile.gender,
-  address: mockProfile.addressText,
-  pincode: mockProfile.address.pincode,
-  country: mockProfile.country,
-  countryName: mockProfile.countryName,
-  state: mockProfile.address.state,
-  areaType: mockProfile.areaType,
-  educationalStatus: mockProfile.educationalStatus,
-  alternatePhone: digitsOnly(mockProfile.alternateMobile),
+function createInitialApplicant(source: typeof mockProfile): ApplicantForm {
+  return {
+    fullName: source.fullName,
+    email: source.email,
+    confirmEmail: "",
+    mobile: digitsOnly(source.mobile),
+    gender: source.gender,
+    address: source.addressText,
+    pincode: source.address.pincode,
+    country: source.country,
+    countryName: source.countryName,
+    state: source.address.state,
+    areaType: source.areaType,
+    educationalStatus: source.educationalStatus,
+    alternatePhone: digitsOnly(source.alternateMobile),
+  }
 }
 
 function FieldLabel({ children, htmlFor, required, description }: { children: string; htmlFor?: string; required?: boolean; description?: string }) {
@@ -134,8 +138,11 @@ function ProfileCard({ title, description, icon, children }: { title: string; de
 }
 
 export function ProfilePage() {
-  const [profile, setProfile] = useState<ApplicantForm>(initialApplicant)
-  const [draft, setDraft] = useState<ApplicantForm>(initialApplicant)
+  const { user } = useAuth()
+  const { requests } = useRequests()
+  const accountProfile = user?.profile ?? mockProfile
+  const [profile, setProfile] = useState<ApplicantForm>(() => createInitialApplicant(accountProfile))
+  const [draft, setDraft] = useState<ApplicantForm>(() => createInitialApplicant(accountProfile))
   const [isEditing, setIsEditing] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [didSave, setDidSave] = useState(false)
@@ -199,9 +206,15 @@ export function ProfilePage() {
     setDidSave(true)
   }
 
-  const profileName = profile.fullName || mockProfile.fullName
+  const profileName = profile.fullName || accountProfile.fullName
   const initials = profileName.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase()
   const filteredStates = indianStatesAndTerritories.filter((state) => state.toLowerCase().includes(stateSearch.toLowerCase()))
+  const requestMetrics = [
+    { label: "Total requests", value: String(requests.length), icon: "description" },
+    { label: "Pending", value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
+    { label: "Replies received", value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
+    { label: "Appeals", value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
+  ]
 
   return (
     <div className="mx-auto flex w-full max-w-container-max flex-col gap-6 px-margin-mobile py-8 md:px-margin-desktop md:py-10">
@@ -211,10 +224,10 @@ export function ProfilePage() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-headline-lg text-2xl text-primary">{profileName}</h1>
-              <Badge className="border-state-success/20 bg-state-success/10 text-state-success" variant="outline">{mockProfile.account.status}</Badge>
+              <Badge className="border-state-success/20 bg-state-success/10 text-state-success" variant="outline">{accountProfile.account.status}</Badge>
             </div>
             <p className="mt-1 text-sm text-on-surface-variant">Applicant Profile · Personal and contact details used for RTI applications</p>
-            <p className="mt-2 text-xs text-on-surface-variant">Citizen ID: {mockProfile.id} · @{mockProfile.username}</p>
+            <p className="mt-2 text-xs text-on-surface-variant">Citizen ID: {accountProfile.id} · @{accountProfile.username}</p>
           </div>
         </div>
         {!isEditing ? (
@@ -232,7 +245,7 @@ export function ProfilePage() {
       ) : null}
 
       <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {mockProfileMetrics.map((metric) => (
+        {requestMetrics.map((metric) => (
           <Card className="border border-outline-variant bg-surface-container-lowest py-4 shadow-sm" key={metric.label}>
             <CardContent>
               <div className="flex items-center justify-between"><span className="text-sm text-on-surface-variant">{metric.label}</span><MaterialIcon className="text-primary">{metric.icon}</MaterialIcon></div>
@@ -371,10 +384,10 @@ export function ProfilePage() {
 
             <ProfileCard description="Your secure access details for this RTI portal." icon="manage_accounts" title="Account Details">
               <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-                <ReadOnlyField label="Citizen ID" value={mockProfile.id} />
-                <ReadOnlyField label="Username" value={`@${mockProfile.username}`} />
-                <ReadOnlyField label="Member Since" value={mockProfile.account.memberSince} />
-                <ReadOnlyField label="Last Sign In" value={mockProfile.account.lastLogin} />
+                <ReadOnlyField label="Citizen ID" value={accountProfile.id} />
+                <ReadOnlyField label="Username" value={`@${accountProfile.username}`} />
+                <ReadOnlyField label="Member Since" value={accountProfile.account.memberSince} />
+                <ReadOnlyField label="Last Sign In" value={accountProfile.account.lastLogin} />
               </dl>
             </ProfileCard>
           </section>

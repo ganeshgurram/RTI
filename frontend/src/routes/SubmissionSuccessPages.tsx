@@ -1,6 +1,7 @@
 import { type ReactNode } from "react"
-import { Link } from "react-router-dom"
+import { Link, Navigate, useLocation } from "react-router-dom"
 
+import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const requestDetails = {
@@ -48,6 +49,24 @@ function DetailLabel({ children }: { children: ReactNode }) {
 }
 
 export function RequestSubmissionSuccessPage() {
+  const location = useLocation()
+  const { requests } = useRequests()
+  const requestId = (location.state as { requestId?: string } | null)?.requestId
+  const request = requests.find((item) => item.id === requestId)
+
+  if (!request) {
+    return <Navigate replace to="/request-history" />
+  }
+
+  const requestDetails = {
+    registrationNumber: request.id,
+    name: request.applicantName,
+    date: request.submittedOn,
+    authority: request.authority,
+    phone: request.applicantPhone,
+    email: request.applicantEmail,
+  }
+
   const copyRegistrationNumber = async () => {
     await navigator.clipboard?.writeText(requestDetails.registrationNumber)
   }
@@ -68,7 +87,7 @@ export function RequestSubmissionSuccessPage() {
               <div className="grid grid-cols-2 gap-6"><div className="flex flex-col gap-1"><DetailLabel>Name</DetailLabel><span className="text-body-md font-medium text-on-surface">{requestDetails.name}</span></div><div className="flex flex-col gap-1"><DetailLabel>Date of Filing</DetailLabel><span className="flex items-center gap-2 text-body-md font-medium text-on-surface"><MaterialIcon className="text-sm text-outline">calendar_today</MaterialIcon>{requestDetails.date}</span></div></div>
               <div className="flex flex-col gap-1"><DetailLabel>Request filed with</DetailLabel><span className="text-body-md font-medium text-on-surface">{requestDetails.authority}</span></div>
             </div>
-            <div className="flex flex-col bg-surface/50 p-6"><div className="mb-6 flex items-center gap-2"><MaterialIcon className="text-primary/70">contact_mail</MaterialIcon><h3 className="font-headline-md text-lg text-primary/80">Contact Details</h3></div><div className="flex flex-col gap-6"><ContactDetail icon="phone" label="Telephone Number" value={requestDetails.phone} /><ContactDetail icon="mail" label="Email Id" value={requestDetails.email} /></div><div className="mt-auto flex items-center gap-3 border-t border-outline-variant/50 pt-6"><span className="size-3 rounded-full bg-secondary" /><span className="text-sm font-semibold tracking-wide text-secondary">Status: Pending Verification</span></div></div>
+            <div className="flex flex-col bg-surface/50 p-6"><div className="mb-6 flex items-center gap-2"><MaterialIcon className="text-primary/70">contact_mail</MaterialIcon><h3 className="font-headline-md text-lg text-primary/80">Contact Details</h3></div><div className="flex flex-col gap-6"><ContactDetail icon="phone" label="Telephone Number" value={requestDetails.phone} /><ContactDetail icon="mail" label="Email Id" value={requestDetails.email} /></div><div className="mt-auto flex items-center gap-3 border-t border-outline-variant/50 pt-6"><span className="size-3 rounded-full bg-secondary" /><span className="text-sm font-semibold tracking-wide text-secondary">Status: {request.status}</span></div></div>
           </div>
         </section>
 

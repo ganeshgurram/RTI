@@ -4,17 +4,18 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { mockRequests } from "@/data/mock-profile"
+import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 export function RequestHistoryTable() {
+  const { requests } = useRequests()
   const [requestSearch, setRequestSearch] = useState("")
   const [requestStatus, setRequestStatus] = useState("all")
   const [requestPage, setRequestPage] = useState(1)
   const requestPageSize = 10
   const requestQuery = requestSearch.trim().toLowerCase()
-  const requestStatuses = [...new Set(mockRequests.map((request) => request.status))]
-  const filteredRequests = mockRequests.filter((request) => {
+  const requestStatuses = [...new Set(requests.map((request) => request.status))]
+  const filteredRequests = requests.filter((request) => {
     const matchesSearch = !requestQuery || [request.id, request.subject, request.authority].some((value) => value.toLowerCase().includes(requestQuery))
     return matchesSearch && (requestStatus === "all" || request.status === requestStatus)
   })

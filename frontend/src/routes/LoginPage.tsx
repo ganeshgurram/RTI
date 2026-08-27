@@ -56,7 +56,7 @@ export function LoginPage() {
     completeLogin(username, password)
   }
 
-  const handleDigiLockerSignIn = () => completeLogin(demoCredentials.username, demoCredentials.password)
+  const handleDigiLockerSignIn = () => navigate("/digilocker-authorize")
 
   return (
     <section className="mx-auto flex min-h-[calc(100svh-12rem)] w-full max-w-container-max items-center justify-center p-margin-mobile md:p-margin-desktop">
@@ -100,12 +100,12 @@ export function LoginPage() {
                 <Field>
                   <FieldLabel htmlFor="captcha">Security Check</FieldLabel>
                   <div className="flex items-center gap-2">
+                    <Input aria-invalid={Boolean(error && captcha)} className="h-10" id="captcha" onChange={(event) => { setCaptcha(event.target.value); setError("") }} placeholder="Enter captcha" required value={captcha} />
                     <div className="relative flex h-10 w-32 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-outline-variant bg-surface-container-high">
                       <img alt="" className="h-full w-full object-cover opacity-60 mix-blend-multiply" src={captchaUrl} />
                       <span className="absolute inset-0 flex items-center justify-center font-mono text-sm font-bold tracking-widest text-primary mix-blend-difference">{activeCaptcha.split("").join(" ")}</span>
                     </div>
                     <Button aria-label="Refresh security check" onClick={refreshCaptcha} size="icon-lg" type="button" variant="ghost"><MaterialIcon>refresh</MaterialIcon></Button>
-                    <Input aria-invalid={Boolean(error && captcha)} className="h-10" id="captcha" onChange={(event) => { setCaptcha(event.target.value); setError("") }} placeholder="Enter captcha" required value={captcha} />
                   </div>
                 </Field>
 

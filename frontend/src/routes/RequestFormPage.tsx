@@ -2,7 +2,7 @@ import { useState, type FormEvent, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { useAuth } from "@/auth/AuthContext"
-import { mockProfile } from "@/data/mock-profile"
+import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const inputClassName = "h-10 w-full rounded border border-outline-variant bg-surface-container-lowest px-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary"
@@ -36,22 +36,48 @@ function Required() {
 export function RequestFormPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { createRequest } = useRequests()
   const [captchaIndex, setCaptchaIndex] = useState(0)
   const [paymentMessage, setPaymentMessage] = useState("")
+  const [submissionError, setSubmissionError] = useState("")
   const [isBplApplicant, setIsBplApplicant] = useState(false)
   const captchaCodes = ["915267", "418903", "672154"]
   const captchaCode = captchaCodes[captchaIndex]
-  const applicantProfile = user ? mockProfile : null
+  const applicantProfile = user?.profile ?? null
   const profileMobile = applicantProfile?.mobile.replace(/\D/g, "")
   const profileAlternatePhone = applicantProfile?.alternateMobile.replace(/\D/g, "")
 
   const submitRequest = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    navigate("/request-submission-success")
+    const formData = new FormData(event.currentTarget)
+    const email = String(formData.get("email") ?? "").trim()
+    const confirmedEmail = String(formData.get("confirmEmail") ?? "").trim()
+    const enteredCaptcha = String(formData.get("captcha") ?? "").trim()
+
+    if (email.toLowerCase() !== confirmedEmail.toLowerCase()) {
+      setSubmissionError("Email addresses do not match.")
+      return
+    }
+
+    if (enteredCaptcha !== captchaCode) {
+      setSubmissionError("The security code does not match. Please try again.")
+      return
+    }
+
+    const request = createRequest({
+      applicantEmail: email,
+      applicantName: String(formData.get("fullName") ?? "").trim(),
+      applicantPhone: `+91 ${String(formData.get("mobile") ?? "").trim()}`,
+      authority: String(formData.get("authority") ?? ""),
+      subject: String(formData.get("requestText") ?? ""),
+    })
+
+    navigate("/request-submission-success", { state: { requestId: request.id } })
   }
 
   const resetRequest = () => {
     setPaymentMessage("")
+    setSubmissionError("")
     setIsBplApplicant(false)
   }
 
@@ -69,7 +95,7 @@ export function RequestFormPage() {
         <div className="grid grid-cols-1 gap-gutter p-6 md:grid-cols-2">
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-ministry">Ministry/Department/Apex body<Required /></label>
-            <select className={selectClassName} defaultValue="" id="request-ministry">
+            <select className={selectClassName} defaultValue="" id="request-ministry" name="ministry" required>
               <option disabled value="">Select Ministry/Department/Apex body</option>
               <option>Department of Personnel and Training</option>
               <option>Ministry of Water Resources, River Development &amp; Ganga Rejuvenation</option>
@@ -77,7 +103,7 @@ export function RequestFormPage() {
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-authority">Select Public Authority<Required /></label>
-            <select className={selectClassName} defaultValue="" id="request-authority">
+            <select className={selectClassName} defaultValue="" id="request-authority" name="authority" required>
               <option disabled value="">Select Public Authority</option>
               <option>Central Information Commission</option>
               <option>Department of Personnel and Training</option>
@@ -90,29 +116,29 @@ export function RequestFormPage() {
         <div className="grid grid-cols-1 gap-gutter p-6 md:grid-cols-2">
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-email">Email-ID<Required /></label>
-            <input className={inputClassName} defaultValue={user?.email} id="request-email" placeholder="Enter Email-ID" type="email" />
+            <input className={inputClassName} defaultValue={user?.email} id="request-email" name="email" placeholder="Enter Email-ID" required type="email" />
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-mobile">Mobile Number<Required /></label>
             <div className="flex gap-2">
               <span className="inline-flex h-10 items-center rounded border border-outline-variant bg-surface-container-low px-3 text-body-md text-on-surface-variant">+91</span>
-              <input className={`${inputClassName} flex-1`} defaultValue={profileMobile} id="request-mobile" placeholder="Enter 10 digit mobile number" type="tel" />
+              <input className={`${inputClassName} flex-1`} defaultValue={profileMobile} id="request-mobile" maxLength={10} name="mobile" pattern="[0-9]{10}" placeholder="Enter 10 digit mobile number" required type="tel" />
             </div>
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-confirm-email">Confirm Email-ID<Required /></label>
-            <input className={inputClassName} defaultValue={user?.email} id="request-confirm-email" placeholder="Re-enter Email-ID" type="email" />
+            <input className={inputClassName} defaultValue={user?.email} id="request-confirm-email" name="confirmEmail" placeholder="Re-enter Email-ID" required type="email" />
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-name">Name<Required /></label>
-            <input className={inputClassName} defaultValue={user?.fullName} id="request-name" placeholder="Enter Full Name" type="text" />
+            <input className={inputClassName} defaultValue={user?.fullName} id="request-name" name="fullName" placeholder="Enter Full Name" required type="text" />
           </div>
           <fieldset className="space-y-1">
             <legend className={labelClassName}>Gender<Required /></legend>
             <div className="flex h-10 flex-wrap items-center gap-x-4 gap-y-1">
               {['Male', 'Female', 'Third Gender'].map((gender) => (
                 <label className="inline-flex items-center text-body-md" key={gender}>
-                  <input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.gender === gender} name="request-gender" type="radio" value={gender} />
+                  <input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.gender === gender} name="request-gender" required type="radio" value={gender} />
                   <span className="ml-2">{gender}</span>
                 </label>
               ))}
@@ -121,22 +147,22 @@ export function RequestFormPage() {
           <div className="space-y-1 md:col-span-2">
             <label className={labelClassName} htmlFor="request-address-line-1">Address<Required /></label>
             <div className="space-y-2">
-              <input className={inputClassName} defaultValue={applicantProfile?.address.line1} id="request-address-line-1" placeholder="Line 1" type="text" />
+              <input className={inputClassName} defaultValue={applicantProfile?.address.line1} id="request-address-line-1" name="addressLine1" placeholder="Line 1" required type="text" />
               <input className={inputClassName} defaultValue={applicantProfile?.address.line2} placeholder="Line 2" type="text" />
               <input className={inputClassName} defaultValue={applicantProfile ? `${applicantProfile.address.city}, ${applicantProfile.address.district}` : undefined} placeholder="Line 3" type="text" />
             </div>
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-pincode">Pin code<Required /></label>
-            <input className={inputClassName} defaultValue={applicantProfile?.address.pincode} id="request-pincode" placeholder="Enter 6 digit PIN code" inputMode="numeric" type="text" />
+            <input className={inputClassName} defaultValue={applicantProfile?.address.pincode} id="request-pincode" inputMode="numeric" maxLength={6} name="pincode" pattern="[0-9]{6}" placeholder="Enter 6 digit PIN code" required type="text" />
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-country">Country<Required /></label>
-            <select className={selectClassName} defaultValue={applicantProfile?.country ?? "India"} id="request-country"><option>India</option><option>Other</option></select>
+            <select className={selectClassName} defaultValue={applicantProfile?.country ?? "India"} id="request-country" name="country" required><option>India</option><option>Other</option></select>
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-state">State<Required /></label>
-            <select className={selectClassName} defaultValue={applicantProfile?.address.state ?? ""} id="request-state"><option disabled value="">Select State</option><option>Delhi</option><option>Maharashtra</option><option>Tamil Nadu</option></select>
+            <select className={selectClassName} defaultValue={applicantProfile?.address.state ?? ""} id="request-state" name="state" required><option disabled value="">Select State</option><option>Delhi</option><option>Kerala</option><option>Maharashtra</option><option>Tamil Nadu</option></select>
           </div>
           <fieldset className="space-y-1">
             <legend className={labelClassName}>Status</legend>
@@ -162,13 +188,13 @@ export function RequestFormPage() {
           <div className="grid grid-cols-1 gap-gutter md:grid-cols-2">
             <div className="space-y-1">
               <label className={labelClassName} htmlFor="request-citizenship">Citizenship<Required /></label>
-              <select className={selectClassName} defaultValue={applicantProfile?.citizenship ?? "Indian"} id="request-citizenship"><option>Indian</option><option>Other</option></select>
+              <select className={selectClassName} defaultValue={applicantProfile?.citizenship ?? "Indian"} id="request-citizenship" name="citizenship" required><option>Indian</option><option>Other</option></select>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-gutter border-t border-surface-variant pt-6 md:grid-cols-2">
             <div className="space-y-1">
               <label className={labelClassName} htmlFor="request-bpl">Is the Applicant Below Poverty Line ?<Required /></label>
-              <select className={selectClassName} id="request-bpl" onChange={(event) => setIsBplApplicant(event.target.value === "Yes")} value={isBplApplicant ? "Yes" : "No"}>
+              <select className={selectClassName} id="request-bpl" name="bpl" onChange={(event) => setIsBplApplicant(event.target.value === "Yes")} value={isBplApplicant ? "Yes" : "No"}>
                 <option>No</option>
                 <option>Yes</option>
               </select>
@@ -187,7 +213,7 @@ export function RequestFormPage() {
           <div className="space-y-4 border-t border-surface-variant pt-6">
             <label className={labelClassName} htmlFor="request-text">Text for RTI Request application<Required /></label>
             <p className="rounded border border-primary-fixed-dim bg-primary-fixed/30 p-2 text-label-sm text-surface-tint">Note:- Only alphabets A-Z a-z number 0-9 and special characters , . - _ ( ) / @ : &amp; ? \ % are allowed in Text for RTI Request application.</p>
-            <textarea className="min-h-48 w-full rounded border border-outline-variant bg-surface-container-lowest p-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="request-text" maxLength={3000} placeholder="Enter Text for RTI Request application upto 3000 characters" rows={8} />
+            <textarea className="min-h-48 w-full rounded border border-outline-variant bg-surface-container-lowest p-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="request-text" maxLength={3000} name="requestText" placeholder="Enter Text for RTI Request application upto 3000 characters" required rows={8} />
           </div>
           <div className={`${isBplApplicant ? "block" : "hidden"} space-y-2 border-t border-surface-variant pt-6`}>
             <label className={labelClassName} htmlFor="request-document">Supporting document <span className="font-normal text-label-sm text-on-surface-variant">(only pdf upto 1 MB)</span><Required /></label>
@@ -205,13 +231,14 @@ export function RequestFormPage() {
               <div className="rounded border border-outline-variant bg-surface-variant px-6 py-2 font-mono text-headline-md tracking-[0.2em] text-on-surface-variant">{captchaCode}</div>
               <button className="mt-1 flex items-center gap-1 text-label-sm text-surface-tint hover:underline" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} type="button"><MaterialIcon className="text-[14px]">refresh</MaterialIcon>Refresh</button>
             </div>
-            <input className={`${inputClassName} h-12 flex-1`} id="request-captcha" placeholder="Enter code" type="text" />
+            <input className={`${inputClassName} h-12 flex-1`} id="request-captcha" name="captcha" placeholder="Enter code" required type="text" />
           </div>
         </div>
         {paymentMessage ? <p className="rounded-md border border-primary-fixed-dim bg-primary-fixed/30 p-3 text-sm font-medium text-primary" role="status">{paymentMessage}</p> : null}
+        {submissionError ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{submissionError}</p> : null}
         <div className="flex flex-wrap gap-4 border-t border-surface-variant pt-6">
           <button className={`${isBplApplicant ? "" : "hidden"} rounded bg-primary px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit">Submit</button>
-          <button className={`${isBplApplicant ? "hidden" : "flex"} items-center gap-2 rounded bg-surface-tint px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} onClick={() => setPaymentMessage("Payment marked as complete for this frontend demo.")} type="button"><MaterialIcon className="text-[18px]">payments</MaterialIcon>Make Payment</button>
+          <button className={`${isBplApplicant ? "hidden" : "flex"} items-center gap-2 rounded bg-surface-tint px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit"><MaterialIcon className="text-[18px]">payments</MaterialIcon>Make Payment</button>
           <button className="rounded border border-outline-variant bg-surface-container px-8 py-3 font-label-lg text-on-surface transition-colors hover:bg-surface-container-high" type="reset">Reset</button>
         </div>
       </section>
