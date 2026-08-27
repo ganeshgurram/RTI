@@ -44,6 +44,7 @@ export function FirstAppealFormPage() {
   const location = useLocation()
   const { user } = useAuth()
   const { createFirstAppeal, requests } = useRequests()
+  const { t } = useTranslation()
   const [captchaIndex, setCaptchaIndex] = useState(0)
   const captchaCodes = ["290563", "572946", "814307"]
   const requestId = (location.state as { requestId?: string } | null)?.requestId
@@ -61,7 +62,6 @@ export function FirstAppealFormPage() {
   // signed-in profile and are left blank when there is none.
   const appellantProfile = user?.profile ?? null
   const appellantMobile = request.applicantPhone.replace(/\D/g, "").slice(-10)
-  const { t } = useTranslation()
 
   const submitAppeal = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
