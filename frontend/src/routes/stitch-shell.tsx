@@ -117,7 +117,7 @@ function StitchTopNav() {
 
   const drawerLinks = [
     ...links,
-    { label: "Second Appeal", path: "/profile" },
+    { label: "Second Appeal", path: "/second-appeal" },
     { label: "FAQs", path: "/faq" },
     ...(user ? [] : [{ label: "Login", path: "/login" }]),
   ]

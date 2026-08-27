@@ -157,7 +157,9 @@ export function HomePage() {
                   ? "/submit-first-appeal"
                 : title === "View Status"
                   ? viewStatusPath
-                  : null
+                  : title === "Submit Second Appeal"
+                    ? "/second-appeal"
+                    : null
               const cardContent = (
                 <>
                   <div className="absolute left-0 top-0 h-1 w-full origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />

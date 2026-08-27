@@ -18,6 +18,7 @@ import { PublicAuthoritiesPage } from "@/routes/PublicAuthoritiesPage"
 import { FirstAppealFormPage } from "@/routes/FirstAppealFormPage"
 import { RequestFormPage } from "@/routes/RequestFormPage"
 import { SubmitFirstAppealPage } from "@/routes/SubmitFirstAppealPage"
+import { SecondAppealPage } from "@/routes/SecondAppealPage"
 import { AppealSubmissionSuccessPage, RequestSubmissionSuccessPage } from "@/routes/SubmissionSuccessPages"
 import { RequestHistoryPage } from "@/routes/RequestHistoryPage"
 import { StatusPage } from "@/routes/StatusPage"
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
       { path: "submit-first-appeal", element: <FirstAppealRoute /> },
       { path: "first-appeal-form", element: <FirstAppealFormPage /> },
       { path: "appeal-submission-success", element: <AppealSubmissionSuccessPage /> },
+      { path: "second-appeal", element: <SecondAppealPage /> },
       { path: "profile", element: <ProtectedProfile /> },
       { path: "request-history", element: <ProtectedRequestHistory /> },
       { path: "notifications", element: <ProtectedNotifications /> },
