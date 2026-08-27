@@ -22,6 +22,15 @@ export type PaymentTransaction = {
   refundReference?: string
 }
 
+/** The part of a non-BPL application held until its mock payment is confirmed. */
+export type PaymentRequestDraft = {
+  applicantEmail: string
+  applicantName: string
+  applicantPhone: string
+  authority: string
+  subject: string
+}
+
 export const mockTransactions: PaymentTransaction[] = [
   {
     transactionId: "TXN_9823410",
@@ -81,10 +90,10 @@ export function normaliseMobile(value: string) {
   return value.replace(/\D/g, "").slice(-10)
 }
 
-export function findTransaction(email: string, mobile: string) {
+export function findTransaction(transactions: PaymentTransaction[], email: string, mobile: string) {
   const normalisedEmail = email.trim().toLowerCase()
   const normalisedMobile = normaliseMobile(mobile)
-  const byEmail = mockTransactions.find((transaction) => transaction.email === normalisedEmail)
+  const byEmail = transactions.find((transaction) => transaction.email === normalisedEmail)
 
   if (!byEmail) return { transaction: null, mobileMismatch: false }
 

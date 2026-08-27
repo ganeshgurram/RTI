@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { findTransaction, type PaymentTransaction } from "@/data/mock-transactions"
 import { cn } from "@/lib/utils"
+import { usePayments } from "@/payments/PaymentContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const captchaCodes = ["C8T9P", "M4K7Q", "R2V6N"]
@@ -29,6 +30,7 @@ function Detail({ label, value }: { label: string; value: string }) {
 
 export function PaymentReconciliationPage() {
   const navigate = useNavigate()
+  const { payments } = usePayments()
   const [email, setEmail] = useState("")
   const [mobile, setMobile] = useState("")
   const [captcha, setCaptcha] = useState("")
@@ -59,7 +61,7 @@ export function PaymentReconciliationPage() {
     if (!/^\S+@\S+\.\S+$/.test(email)) nextErrors.email = "Enter the email address used for this payment."
     if (captcha.trim().toUpperCase() !== activeCaptcha) nextErrors.captcha = "Captcha does not match. Please try again."
 
-    const { mobileMismatch, transaction } = findTransaction(email, mobile)
+    const { mobileMismatch, transaction } = findTransaction(payments, email, mobile)
 
     if (!nextErrors.email && !nextErrors.captcha) {
       if (mobileMismatch) {
@@ -72,7 +74,7 @@ export function PaymentReconciliationPage() {
     setErrors(nextErrors)
 
     if (!Object.keys(nextErrors).length && transaction) {
-      navigate("/transaction-status", { state: { transaction } })
+      navigate("/transaction-status", { state: { transactionId: transaction.transactionId } })
     }
   }
 
@@ -182,7 +184,11 @@ const outcomeViews: Record<"located" | PaymentTransaction["outcome"], OutcomeVie
 export function TransactionStatusPage() {
   const location = useLocation()
   const [hasCheckedBank, setHasCheckedBank] = useState(false)
-  const transaction = (location.state as { transaction?: PaymentTransaction } | null)?.transaction
+  const { payments } = usePayments()
+  const routeState = location.state as { transaction?: PaymentTransaction; transactionId?: string } | null
+  const transaction = routeState?.transactionId
+    ? payments.find((payment) => payment.transactionId === routeState.transactionId)
+    : routeState?.transaction
 
   // Reached without a lookup, so there is no transaction to report on.
   if (!transaction) {

@@ -18,7 +18,7 @@ export type RequestAuthority = {
 }
 
 type RequestGuidelinesContextValue = {
-  openRequestGuidelines: (options?: { cancelTo?: number | string; authority?: RequestAuthority }) => void
+  openRequestGuidelines: (options?: { cancelTo?: number | string; authority?: RequestAuthority; journey?: "request" | "firstAppeal" }) => void
 }
 
 const RequestGuidelinesContext = createContext<RequestGuidelinesContextValue | null>(null)
@@ -37,6 +37,17 @@ const guidelines = [
   "Use the View Status service and your registration number to track an application or appeal. The provisions of the RTI Act, 2005 and its rules apply to all requests filed here.",
 ]
 
+const firstAppealGuidelines = [
+  "A First Appeal may be filed online only for an RTI request that was originally filed through this portal.",
+  "Keep the original RTI request registration number and the email address used to file it ready. They are used to identify the request being appealed.",
+  "Choose the ground that best explains your appeal and state the facts clearly in the appeal text. The appeal text is limited to 500 characters.",
+  "A First Appeal may be filed when information is refused, no response is received within the time limit, an unreasonable fee is requested, or information supplied is incomplete, misleading, or false.",
+  "No fee is charged for filing a First Appeal through this portal.",
+  "A First Appeal should normally be filed within 30 days of receiving the response, or from the date the response was due. The First Appellate Authority normally decides it within 30 days, extendable to 45 days where reasons are recorded.",
+  "Do not enter Aadhaar, PAN, bank details, OTPs, or passwords in the appeal text or supporting document. Upload only a relevant PDF, up to 1 MB.",
+  "After submission, save the First Appeal registration number and use the portal to track its progress.",
+]
+
 export function RequestGuidelinesDialogProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
@@ -44,6 +55,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
   const [hasReachedEnd, setHasReachedEnd] = useState(false)
   const [cancelTo, setCancelTo] = useState<number | string | null>(null)
   const [authority, setAuthority] = useState<RequestAuthority | null>(null)
+  const [journey, setJourney] = useState<"request" | "firstAppeal">("request")
   const guidelinesScrollRef = useRef<HTMLDivElement>(null)
 
   const updateScrollProgress = () => {
@@ -76,6 +88,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
     // Cleared with the rest, so a later visit from the home page or top nav does not
     // silently reuse the office picked in the directory earlier.
     setAuthority(null)
+    setJourney("request")
 
     if (shouldReturn && destination !== null) {
       if (typeof destination === "number") {
@@ -98,9 +111,17 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
   }
 
   const handleSubmit = () => {
+    const destination = journey === "firstAppeal" ? "/submit-first-appeal" : "/submit-request"
+    const state = journey === "firstAppeal"
+      ? { guidelinesAccepted: true }
+      : { guidelinesAccepted: true, authority }
+
     closeDialog()
-    navigate("/submit-request", { state: { guidelinesAccepted: true, authority } })
+    navigate(destination, { state })
   }
+
+  const isFirstAppeal = journey === "firstAppeal"
+  const activeGuidelines = isFirstAppeal ? firstAppealGuidelines : guidelines
 
   return (
     <RequestGuidelinesContext.Provider
@@ -110,6 +131,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
           setHasReachedEnd(false)
           setCancelTo(options?.cancelTo ?? null)
           setAuthority(options?.authority ?? null)
+          setJourney(options?.journey ?? "request")
           setIsOpen(true)
         },
       }}
@@ -121,10 +143,12 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
         >
           <DialogHeader className="border-b border-outline-variant px-5 py-4 pr-12 sm:px-6">
             <DialogTitle className="font-headline-md text-xl font-bold text-primary">
-              Guidelines for Filing an RTI Request
+              {isFirstAppeal ? "Guidelines for Filing a First Appeal" : "Guidelines for Filing an RTI Request"}
             </DialogTitle>
             <DialogDescription className="text-on-surface-variant">
-              Please read these guidelines before starting your application.
+              {isFirstAppeal
+                ? "Please read these guidelines before checking the RTI request you want to appeal."
+                : "Please read these guidelines before starting your application."}
             </DialogDescription>
           </DialogHeader>
 
@@ -134,7 +158,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
             ref={guidelinesScrollRef}
           >
             <ol className="space-y-4 pl-5 text-sm leading-6 text-on-surface-variant marker:font-semibold marker:text-primary">
-              {guidelines.map((guideline) => (
+              {activeGuidelines.map((guideline) => (
                 <li key={guideline}>{guideline}</li>
               ))}
             </ol>
@@ -161,7 +185,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
               Cancel
             </Button>
             <Button disabled={!hasAcknowledged} onClick={handleSubmit} type="button">
-              Submit Request
+              {isFirstAppeal ? "Continue to First Appeal" : "Submit Request"}
             </Button>
           </DialogFooter>
         </DialogContent>

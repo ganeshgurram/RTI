@@ -16,7 +16,14 @@ type CreateRequestInput = {
   subject: string
 }
 
+type CreateFirstAppealInput = {
+  originalRequest: RtiRequest
+  applicantEmail: string
+  applicantPhone: string
+}
+
 type RequestContextValue = {
+  createFirstAppeal: (input: CreateFirstAppealInput) => RtiRequest
   createRequest: (input: CreateRequestInput) => RtiRequest
   requests: RtiRequest[]
 }
@@ -60,6 +67,25 @@ export function RequestProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<RequestContextValue>(() => ({
     requests,
+    createFirstAppeal: (input) => {
+      const now = new Date()
+      const appeal: RtiRequest = {
+        id: `RTI-A-${now.getFullYear()}-${String(now.getTime()).slice(-6)}`,
+        subject: `First appeal: ${input.originalRequest.subject}`,
+        authority: input.originalRequest.authority,
+        submittedOn: formatRequestDate(now),
+        lastUpdated: formatRequestDate(now),
+        status: "First Appeal Filed",
+        nextAction: "Awaiting review by the First Appellate Authority",
+        statusClass: "border-tertiary/20 bg-tertiary-fixed text-on-tertiary-fixed-variant",
+        applicantEmail: input.applicantEmail,
+        applicantName: input.originalRequest.applicantName,
+        applicantPhone: input.applicantPhone,
+      }
+
+      setRequests((current) => [appeal, ...current])
+      return appeal
+    },
     createRequest: (input) => {
       const now = new Date()
       const request: RtiRequest = {

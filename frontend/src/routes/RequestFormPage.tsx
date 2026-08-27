@@ -1,7 +1,8 @@
-import { useState, type FormEvent, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
 import { useAuth } from "@/auth/AuthContext"
+import type { PaymentRequestDraft } from "@/data/mock-transactions"
 import type { RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
@@ -34,23 +35,137 @@ function Required() {
   return <span className="text-error"> *</span>
 }
 
-const ministryOptions = [
-  "Department of Personnel and Training",
-  "Ministry of Water Resources, River Development & Ganga Rejuvenation",
-]
+type DirectoryAuthority = {
+  id: string
+  parentId: string
+  level: number
+  name: string
+}
 
-const authorityOptions = [
-  "Central Information Commission",
-  "Department of Personnel and Training",
-]
+type DirectoryData = {
+  authorities: DirectoryAuthority[]
+}
 
-/**
- * The directory holds 2,907 offices and this form lists two, so an office chosen there is
- * almost never already an option. Adding it keeps the applicant's choice instead of asking
- * them to pick again from a list that does not contain it.
- */
-function withSelected(options: string[], selected?: string) {
-  return selected && !options.includes(selected) ? [selected, ...options] : options
+type DirectoryOption = {
+  id: string
+  label: string
+  ministryName?: string
+}
+
+// These parent IDs are present in the official directory's hierarchy but do not have a row of
+// their own. Keeping their displayed name here lets the request form group all their offices.
+const directoryMinistryNames: Record<string, string> = {
+  "9": "Ministry of Agriculture & Farmers Welfare",
+  "16": "Ministry of Chemicals & Fertilizers",
+  "22": "Ministry of Commerce & Industry",
+  "26": "Ministry of Communications",
+  "30": "Ministry of Consumer Affairs, Food & Public Distribution",
+  "33": "Ministry of Defence",
+  "41": "Ministry of Finance",
+  "46": "Ministry of Health & Family Welfare",
+  "50": "Ministry of Heavy Industries & Public Enterprises",
+  "65": "Ministry of Law & Justice",
+  "74": "Ministry of Personnel, Public Grievances & Pensions",
+  "87": "Ministry of Science & Technology",
+}
+
+function ministryFor(authority: DirectoryAuthority, authoritiesById: Map<string, DirectoryAuthority>) {
+  let current = authority
+
+  while (current.parentId) {
+    if (directoryMinistryNames[current.parentId]) return directoryMinistryNames[current.parentId]
+
+    const parent = authoritiesById.get(current.parentId)
+    if (!parent) break
+    current = parent
+  }
+
+  return current.name
+}
+
+function SearchableDirectorySelect({
+  disabled = false,
+  id,
+  name,
+  onOptionSelect,
+  onValueChange,
+  options,
+  placeholder,
+  value,
+}: {
+  disabled?: boolean
+  id: string
+  name: string
+  onOptionSelect: (option: DirectoryOption) => void
+  onValueChange: (value: string) => void
+  options: DirectoryOption[]
+  placeholder: string
+  value: string
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const matchingOptions = useMemo(() => {
+    const query = value.trim().toLocaleLowerCase()
+    if (!query) return options
+
+    return options.filter((option) => (
+      option.label.toLocaleLowerCase().includes(query) ||
+      option.ministryName?.toLocaleLowerCase().includes(query)
+    ))
+  }, [options, value])
+  const visibleOptions = matchingOptions.slice(0, 100)
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setIsOpen(false)
+    }
+
+    document.addEventListener("mousedown", closeOnOutsideClick)
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick)
+  }, [])
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <div className="relative">
+        <input
+          aria-autocomplete="list"
+          aria-controls={`${id}-options`}
+          aria-expanded={isOpen}
+          className={`${inputClassName} pr-10 disabled:cursor-not-allowed disabled:bg-surface-container-low`}
+          disabled={disabled}
+          id={id}
+          name={name}
+          onChange={(event) => { onValueChange(event.target.value); setIsOpen(true) }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={(event) => { if (event.key === "Escape") setIsOpen(false) }}
+          placeholder={placeholder}
+          required
+          role="combobox"
+          value={value}
+        />
+        <MaterialIcon aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">search</MaterialIcon>
+      </div>
+      {isOpen && !disabled ? (
+        <div className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-outline-variant bg-surface-container-lowest p-1 shadow-lg" id={`${id}-options`} role="listbox">
+          {visibleOptions.map((option) => (
+            <button
+              className="flex w-full flex-col rounded-md px-3 py-2 text-left transition-colors hover:bg-surface-container-low focus:bg-surface-container-low focus:outline-none"
+              key={option.id}
+              onClick={() => { onOptionSelect(option); setIsOpen(false) }}
+              onMouseDown={(event) => event.preventDefault()}
+              role="option"
+              type="button"
+            >
+              <span className="text-sm font-medium text-on-surface">{option.label}</span>
+              {option.ministryName ? <span className="mt-0.5 text-xs text-on-surface-variant">{option.ministryName}</span> : null}
+            </button>
+          ))}
+          {!visibleOptions.length ? <p className="px-3 py-6 text-center text-sm text-on-surface-variant">No matching option found.</p> : null}
+          {matchingOptions.length > visibleOptions.length ? <p className="px-3 py-2 text-xs text-on-surface-variant">Showing the first 100 matches. Keep typing to narrow the list.</p> : null}
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 export function RequestFormPage({ authority }: { authority?: RequestAuthority }) {
@@ -61,10 +176,46 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
   const [paymentMessage, setPaymentMessage] = useState("")
   const [submissionError, setSubmissionError] = useState("")
   const [isBplApplicant, setIsBplApplicant] = useState(false)
+  const [directory, setDirectory] = useState<DirectoryData | null>(null)
+  const [hasDirectoryError, setHasDirectoryError] = useState(false)
+  const [selectedMinistry, setSelectedMinistry] = useState(authority?.ministryName ?? "")
+  const [selectedAuthority, setSelectedAuthority] = useState(authority?.name ?? "")
   const captchaCodes = ["915267", "418903", "672154"]
   const captchaCode = captchaCodes[captchaIndex]
   const applicantProfile = user?.profile ?? null
   const profileMobile = applicantProfile?.mobile.replace(/\D/g, "")
+
+  useEffect(() => {
+    let isCurrent = true
+
+    void fetch("/data/public-authorities.json")
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load the directory")
+        return response.json() as Promise<DirectoryData>
+      })
+      .then((data) => { if (isCurrent) setDirectory(data) })
+      .catch(() => { if (isCurrent) setHasDirectoryError(true) })
+
+    return () => { isCurrent = false }
+  }, [])
+
+  const { authorityOptions, ministryOptions } = useMemo(() => {
+    if (!directory) return { authorityOptions: [] as DirectoryOption[], ministryOptions: [] as DirectoryOption[] }
+
+    const authoritiesById = new Map(directory.authorities.map((entry) => [entry.id, entry]))
+    const allAuthorityOptions = directory.authorities
+      .map((entry) => ({ id: entry.id, label: entry.name, ministryName: ministryFor(entry, authoritiesById) }))
+      .sort((left, right) => left.label.localeCompare(right.label))
+    const allMinistryOptions = [...new Set(allAuthorityOptions.map((option) => option.ministryName ?? option.label))]
+      .sort((left, right) => left.localeCompare(right))
+      .map((name) => ({ id: `ministry-${name}`, label: name }))
+
+    return { authorityOptions: allAuthorityOptions, ministryOptions: allMinistryOptions }
+  }, [directory])
+
+  const authoritiesForSelectedMinistry = selectedMinistry
+    ? authorityOptions.filter((option) => option.ministryName === selectedMinistry)
+    : authorityOptions
 
   const submitRequest = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -83,13 +234,29 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
       return
     }
 
-    const request = createRequest({
+    const selectedAuthorityOption = authorityOptions.find((option) => (
+      option.label === selectedAuthority && option.ministryName === selectedMinistry
+    ))
+
+    if (!selectedAuthorityOption) {
+      setSubmissionError("Select a Ministry/Department and Public Authority from the directory.")
+      return
+    }
+
+    const requestDraft: PaymentRequestDraft = {
       applicantEmail: email,
       applicantName: String(formData.get("fullName") ?? "").trim(),
       applicantPhone: `+91 ${String(formData.get("mobile") ?? "").trim()}`,
-      authority: String(formData.get("authority") ?? ""),
+      authority: selectedAuthorityOption.label,
       subject: String(formData.get("requestText") ?? ""),
-    })
+    }
+
+    if (!isBplApplicant) {
+      navigate("/mock-payment", { state: { draft: requestDraft } })
+      return
+    }
+
+    const request = createRequest(requestDraft)
 
     navigate("/request-submission-success", { state: { requestId: request.id } })
   }
@@ -115,18 +282,13 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
         <div className="grid grid-cols-1 gap-gutter p-6 md:grid-cols-2">
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-ministry">Ministry/Department/Apex body<Required /></label>
-            <select className={selectClassName} defaultValue={authority?.ministryName ?? ""} id="request-ministry" name="ministry" required>
-              <option disabled value="">Select Ministry/Department/Apex body</option>
-              {withSelected(ministryOptions, authority?.ministryName).map((name) => <option key={name}>{name}</option>)}
-            </select>
+            <SearchableDirectorySelect disabled={!directory} id="request-ministry" name="ministry" onOptionSelect={(option) => { setSelectedMinistry(option.label); setSelectedAuthority("") }} onValueChange={(value) => { setSelectedMinistry(value); setSelectedAuthority("") }} options={ministryOptions} placeholder={directory ? "Search Ministry/Department" : "Loading directory..."} value={selectedMinistry} />
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-authority">Select Public Authority<Required /></label>
-            <select className={selectClassName} defaultValue={authority?.name ?? ""} id="request-authority" name="authority" required>
-              <option disabled value="">Select Public Authority</option>
-              {withSelected(authorityOptions, authority?.name).map((name) => <option key={name}>{name}</option>)}
-            </select>
+            <SearchableDirectorySelect disabled={!directory} id="request-authority" name="authority" onOptionSelect={(option) => { setSelectedAuthority(option.label); setSelectedMinistry(option.ministryName ?? "") }} onValueChange={setSelectedAuthority} options={authoritiesForSelectedMinistry} placeholder={directory ? "Search Public Authority" : "Loading directory..."} value={selectedAuthority} />
           </div>
+          {hasDirectoryError ? <p className="text-sm font-medium text-error md:col-span-2" role="alert">The Public Authorities directory could not be loaded. Please refresh the page and try again.</p> : null}
         </div>
       </FormSection>
 

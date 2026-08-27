@@ -153,6 +153,8 @@ export function HomePage() {
             {actionCards.map(([icon, title, body, cta, iconClass]) => {
               const destination = title === "Submit Request"
                 ? "/submit-request"
+                : title === "Submit First Appeal"
+                  ? "/submit-first-appeal"
                 : title === "View Status"
                   ? viewStatusPath
                   : null

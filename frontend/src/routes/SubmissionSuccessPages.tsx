@@ -1,6 +1,7 @@
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 import { Link, Navigate, useLocation } from "react-router-dom"
 
+import { Button } from "@/components/ui/button"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -45,6 +46,7 @@ function DetailLabel({ children }: { children: ReactNode }) {
 export function RequestSubmissionSuccessPage() {
   const location = useLocation()
   const { requests } = useRequests()
+  const [isRegistrationCopied, setIsRegistrationCopied] = useState(false)
   const requestId = (location.state as { requestId?: string } | null)?.requestId
   const request = requests.find((item) => item.id === requestId)
 
@@ -62,7 +64,34 @@ export function RequestSubmissionSuccessPage() {
   }
 
   const copyRegistrationNumber = async () => {
-    await navigator.clipboard?.writeText(requestDetails.registrationNumber)
+    let didCopy = false
+
+    try {
+      if (window.isSecureContext && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(requestDetails.registrationNumber)
+        didCopy = true
+      }
+    } catch {
+      // Clipboard access can be denied even on HTTPS. Fall back to the browser's legacy copy
+      // command below, which also supports local HTTP preview environments.
+    }
+
+    if (!didCopy) {
+      const copyTarget = document.createElement("textarea")
+      copyTarget.value = requestDetails.registrationNumber
+      copyTarget.setAttribute("readonly", "")
+      copyTarget.style.position = "fixed"
+      copyTarget.style.opacity = "0"
+      document.body.appendChild(copyTarget)
+      copyTarget.select()
+      didCopy = document.execCommand("copy")
+      copyTarget.remove()
+    }
+
+    if (didCopy) {
+      setIsRegistrationCopied(true)
+      window.setTimeout(() => setIsRegistrationCopied(false), 2_000)
+    }
   }
 
   return (
@@ -77,18 +106,17 @@ export function RequestSubmissionSuccessPage() {
           <div className="flex items-center gap-3 border-b border-outline-variant bg-surface-container-low px-6 py-4"><MaterialIcon className="text-primary">description</MaterialIcon><h2 className="font-headline-md text-xl text-primary">Registration Details</h2></div>
           <div className="grid grid-cols-1 divide-y divide-outline-variant md:grid-cols-2 md:divide-x md:divide-y-0">
             <div className="flex flex-col gap-6 p-6">
-              <div className="flex flex-col gap-1"><DetailLabel>Registration Number</DetailLabel><div className="flex items-center justify-between rounded-md border border-outline-variant/50 bg-surface-container px-4 py-3"><span className="font-mono text-body-lg font-bold tracking-wide text-on-surface">{requestDetails.registrationNumber}</span><button aria-label="Copy registration number" className="text-surface-tint transition-colors hover:text-primary" onClick={copyRegistrationNumber} title="Copy Registration Number" type="button"><MaterialIcon className="text-xl">content_copy</MaterialIcon></button></div></div>
+              <div className="flex flex-col gap-1"><DetailLabel>Registration Number</DetailLabel><div className="flex items-center justify-between rounded-md border border-outline-variant/50 bg-surface-container px-4 py-3"><span className="font-mono text-body-lg font-bold tracking-wide text-on-surface">{requestDetails.registrationNumber}</span><Button aria-label={isRegistrationCopied ? "Registration number copied" : "Copy registration number"} className={isRegistrationCopied ? "w-auto px-2 text-state-success" : "text-surface-tint"} onClick={copyRegistrationNumber} size="icon" title={isRegistrationCopied ? "Copied" : "Copy Registration Number"} type="button" variant="outline"><MaterialIcon className="text-lg">{isRegistrationCopied ? "check" : "content_copy"}</MaterialIcon>{isRegistrationCopied ? <span className="text-xs font-semibold">Copied</span> : null}<span className="sr-only" aria-live="polite">{isRegistrationCopied ? "Registration number copied" : ""}</span></Button></div></div>
               <div className="grid grid-cols-2 gap-6"><div className="flex flex-col gap-1"><DetailLabel>Name</DetailLabel><span className="text-body-md font-medium text-on-surface">{requestDetails.name}</span></div><div className="flex flex-col gap-1"><DetailLabel>Date of Filing</DetailLabel><span className="flex items-center gap-2 text-body-md font-medium text-on-surface"><MaterialIcon className="text-sm text-outline">calendar_today</MaterialIcon>{requestDetails.date}</span></div></div>
               <div className="flex flex-col gap-1"><DetailLabel>Request filed with</DetailLabel><span className="text-body-md font-medium text-on-surface">{requestDetails.authority}</span></div>
             </div>
-            <div className="flex flex-col bg-surface/50 p-6"><div className="mb-6 flex items-center gap-2"><MaterialIcon className="text-primary/70">contact_mail</MaterialIcon><h3 className="font-headline-md text-lg text-primary/80">Contact Details</h3></div><div className="flex flex-col gap-6"><ContactDetail icon="phone" label="Telephone Number" value={requestDetails.phone} /><ContactDetail icon="mail" label="Email Id" value={requestDetails.email} /></div><div className="mt-auto flex items-center gap-3 border-t border-outline-variant/50 pt-6"><span className="size-3 rounded-full bg-secondary" /><span className="text-sm font-semibold tracking-wide text-secondary">Status: {request.status}</span></div></div>
+            <div className="flex flex-col bg-surface/50 p-6"><div className="mb-6 flex items-center gap-2"><MaterialIcon className="text-primary/70">contact_mail</MaterialIcon><h3 className="font-headline-md text-lg text-primary/80">Contact Details</h3></div><div className="flex flex-col gap-6"><ContactDetail icon="phone" label="Telephone Number" value={requestDetails.phone} /><ContactDetail icon="mail" label="Email Id" value={requestDetails.email} /></div><div className="mt-auto flex items-center gap-3 border-t border-outline-variant/50 pt-6"><span className="size-3 rounded-full bg-state-warning" /><span className="text-sm font-semibold tracking-wide text-state-warning">Status: {request.status}</span></div></div>
           </div>
         </section>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <button className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-primary bg-surface-container-lowest px-8 py-3 text-sm font-bold uppercase tracking-wider text-primary shadow-sm transition-colors hover:bg-primary hover:text-on-primary sm:w-auto" onClick={() => downloadRegistration(requestDetails, "request")} type="button"><MaterialIcon className="text-lg">save</MaterialIcon>Save</button>
-          <button className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-secondary bg-surface-container-lowest px-8 py-3 text-sm font-bold uppercase tracking-wider text-secondary shadow-sm transition-colors hover:bg-secondary hover:text-on-secondary sm:w-auto" onClick={() => window.print()} type="button"><MaterialIcon className="text-lg">print</MaterialIcon>Print</button>
-          <button className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wider text-on-primary shadow-md transition-colors hover:bg-primary-container sm:w-auto" onClick={() => window.print()} type="button"><MaterialIcon className="text-lg">article</MaterialIcon>Print Application</button>
+          <button className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wider text-on-primary shadow-md transition-colors hover:bg-primary-container sm:w-auto" onClick={() => window.print()} type="button"><MaterialIcon className="text-lg">print</MaterialIcon>Print Registration Details</button>
         </div>
       </div>
     </main>
@@ -115,14 +143,14 @@ export function AppealSubmissionSuccessPage() {
   return (
     <main className="flex flex-1 items-center justify-center p-6 md:p-12">
       <div className="w-full max-w-3xl rounded-xl border border-outline-variant bg-surface-container-lowest p-8 shadow-sm md:p-12">
-        <header className="mb-10 flex flex-col items-center text-center"><div className="mb-6"><MaterialIcon className="text-6xl text-primary">check_circle</MaterialIcon></div><h1 className="mb-2 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">Your RTI Appeal filed successfully.</h1><p className="text-body-lg text-on-surface-variant">Please note down the details of registration for future reference.</p></header>
+        <header className="mb-10 flex flex-col items-center text-center"><div className="mb-6"><SuccessIcon /></div><h1 className="mb-2 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">Your RTI Appeal filed successfully.</h1><p className="text-body-lg text-on-surface-variant">Please note down the details of registration for future reference.</p></header>
         <section className="print-submission-details mb-8 overflow-hidden rounded-lg border border-outline-variant">
           <div className="border-b border-outline-variant bg-surface-container-low px-6 py-4"><h2 className="font-headline-md text-title-md text-primary">Registration Details</h2></div>
           <div className="divide-y divide-outline-variant"><AppealTableRow label="Registration Number" value={appealDetails.registrationNumber} /><AppealTableRow label="Name" value={appealDetails.name} /><AppealTableRow label="Date of Filing" value={appealDetails.date} /><AppealTableRow label="Request filed with" value={appealDetails.authority} />{appealDetails.againstRequestId ? <AppealTableRow label="Appeal against request" value={appealDetails.againstRequestId} /> : null}</div>
           <div className="flex items-center gap-2 border-y border-outline-variant bg-surface-container-low px-6 py-4"><MaterialIcon className="text-xl text-primary">contact_page</MaterialIcon><h3 className="font-headline-md text-label-lg uppercase tracking-wider text-primary">Contact Details</h3></div>
           <div className="divide-y divide-outline-variant"><AppealTableRow label="Telephone Number" value={appealDetails.phone} /><AppealTableRow label="Email Id" value={appealDetails.email} /></div>
         </section>
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4"><button className="flex items-center gap-2 rounded-full bg-primary px-8 py-3 font-headline text-label-lg font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container" onClick={() => downloadRegistration(appealDetails, "appeal")} type="button"><MaterialIcon className="text-lg">save</MaterialIcon>Save</button><button className="flex items-center gap-2 rounded-full border border-outline px-8 py-3 font-headline text-label-lg font-bold text-primary transition-colors hover:bg-surface-container-low" onClick={() => window.print()} type="button"><MaterialIcon className="text-lg">print</MaterialIcon>Print</button><button className="flex items-center gap-2 rounded-full px-6 py-3 font-headline text-label-lg font-bold text-primary transition-colors hover:bg-surface-container-low" onClick={() => window.print()} type="button"><MaterialIcon className="text-lg">description</MaterialIcon>Print Application</button></div>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4"><button className="flex items-center gap-2 rounded-full bg-primary px-8 py-3 font-headline text-label-lg font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container" onClick={() => downloadRegistration(appealDetails, "appeal")} type="button"><MaterialIcon className="text-lg">save</MaterialIcon>Save</button><button className="flex items-center gap-2 rounded-full border border-outline px-8 py-3 font-headline text-label-lg font-bold text-primary transition-colors hover:bg-surface-container-low" onClick={() => window.print()} type="button"><MaterialIcon className="text-lg">print</MaterialIcon>Print Appeal Details</button></div>
         <div className="mt-10 text-center"><Link className="inline-flex items-center gap-2 font-label-lg text-label-lg font-medium text-primary hover:underline" to="/"><MaterialIcon className="text-sm">arrow_back</MaterialIcon>Return to Dashboard</Link></div>
       </div>
     </main>

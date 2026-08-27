@@ -34,15 +34,11 @@ function HelpIcon({ title }: { title: string }) {
   return <span title={title}><MaterialIcon className="cursor-help text-outline">help</MaterialIcon></span>
 }
 
-function formatAppealDate(date: Date) {
-  return new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(date)
-}
-
 export function FirstAppealFormPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const { requests } = useRequests()
+  const { createFirstAppeal, requests } = useRequests()
   const [captchaIndex, setCaptchaIndex] = useState(0)
   const captchaCodes = ["290563", "572946", "814307"]
   const requestId = (location.state as { requestId?: string } | null)?.requestId
@@ -60,22 +56,27 @@ export function FirstAppealFormPage() {
   // signed-in profile and are left blank when there is none.
   const appellantProfile = user?.profile ?? null
   const appellantMobile = request.applicantPhone.replace(/\D/g, "").slice(-10)
-  const appellantLandline = appellantProfile?.alternateMobile.replace(/\D/g, "").slice(-10) ?? ""
 
   const submitAppeal = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
-    const now = new Date()
+    const email = String(formData.get("email") ?? "").trim()
+    const phone = `+91 ${String(formData.get("mobile") ?? "").trim()}`
+    const appeal = createFirstAppeal({
+      originalRequest: request,
+      applicantEmail: email,
+      applicantPhone: phone,
+    })
 
     navigate("/appeal-submission-success", {
       state: {
         appeal: {
-          registrationNumber: `RTI-A-${now.getFullYear()}-${String(now.getTime()).slice(-6)}`,
+          registrationNumber: appeal.id,
           name: request.applicantName,
-          date: formatAppealDate(now),
+          date: appeal.submittedOn,
           authority: request.authority,
-          phone: `+91 ${String(formData.get("mobile") ?? "").trim()}`,
-          email: String(formData.get("email") ?? "").trim(),
+          phone,
+          email,
           againstRequestId: request.id,
         },
       },
@@ -118,7 +119,6 @@ export function FirstAppealFormPage() {
           <AppealRow label="State"><select className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.state ?? ""}><option disabled value="">Select State</option>{stateOptions.map((option) => <option key={option}>{option}</option>)}</select></AppealRow>
           <AppealRow label="Status"><div className="flex gap-4">{['Rural', 'Urban'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.areaType ?? "Urban") === option} name="appeal-area" type="radio" value={option} />{option}</label>)}</div></AppealRow>
           <AppealRow label="Educational Status"><div className="flex gap-4">{['Literate', 'Illiterate'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.educationalStatus ?? "Literate") === option} name="appeal-education" type="radio" value={option} />{option}</label>)}</div></AppealRow>
-          <AppealRow label="Phone Number"><div className="flex items-center gap-2"><div className="flex w-full md:w-2/3"><input className="w-16 rounded-l border border-r-0 border-outline-variant bg-surface-container-lowest px-3 py-2 text-center text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue="+91" type="text" /><input className="flex-grow rounded-r border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue={appellantLandline} type="tel" /></div><HelpIcon title="Landline number" /></div></AppealRow>
           <AppealRow hint="(For receiving SMS alerts)" label="Mobile Number"><div className="flex items-center gap-2"><div className="flex w-full md:w-2/3"><input className="w-16 rounded-l border border-r-0 border-outline-variant bg-surface-container-lowest px-3 py-2 text-center text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue="+91" type="text" /><input className="flex-grow rounded-r border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue={appellantMobile} name="mobile" type="tel" /></div><HelpIcon title="Mobile number" /></div></AppealRow>
           <AppealRow label="Email-Id" required><div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-2/3`} defaultValue={request.applicantEmail} name="email" type="email" /><HelpIcon title="Email address" /></div></AppealRow>
         </AppealSection>
@@ -126,7 +126,7 @@ export function FirstAppealFormPage() {
         <AppealSection title="Appeal Details">
           <AppealRow hint="(Only Indian citizens can file RTI Request application)" label="Citizenship"><select className={`${fieldClassName} md:w-1/3`} defaultValue="Indian" disabled><option>Indian</option></select></AppealRow>
           <AppealRow label="Is the Applicant Below Poverty Line ?" required><select className={`${fieldClassName} md:w-1/3`} defaultValue="No"><option>Yes</option><option>No</option></select></AppealRow>
-          <AppealRow label="Ground For Appeal" required><select className={`${fieldClassName} md:w-2/3`} defaultValue="---Select---"><option>---Select---</option><option>Refusal of information</option><option>No response received</option></select></AppealRow>
+          <AppealRow label="Ground For Appeal" required><select className={`${fieldClassName} md:w-2/3`} defaultValue="" required><option disabled value="">-- Select --</option><option>Refused access to information requested</option><option>No response within the time limit</option><option>Unreasonable amount of fee required to pay</option><option>Provided incomplete, misleading or false information</option><option>Any other ground</option></select></AppealRow>
           <div className="rounded border border-outline-variant bg-surface p-4">
             <p className="mb-2 text-label-sm text-on-surface-variant">(Enter Text for RTI first appeal application upto 500 characters)</p>
             <p className="mb-4 flex items-center gap-1 text-label-sm font-medium italic text-surface-tint"><span className="font-bold not-italic text-error">Note:-</span>Only alphabets A-Z a-z number 0-9 and special characters , . - _ ( ) / @ : &amp; \ ? % are allowed in Text for RTI first appeal application.</p>
