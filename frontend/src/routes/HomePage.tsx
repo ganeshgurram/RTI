@@ -140,7 +140,7 @@ export function HomePage() {
               An initiative of Department of Personnel & Training, Government of India, empowering citizens to seek information and promote transparency in governance.
             </p>
             <div className="mx-auto flex w-full max-w-md flex-col justify-center gap-4 sm:flex-row">
-              <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-8 py-3 font-label-lg text-label-lg text-on-secondary shadow-md transition-colors hover:bg-secondary/90 sm:w-auto" onClick={openRequestGuidelines} type="button">
+              <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-8 py-3 font-label-lg text-label-lg text-on-secondary shadow-md transition-colors hover:bg-secondary/90 sm:w-auto" onClick={() => openRequestGuidelines()} type="button">
                 Submit a Request <MaterialIcon className="text-sm">arrow_forward</MaterialIcon>
               </button>
               <Link className="w-full rounded-lg border border-surface-container-highest/30 bg-surface-container/10 px-8 py-3 font-label-lg text-label-lg text-on-primary backdrop-blur-sm transition-colors hover:bg-surface-container/20 sm:w-auto" to={viewStatusPath}>
@@ -151,19 +151,37 @@ export function HomePage() {
         </section>
         <section className="relative z-20 mx-auto -mt-10 mb-20 max-w-container-max px-margin-mobile md:px-margin-desktop">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {actionCards.map(([icon, title, body, cta, iconClass]) => (
-              <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest p-8 shadow-sm transition-shadow hover:shadow-md" key={title}>
-                <div className="absolute left-0 top-0 h-1 w-full origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
-                <div className={`mb-6 flex size-14 items-center justify-center rounded-full ${iconClass}`}>
-                  <MaterialIcon className="text-3xl">{icon}</MaterialIcon>
+            {actionCards.map(([icon, title, body, cta, iconClass]) => {
+              const destination = title === "Submit Request"
+                ? "/submit-request"
+                : title === "View Status"
+                  ? viewStatusPath
+                  : null
+              const cardContent = (
+                <>
+                  <div className="absolute left-0 top-0 h-1 w-full origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
+                  <div className={`mb-6 flex size-14 items-center justify-center rounded-full ${iconClass}`}>
+                    <MaterialIcon className="text-3xl">{icon}</MaterialIcon>
+                  </div>
+                  <h3 className="mb-3 font-headline-md text-headline-md text-primary">{title}</h3>
+                  <p className="mb-6 flex-grow font-body-md text-body-md text-on-surface-variant">{body}</p>
+                  <div className="flex items-center gap-1 font-label-lg text-label-lg text-foreground transition-all group-hover:gap-2">
+                    {cta} <MaterialIcon className="text-sm">arrow_right_alt</MaterialIcon>
+                  </div>
+                </>
+              )
+              const cardClassName = "group relative flex h-full flex-col overflow-hidden rounded-xl border border-surface-variant bg-surface-container-lowest p-8 shadow-sm transition-shadow hover:shadow-md"
+
+              return destination ? (
+                <Link className={`${cardClassName} cursor-pointer`} key={title} to={destination}>
+                  {cardContent}
+                </Link>
+              ) : (
+                <div className={cardClassName} key={title}>
+                  {cardContent}
                 </div>
-                <h3 className="mb-3 font-headline-md text-headline-md text-primary">{title}</h3>
-                <p className="mb-6 flex-grow font-body-md text-body-md text-on-surface-variant">{body}</p>
-                <div className="flex items-center gap-1 font-label-lg text-label-lg text-foreground transition-all group-hover:gap-2">
-                  {cta} <MaterialIcon className="text-sm">arrow_right_alt</MaterialIcon>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
         <section className="border-t border-surface-variant bg-surface py-20">

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 
 type RequestGuidelinesContextValue = {
-  openRequestGuidelines: () => void
+  openRequestGuidelines: (options?: { cancelTo?: number | string }) => void
 }
 
 const RequestGuidelinesContext = createContext<RequestGuidelinesContextValue | null>(null)
@@ -36,6 +36,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
   const [isOpen, setIsOpen] = useState(false)
   const [hasAcknowledged, setHasAcknowledged] = useState(false)
   const [hasReachedEnd, setHasReachedEnd] = useState(false)
+  const [cancelTo, setCancelTo] = useState<number | string | null>(null)
   const guidelinesScrollRef = useRef<HTMLDivElement>(null)
 
   const updateScrollProgress = () => {
@@ -59,10 +60,20 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
     return () => window.cancelAnimationFrame(frame)
   }, [isOpen])
 
-  const closeDialog = () => {
+  const closeDialog = (shouldReturn = false) => {
+    const destination = cancelTo
     setIsOpen(false)
     setHasAcknowledged(false)
     setHasReachedEnd(false)
+    setCancelTo(null)
+
+    if (shouldReturn && destination !== null) {
+      if (typeof destination === "number") {
+        navigate(destination)
+      } else {
+        navigate(destination)
+      }
+    }
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -73,20 +84,21 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
       return
     }
 
-    closeDialog()
+    closeDialog(true)
   }
 
   const handleSubmit = () => {
     closeDialog()
-    navigate("/submit-request")
+    navigate("/submit-request", { state: { guidelinesAccepted: true } })
   }
 
   return (
     <RequestGuidelinesContext.Provider
       value={{
-        openRequestGuidelines: () => {
+        openRequestGuidelines: (options) => {
           setHasAcknowledged(false)
           setHasReachedEnd(false)
+          setCancelTo(options?.cancelTo ?? null)
           setIsOpen(true)
         },
       }}
@@ -134,7 +146,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
           </div>
 
           <DialogFooter className="mx-0 mb-0 border-t border-outline-variant bg-surface-container-low px-5 py-4 sm:px-6">
-            <Button onClick={closeDialog} type="button" variant="outline">
+            <Button onClick={() => closeDialog(true)} type="button" variant="outline">
               Cancel
             </Button>
             <Button disabled={!hasAcknowledged} onClick={handleSubmit} type="button">

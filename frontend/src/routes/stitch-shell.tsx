@@ -79,7 +79,7 @@ function StitchTopNav() {
     ...links,
     { label: "Submit Second Appeal", path: "/profile" },
     { label: "FAQs", path: "/faq" },
-    { label: "Login", path: "/login" },
+    ...(user ? [] : [{ label: "Login", path: "/login" }]),
   ]
 
   const isActive = (path: string) => {
@@ -143,7 +143,7 @@ function StitchTopNav() {
                           render={
                             <button
                               className="rounded-md px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                              onClick={openRequestGuidelines}
+                              onClick={() => openRequestGuidelines()}
                               type="button"
                             />
                           }
@@ -186,7 +186,7 @@ function StitchTopNav() {
 
               if (link.opensGuidelines) {
                 return (
-                  <button className={className} key={link.label} onClick={openRequestGuidelines} type="button">
+                  <button className={className} key={link.label} onClick={() => openRequestGuidelines()} type="button">
                     {link.label}
                   </button>
                 )
