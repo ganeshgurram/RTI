@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "eval:authorities": "node --experimental-strip-types --no-warnings scripts/eval-authority-recommendations.mjs",
     "eval:privacy": "node --no-warnings scripts/eval-privacy-filter.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:manual": "node scripts/build-user-manual.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

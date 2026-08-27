@@ -117,7 +117,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
       {children}
       <Dialog onOpenChange={handleOpenChange} open={isOpen}>
         <DialogContent
-          className="grid max-h-[calc(100svh_-_2rem)] w-[calc(100%_-_2rem)] grid-rows-[auto_minmax(0,1fr)_auto_auto] gap-0 overflow-hidden p-0 sm:max-w-3xl"
+          className="grid max-h-[calc(100svh/var(--app-scale)_-_2rem)] w-[calc(100%_-_2rem)] grid-rows-[auto_minmax(0,1fr)_auto_auto] gap-0 overflow-hidden p-0 sm:max-w-3xl"
         >
           <DialogHeader className="border-b border-outline-variant px-5 py-4 pr-12 sm:px-6">
             <DialogTitle className="font-headline-md text-xl font-bold text-primary">

@@ -49,7 +49,7 @@ export function DigiLockerAuthorizationPage() {
   const isComplete = step === "complete"
 
   return (
-    <main className="mx-auto flex min-h-[calc(100svh-12rem)] w-full max-w-container-max items-center justify-center px-margin-mobile py-8 md:px-margin-desktop md:py-10">
+    <main className="mx-auto flex min-h-[calc(100svh/var(--app-scale)-12rem)] w-full max-w-container-max items-center justify-center px-margin-mobile py-8 md:px-margin-desktop md:py-10">
       <Card className="w-full max-w-2xl border border-outline-variant bg-surface-container-lowest shadow-sm">
         <CardHeader className="items-center text-center">
           <Badge className="mb-2 border-primary/20 bg-primary-fixed text-primary" variant="outline">

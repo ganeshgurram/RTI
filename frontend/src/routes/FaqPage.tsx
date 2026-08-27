@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -236,12 +237,12 @@ export function FaqPage() {
             <div className="rounded-lg bg-primary p-stack-md text-primary-foreground">
               <h3 className="mb-stack-sm font-headline-md text-headline-md text-primary-foreground">Need Help?</h3>
               <p className="mb-stack-md font-body-md opacity-90">If you cannot find the answer you are looking for, contact our support desk.</p>
-              <button className="w-full rounded-DEFAULT border border-primary-foreground/20 bg-primary-foreground py-2 font-label-lg text-primary transition-colors hover:bg-primary-foreground/90">Contact Support</button>
+              <Link className="block w-full rounded-DEFAULT border border-primary-foreground/20 bg-primary-foreground py-2 text-center font-label-lg text-primary transition-colors hover:bg-primary-foreground/90" to="/contact-us">Contact Support</Link>
             </div>
             <div className="rounded-lg border border-surface-variant bg-surface-container-lowest p-stack-md">
               <h4 className="mb-2 font-headline-md text-headline-md text-foreground">User Manual</h4>
               <p className="mb-4 font-body-md text-on-surface-variant">Download the comprehensive guide for using the RTI Online portal.</p>
-              <a className="inline-flex items-center font-label-lg text-foreground hover:underline" href="#">Download PDF <MaterialIcon className="ml-1 text-sm">download</MaterialIcon></a>
+              <a className="inline-flex items-center font-label-lg text-foreground hover:underline" download href="/rti-online-user-manual.pdf">Download PDF <MaterialIcon className="ml-1 text-sm">download</MaterialIcon></a>
             </div>
           </aside>
         </section>

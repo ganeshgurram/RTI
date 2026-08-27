@@ -1,4 +1,4 @@
-const MAX_OUTPUT_TOKENS = 1000
+const MAX_OUTPUT_TOKENS = 1200
 
 const OPENROUTER_MODEL = "openai/gpt-5.6-luna"
 /**

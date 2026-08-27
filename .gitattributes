@@ -3,6 +3,7 @@
 *.html text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+*.pdf binary
 *.ts text eol=lf
 *.tsx text eol=lf
 *.yml text eol=lf

@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap") layer(base);
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -38,6 +38,9 @@
     --text-headline-lg-mobile--line-height: 36px;
     --text-display-lg: 48px;
     --text-display-lg--line-height: 56px;
+    /* Mirrors the root zoom set by the text-size controls. Viewport units ignore zoom,
+       so anything sized against the viewport must divide by this to stay on screen. */
+    --app-scale: 1;
     --spacing-margin-desktop: 40px;
     --spacing-margin-mobile: 16px;
     --spacing-stack-lg: 32px;

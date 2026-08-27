@@ -17,6 +17,27 @@ import {
 
 const emblemUrl =
   "/assets/indian-emblem.png"
+
+/**
+ * Text sizing scales the root element rather than overriding the type tokens. The custom
+ * @theme inline sizes compile to literal px (.text-body-md is font-size:16px), so a runtime
+ * variable override would move only the stock Tailwind sizes and tear the page in half.
+ */
+const textScaleStorageKey = "rti-demo-text-scale"
+const minTextScale = 0.85
+const maxTextScale = 1.15
+const textScaleStep = 0.15
+
+function getStoredTextScale() {
+  try {
+    const stored = Number(localStorage.getItem(textScaleStorageKey))
+    return Number.isFinite(stored) && stored >= minTextScale && stored <= maxTextScale ? stored : 1
+  } catch {
+    return 1
+  }
+}
+
+const clampTextScale = (value: number) => Number(Math.min(maxTextScale, Math.max(minTextScale, value)).toFixed(2))
 function MaterialIcon({ children, className = "" }: { children: string; className?: string }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
@@ -28,13 +49,31 @@ function StitchTopNav() {
   const { openRequestGuidelines } = useRequestGuidelines()
   const { markAllAsRead, notifications, unreadCount } = useNotifications()
   const [isScrolled, setIsScrolled] = useState(false)
+  const [textScale, setTextScale] = useState(getStoredTextScale)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDetailsElement>(null)
   const notificationMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const updateScrollState = () => setIsScrolled(window.scrollY > 0)
+    // setProperty rather than style.zoom: zoom is missing from lib.dom's CSSStyleDeclaration.
+    if (textScale === 1) {
+      document.documentElement.style.removeProperty("zoom")
+    } else {
+      document.documentElement.style.setProperty("zoom", String(textScale))
+    }
+
+    document.documentElement.style.setProperty("--app-scale", String(textScale))
+
+    try {
+      localStorage.setItem(textScaleStorageKey, String(textScale))
+    } catch {
+      // Private browsing can refuse writes; the choice just will not survive a reload.
+    }
+  }, [textScale])
+
+  useEffect(() => {
+    const updateScrollState = () => setIsScrolled(window.scrollY > 8)
 
     updateScrollState()
     window.addEventListener("scroll", updateScrollState, { passive: true })
@@ -70,15 +109,15 @@ function StitchTopNav() {
 
   const links = [
     { label: "Home", path: "/" },
-    { label: "Submit Request", path: "/submit-request", opensGuidelines: false },
-    { label: "Submit First Appeal", path: "/submit-first-appeal" },
+    { label: "RTI Request", path: "/submit-request", opensGuidelines: false },
+    { label: "First Appeal", path: "/submit-first-appeal" },
     { label: "View Status", path: user ? "/request-history" : "/status" },
     { label: "Payment Reconciliation", path: "/payment-reconciliation" },
   ]
 
   const drawerLinks = [
     ...links,
-    { label: "Submit Second Appeal", path: "/profile" },
+    { label: "Second Appeal", path: "/profile" },
     { label: "FAQs", path: "/faq" },
     ...(user ? [] : [{ label: "Login", path: "/login" }]),
   ]
@@ -110,8 +149,21 @@ function StitchTopNav() {
 
   return (
     <>
-      <nav className={`sticky top-0 z-50 w-full bg-primary text-on-primary transition-shadow duration-200 ${isScrolled ? "shadow-md" : "shadow-none"}`}>
-        <div className="mx-auto flex h-16 w-full max-w-container-max items-center gap-4 px-3 md:px-margin-desktop">
+      <div className="relative z-50 w-full bg-primary text-on-primary/70">
+        <div className="mx-auto flex h-9 w-full max-w-container-max items-center justify-end gap-1 px-3 text-label-sm md:px-margin-desktop">
+          <span className="mr-1 hidden sm:inline">Text size</span>
+          <button aria-label="Increase text size" className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale >= maxTextScale} onClick={() => setTextScale((current) => clampTextScale(current + textScaleStep))} type="button">A+</button>
+          <button aria-label="Reset text size" className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale === 1} onClick={() => setTextScale(1)} type="button">A</button>
+          <button aria-label="Decrease text size" className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale <= minTextScale} onClick={() => setTextScale((current) => clampTextScale(current - textScaleStep))} type="button">A-</button>
+          <span aria-hidden="true" className="mx-2 h-4 border-l border-on-primary/30" />
+          <button className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary" type="button">English</button>
+          <span aria-hidden="true" className="opacity-50">|</span>
+          <button className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary" type="button">Hindi</button>
+        </div>
+      </div>
+      <div className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "px-3 pt-3 md:px-6" : "px-0 pt-0"}`}>
+        <nav className={`relative mx-auto w-full border text-on-primary transition-all duration-300 ${isScrolled ? "max-w-container-max rounded-xl border-on-primary/15 bg-[color-mix(in_oklab,var(--on-primary)_10%,var(--primary))] shadow-xl" : "max-w-full rounded-none border-transparent bg-primary shadow-none"}`}>
+          <div className="mx-auto flex h-16 w-full max-w-container-max items-center gap-4 px-3 md:px-margin-desktop">
           <div className="flex items-center gap-2 md:mr-0">
             <Sheet>
               <SheetTrigger
@@ -183,37 +235,34 @@ function StitchTopNav() {
               </span>
             </Link>
           </div>
-          <div className="ml-8 hidden h-full items-center gap-4 md:flex">
+          <div className="ml-6 hidden h-full items-center gap-3 md:flex">
             {links.map((link) => {
-              const className = isActive(link.path)
-                ? "flex h-full items-center border-b-2 border-secondary-fixed pb-1 text-on-primary transition-transform active:scale-95"
-                : "flex h-full items-center px-2 text-on-primary/80 transition-transform hover:bg-primary-fixed-dim/10 hover:text-on-primary active:scale-95"
+              const isCurrent = isActive(link.path)
+              // Both states carry the same box so nothing shifts when the page changes; the
+              // current one inverts to a solid light pill, which reads at a glance in a way
+              // that a 100%-vs-80% white underline never did.
+              const className = `flex h-9 items-center whitespace-nowrap rounded-md px-3 transition-colors active:scale-95 ${
+                isCurrent
+                  ? "bg-on-primary font-semibold text-primary shadow-sm"
+                  : "text-on-primary/75 hover:bg-on-primary/10 hover:text-on-primary"
+              }`
 
               if (link.opensGuidelines) {
                 return (
-                  <button className={className} key={link.label} onClick={() => openRequestGuidelines()} type="button">
+                  <button aria-current={isCurrent ? "page" : undefined} className={className} key={link.label} onClick={() => openRequestGuidelines()} type="button">
                     {link.label}
                   </button>
                 )
               }
 
               return (
-                <Link className={className} key={link.label} to={link.path}>
+                <Link aria-current={isCurrent ? "page" : undefined} className={className} key={link.label} to={link.path}>
                   {link.label}
                 </Link>
               )
             })}
           </div>
           <div className="ml-auto flex items-center gap-4">
-            <div className="mr-4 hidden gap-2 text-label-sm opacity-80 lg:flex">
-              <button className="transition-colors hover:text-secondary-fixed">A+</button>
-              <button className="transition-colors hover:text-secondary-fixed">A</button>
-              <button className="transition-colors hover:text-secondary-fixed">A-</button>
-              <span className="mx-2 h-4 border-l border-on-primary/30" />
-              <button className="transition-colors hover:text-secondary-fixed">English</button>
-              <span className="opacity-50">|</span>
-              <button className="transition-colors hover:text-secondary-fixed">Hindi</button>
-            </div>
             {user ? (
               <>
                 <div className="group relative" ref={notificationMenuRef}>
@@ -243,7 +292,7 @@ function StitchTopNav() {
                 <details className="group relative" onToggle={(event) => setIsProfileMenuOpen(event.currentTarget.open)} open={isProfileMenuOpen} ref={profileMenuRef}>
                   <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full bg-on-primary/10 px-3 py-1.5 transition-colors hover:bg-on-primary/20">
                     <MaterialIcon className="text-[20px]">account_circle</MaterialIcon>
-                    <span className="hidden text-[14px] font-medium sm:block">{user.fullName}</span>
+                    <span className="hidden whitespace-nowrap text-[14px] font-medium sm:block">{user.fullName}</span>
                     <MaterialIcon className="text-[18px] transition-transform group-open:rotate-180">expand_more</MaterialIcon>
                   </summary>
                   <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest py-1 shadow-sm">
@@ -276,8 +325,9 @@ function StitchTopNav() {
               </Link>
             )}
           </div>
-        </div>
-      </nav>
+          </div>
+        </nav>
+      </div>
     </>
   )
 }
@@ -287,7 +337,7 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
   const isFaqActive = activeFaq || location.pathname === "/faq"
 
   return (
-    <footer className="mt-auto bg-on-surface text-surface-container-lowest" data-site-footer>
+    <footer className="mt-auto rounded-t-xl bg-on-surface text-surface-container-lowest" data-site-footer>
       <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-6 px-margin-mobile py-stack-lg md:flex-row md:px-margin-desktop">
         <div className="text-center font-headline-md text-headline-md md:text-left">
           © {new Date().getFullYear()} RTI Online. All Rights Reserved.
@@ -306,7 +356,7 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
           >
             FAQs
           </Link>
-          <a className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" href="#">
+          <a className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" download href="/rti-online-user-manual.pdf">
             User Manual
           </a>
           <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/contact-us">

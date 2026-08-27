@@ -59,7 +59,7 @@ export function LoginPage() {
   const handleDigiLockerSignIn = () => navigate("/digilocker-authorize")
 
   return (
-    <section className="mx-auto flex min-h-[calc(100svh-12rem)] w-full max-w-container-max items-center justify-center p-margin-mobile md:p-margin-desktop">
+    <section className="mx-auto flex min-h-[calc(100svh/var(--app-scale)-12rem)] w-full max-w-container-max items-center justify-center p-margin-mobile md:p-margin-desktop">
       <div className="flex w-full max-w-md flex-col gap-4">
         <div className="flex items-center justify-center gap-2.5">
           <img alt="RTI Online" className="h-9 w-auto shrink-0" src={emblemUrl} />

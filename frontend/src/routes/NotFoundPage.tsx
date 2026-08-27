@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 export function NotFoundPage() {
   return (
-    <main className="flex min-h-svh items-center justify-center bg-background px-4">
+    <main className="flex min-h-[calc(100svh/var(--app-scale))] items-center justify-center bg-background px-4">
       <section className="max-w-md space-y-4 text-center">
         <p className="text-sm font-medium text-primary">404</p>
         <h1 className="text-3xl font-semibold">Page not found</h1>

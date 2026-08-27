@@ -162,6 +162,7 @@ function AuthorityMatches({ suggestions }: { suggestions: AuthoritySuggestion[] 
 
 export function RtiSahayak() {
   const [isOpen, setIsOpen] = useState(false)
+  const [hasScrolledDown, setHasScrolledDown] = useState(false)
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage])
@@ -192,9 +193,10 @@ export function RtiSahayak() {
     }
   }, [messages, isSending, isOpen])
 
-  // Keep the launcher clear of the site footer as it enters the viewport.
+  // Keep the launcher clear of the site footer as it enters the viewport, and reveal the
+  // back-to-top button once the page has moved about a screenful.
   useEffect(() => {
-    const updateFooterOffset = () => {
+    const updateFixedChrome = () => {
       const footer = document.querySelector<HTMLElement>("[data-site-footer]")
       const offset = footer ? Math.max(0, Math.round(window.innerHeight - footer.getBoundingClientRect().top)) : 0
       const launcher = launcherRef.current
@@ -202,17 +204,24 @@ export function RtiSahayak() {
       if (launcher) {
         launcher.style.bottom = `calc(1.25rem + ${offset}px)`
       }
+
+      setHasScrolledDown(window.scrollY > 400)
     }
 
-    updateFooterOffset()
-    window.addEventListener("scroll", updateFooterOffset, { passive: true })
-    window.addEventListener("resize", updateFooterOffset)
+    updateFixedChrome()
+    window.addEventListener("scroll", updateFixedChrome, { passive: true })
+    window.addEventListener("resize", updateFixedChrome)
 
     return () => {
-      window.removeEventListener("scroll", updateFooterOffset)
-      window.removeEventListener("resize", updateFooterOffset)
+      window.removeEventListener("scroll", updateFixedChrome)
+      window.removeEventListener("resize", updateFixedChrome)
     }
   }, [])
+
+  const scrollToTop = () => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" })
+  }
 
   const sendMessage = async (rawMessage: string) => {
     const message = rawMessage.trim()
@@ -287,7 +296,7 @@ export function RtiSahayak() {
       {isOpen && (
         <section
           aria-label="RTI Sahayak chat"
-          className="mb-3 flex h-[min(38rem,calc(100svh-7.5rem))] w-[calc(100vw-2.5rem)] max-w-[25rem] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:w-[25rem]"
+          className="mb-3 flex h-[min(38rem,calc(100svh/var(--app-scale)-7.5rem))] w-[calc(100vw-2.5rem)] max-w-[25rem] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:w-[25rem]"
         >
           <header className="flex items-start gap-3 bg-primary px-4 py-3 text-primary-foreground">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
@@ -407,6 +416,17 @@ export function RtiSahayak() {
           </div>
         </section>
       )}
+
+      {!isOpen && hasScrolledDown ? (
+        <Button
+          aria-label="Back to top"
+          className="mb-3 size-12 rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+          onClick={scrollToTop}
+          size="icon-lg"
+        >
+          <span aria-hidden="true" className="material-symbols-outlined">arrow_upward</span>
+        </Button>
+      ) : null}
 
       <Button
         aria-expanded={isOpen}
