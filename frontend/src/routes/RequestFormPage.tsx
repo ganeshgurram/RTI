@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { useAuth } from "@/auth/AuthContext"
+import type { RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -33,7 +34,26 @@ function Required() {
   return <span className="text-error"> *</span>
 }
 
-export function RequestFormPage() {
+const ministryOptions = [
+  "Department of Personnel and Training",
+  "Ministry of Water Resources, River Development & Ganga Rejuvenation",
+]
+
+const authorityOptions = [
+  "Central Information Commission",
+  "Department of Personnel and Training",
+]
+
+/**
+ * The directory holds 2,907 offices and this form lists two, so an office chosen there is
+ * almost never already an option. Adding it keeps the applicant's choice instead of asking
+ * them to pick again from a list that does not contain it.
+ */
+function withSelected(options: string[], selected?: string) {
+  return selected && !options.includes(selected) ? [selected, ...options] : options
+}
+
+export function RequestFormPage({ authority }: { authority?: RequestAuthority }) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { createRequest } = useRequests()
@@ -89,24 +109,23 @@ export function RequestFormPage() {
           Please fill in all mandatory fields marked with an asterisk (<span className="text-error">*</span>).
         </p>
         {applicantProfile ? <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">check_circle</MaterialIcon>Your personal details have been filled from your applicant profile. You can edit them for this request if needed.</p> : null}
+        {authority ? <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">account_balance</MaterialIcon>Filing to {authority.name}, selected from the Public Authorities directory. You can change it below.</p> : null}
       </header>
 
       <FormSection icon="account_balance" title="Public Authority Details">
         <div className="grid grid-cols-1 gap-gutter p-6 md:grid-cols-2">
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-ministry">Ministry/Department/Apex body<Required /></label>
-            <select className={selectClassName} defaultValue="" id="request-ministry" name="ministry" required>
+            <select className={selectClassName} defaultValue={authority?.ministryName ?? ""} id="request-ministry" name="ministry" required>
               <option disabled value="">Select Ministry/Department/Apex body</option>
-              <option>Department of Personnel and Training</option>
-              <option>Ministry of Water Resources, River Development &amp; Ganga Rejuvenation</option>
+              {withSelected(ministryOptions, authority?.ministryName).map((name) => <option key={name}>{name}</option>)}
             </select>
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-authority">Select Public Authority<Required /></label>
-            <select className={selectClassName} defaultValue="" id="request-authority" name="authority" required>
+            <select className={selectClassName} defaultValue={authority?.name ?? ""} id="request-authority" name="authority" required>
               <option disabled value="">Select Public Authority</option>
-              <option>Central Information Commission</option>
-              <option>Department of Personnel and Training</option>
+              {withSelected(authorityOptions, authority?.name).map((name) => <option key={name}>{name}</option>)}
             </select>
           </div>
         </div>

@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "eval:authorities": "node --experimental-strip-types --no-warnings scripts/eval-authority-recommendations.mjs",
+    "eval:privacy": "node --no-warnings scripts/eval-privacy-filter.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

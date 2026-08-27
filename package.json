@@ -9,6 +9,7 @@
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint",
     "eval:authorities": "npm --prefix frontend run eval:authorities",
+    "eval:privacy": "npm --prefix frontend run eval:privacy",
     "preview": "npm --prefix frontend run preview"
   },
   "engines": {

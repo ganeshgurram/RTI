@@ -23,15 +23,26 @@ export type RtiSahayakReply = {
   usage?: TokenUsage
 }
 
+/**
+ * A message is refused when one of these matches. Every value pattern requires a digit, because
+ * a real registration number, account number, OTP or PIN always has one while the word that
+ * follows "registration number" in an ordinary question - "again", "online", "format" - never
+ * does. Without that, asking how to find a registration number was refused as if it were one.
+ */
 const sensitivePatterns = [
   /\b[A-Z]{5}[0-9]{4}[A-Z]\b/i,
-  /\b(?:\d{4}[ -]?){3}\d{4}\b/,
+  // Aadhaar is 12 digits and never starts below 2, so the 13-19 digit card rule misses it.
+  /\b[2-9]\d{3}[ -]?\d{4}[ -]?\d{4}\b/,
   /\b(?:\d[ -]?){13,19}\b/,
-  /\b(?:\+?91[\s-]?)?[6-9]\d{9}\b/,
+  // Separators allowed inside: the portal itself writes a mobile as "+91 98765 43210".
+  /\b(?:\+?91[\s-]?)?[6-9](?:[ -]?\d){9}\b/,
   /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
-  /\b(?:password|passcode|otp|cvv|upi\s*pin|pin)\s*(?:is|:|=|-)?\s*[A-Z0-9@#$%^&*!]{4,}\b/i,
-  /\b(?:registration|application|request)\s*(?:number|no\.?|#)\s*(?:is|:|=|-)?\s*[A-Z0-9-]{5,}\b/i,
-  /\b(?:bank\s*account|account\s*number|ifsc)\s*(?:is|:|=|-)?\s*[A-Z0-9-]{5,}\b/i,
+  // A stated password needs an explicit is/:/=, or "my password is wrong" is refused as one.
+  /\b(?:password|passcode|passphrase)\s*(?:is|:|=)\s*(?=\S*[\d@#$%^&*!])\S{4,}/i,
+  // "pin code" is a postal code, not a secret, and belongs in the form rather than in chat.
+  /\b(?:otp|cvv|upi\s*pin|pin(?!\s*code))\s*(?:is|:|=|-)?\s*(?=[A-Z0-9]*\d)[A-Z0-9]{3,}\b/i,
+  /\b(?:registration|application|request)\s*(?:number|no\.?|#)\s*(?:is|:|=|-)?\s*(?=[A-Z0-9/-]*\d)[A-Z0-9/-]{5,}\b/i,
+  /\b(?:bank\s*account|account\s*number|ifsc)\s*(?:is|:|=|-)?\s*(?=[A-Z0-9/-]*\d)[A-Z0-9/-]{5,}\b/i,
 ]
 
 export function containsSensitiveData(text: string) {

@@ -2,7 +2,8 @@ import { useMemo, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { type NotificationFilter, mockNotifications } from "@/data/mock-notifications"
+import { type NotificationFilter } from "@/data/mock-notifications"
+import { useNotifications } from "@/notifications/NotificationContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const filters: { value: NotificationFilter; label: string }[] = [
@@ -13,8 +14,7 @@ const filters: { value: NotificationFilter; label: string }[] = [
 
 export function NotificationsPage() {
   const [filter, setFilter] = useState<NotificationFilter>("all")
-  const [notificationItems, setNotificationItems] = useState(mockNotifications)
-  const unreadCount = notificationItems.filter((notification) => !notification.isRead).length
+  const { markAllAsRead, markAsRead, notifications: notificationItems, unreadCount } = useNotifications()
   const notifications = useMemo(
     () => notificationItems.filter((notification) => filter === "all" || (filter === "unread" ? !notification.isRead : notification.isRead)),
     [filter, notificationItems],
@@ -26,16 +26,6 @@ export function NotificationsPage() {
       ? unreadCount
       : notificationItems.length - unreadCount
 
-  const markAllAsRead = () => {
-    setNotificationItems((items) => items.map((notification) => ({ ...notification, isRead: true })))
-  }
-
-  const markAsRead = (notificationId: string) => {
-    setNotificationItems((items) => items.map((notification) => (
-      notification.id === notificationId ? { ...notification, isRead: true } : notification
-    )))
-  }
-
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-margin-mobile py-8 md:px-margin-desktop md:py-10">
       <section aria-labelledby="notification-list-heading">
@@ -44,17 +34,11 @@ export function NotificationsPage() {
             <h2 className="font-headline-lg text-xl text-primary" id="notification-list-heading">All notifications</h2>
             <p className="mt-1 text-sm text-on-surface-variant">Unread updates are highlighted until you view them.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="border-primary/20 bg-primary-fixed text-primary" variant="outline">
-              {unreadCount} unread
-            </Badge>
-            <Button disabled={!unreadCount} onClick={markAllAsRead} size="sm" type="button" variant="outline">
-              <MaterialIcon>done_all</MaterialIcon>
-              Mark all as read
-            </Button>
-          </div>
         </div>
-        <div aria-label="Filter notifications" className="mb-4 flex flex-wrap gap-2" role="group">
+        {/* Mark all as read sits beside the filters but outside the group, so screen readers do
+            not announce it as a fourth filter. */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div aria-label="Filter notifications" className="flex flex-wrap gap-2" role="group">
             {filters.map((item) => (
               <Button
                 aria-pressed={filter === item.value}
@@ -67,6 +51,13 @@ export function NotificationsPage() {
                 {item.label} ({filterCount(item.value)})
               </Button>
             ))}
+          </div>
+          {unreadCount ? (
+            <Button onClick={markAllAsRead} size="sm" type="button">
+              <MaterialIcon>done_all</MaterialIcon>
+              Mark all as read
+            </Button>
+          ) : null}
         </div>
 
         <div className="space-y-3">
@@ -93,10 +84,10 @@ export function NotificationsPage() {
               {!notification.isRead ? (
                 <div className="flex shrink-0 items-start gap-2">
                   <span aria-label="Unread notification" className="mt-2 size-2 rounded-full bg-primary" />
-                  <Button className="hidden sm:inline-flex" onClick={() => markAsRead(notification.id)} size="sm" type="button" variant="outline">
+                  <Button className="hidden sm:inline-flex" onClick={() => markAsRead(notification.id)} size="sm" type="button">
                     Mark as read
                   </Button>
-                  <Button aria-label={`Mark ${notification.title} as read`} className="sm:hidden" onClick={() => markAsRead(notification.id)} size="icon-sm" type="button" variant="outline">
+                  <Button aria-label={`Mark ${notification.title} as read`} className="sm:hidden" onClick={() => markAsRead(notification.id)} size="icon-sm" type="button">
                     <MaterialIcon>done</MaterialIcon>
                   </Button>
                 </div>

@@ -11,8 +11,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+/** The office an applicant picked in the directory, carried through to the request form. */
+export type RequestAuthority = {
+  name: string
+  ministryName?: string
+}
+
 type RequestGuidelinesContextValue = {
-  openRequestGuidelines: (options?: { cancelTo?: number | string }) => void
+  openRequestGuidelines: (options?: { cancelTo?: number | string; authority?: RequestAuthority }) => void
 }
 
 const RequestGuidelinesContext = createContext<RequestGuidelinesContextValue | null>(null)
@@ -37,6 +43,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
   const [hasAcknowledged, setHasAcknowledged] = useState(false)
   const [hasReachedEnd, setHasReachedEnd] = useState(false)
   const [cancelTo, setCancelTo] = useState<number | string | null>(null)
+  const [authority, setAuthority] = useState<RequestAuthority | null>(null)
   const guidelinesScrollRef = useRef<HTMLDivElement>(null)
 
   const updateScrollProgress = () => {
@@ -66,6 +73,9 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
     setHasAcknowledged(false)
     setHasReachedEnd(false)
     setCancelTo(null)
+    // Cleared with the rest, so a later visit from the home page or top nav does not
+    // silently reuse the office picked in the directory earlier.
+    setAuthority(null)
 
     if (shouldReturn && destination !== null) {
       if (typeof destination === "number") {
@@ -89,7 +99,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
 
   const handleSubmit = () => {
     closeDialog()
-    navigate("/submit-request", { state: { guidelinesAccepted: true } })
+    navigate("/submit-request", { state: { guidelinesAccepted: true, authority } })
   }
 
   return (
@@ -99,6 +109,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
           setHasAcknowledged(false)
           setHasReachedEnd(false)
           setCancelTo(options?.cancelTo ?? null)
+          setAuthority(options?.authority ?? null)
           setIsOpen(true)
         },
       }}

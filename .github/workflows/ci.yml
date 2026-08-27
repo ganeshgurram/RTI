@@ -31,6 +31,10 @@ jobs:
         working-directory: frontend
         run: npm run eval:authorities
 
+      - name: Evaluate privacy filter
+        working-directory: frontend
+        run: npm run eval:privacy
+
       - name: Build
         working-directory: frontend
         run: npm run build

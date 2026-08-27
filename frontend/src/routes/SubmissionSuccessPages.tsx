@@ -4,25 +4,19 @@ import { Link, Navigate, useLocation } from "react-router-dom"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
-const requestDetails = {
-  registrationNumber: "DOP&T/R/E/21/00001",
-  name: "rahul",
-  date: "05-01-2021",
-  authority: "Department of Personnel & Training",
-  phone: "23040247",
-  email: "amitjoshi@localhost.com",
+/** What a registration receipt shows, whether it acknowledges a request or a first appeal. */
+type RegistrationDetails = {
+  registrationNumber: string
+  name: string
+  date: string
+  authority: string
+  phone: string
+  email: string
+  /** Appeals only: the registration number of the request being appealed against. */
+  againstRequestId?: string
 }
 
-const appealDetails = {
-  registrationNumber: "DOP&T/A/E/21/00001",
-  name: "rahul",
-  date: "05-01-2021",
-  authority: "Department of Personnel & Training",
-  phone: "23040247",
-  email: "amitjoshi@localhost.com",
-}
-
-function downloadRegistration(details: typeof requestDetails, type: "request" | "appeal") {
+function downloadRegistration(details: RegistrationDetails, type: "request" | "appeal") {
   const body = [
     `RTI ${type === "request" ? "Request" : "First Appeal"} Registration Details`,
     "",
@@ -110,13 +104,21 @@ function AppealTableRow({ label, value }: { label: string; value: string }) {
 }
 
 export function AppealSubmissionSuccessPage() {
+  const location = useLocation()
+  const appealDetails = (location.state as { appeal?: RegistrationDetails } | null)?.appeal
+
+  // Nothing was filed, so there is no receipt to show. Send them to the start of the appeal.
+  if (!appealDetails) {
+    return <Navigate replace to="/submit-first-appeal" />
+  }
+
   return (
     <main className="flex flex-1 items-center justify-center p-6 md:p-12">
       <div className="w-full max-w-3xl rounded-xl border border-outline-variant bg-surface-container-lowest p-8 shadow-sm md:p-12">
         <header className="mb-10 flex flex-col items-center text-center"><div className="mb-6"><MaterialIcon className="text-6xl text-primary">check_circle</MaterialIcon></div><h1 className="mb-2 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">Your RTI Appeal filed successfully.</h1><p className="text-body-lg text-on-surface-variant">Please note down the details of registration for future reference.</p></header>
         <section className="print-submission-details mb-8 overflow-hidden rounded-lg border border-outline-variant">
           <div className="border-b border-outline-variant bg-surface-container-low px-6 py-4"><h2 className="font-headline-md text-title-md text-primary">Registration Details</h2></div>
-          <div className="divide-y divide-outline-variant"><AppealTableRow label="Registration Number" value={appealDetails.registrationNumber} /><AppealTableRow label="Name" value={appealDetails.name} /><AppealTableRow label="Date of Filing" value={appealDetails.date} /><AppealTableRow label="Request filed with" value={appealDetails.authority} /></div>
+          <div className="divide-y divide-outline-variant"><AppealTableRow label="Registration Number" value={appealDetails.registrationNumber} /><AppealTableRow label="Name" value={appealDetails.name} /><AppealTableRow label="Date of Filing" value={appealDetails.date} /><AppealTableRow label="Request filed with" value={appealDetails.authority} />{appealDetails.againstRequestId ? <AppealTableRow label="Appeal against request" value={appealDetails.againstRequestId} /> : null}</div>
           <div className="flex items-center gap-2 border-y border-outline-variant bg-surface-container-low px-6 py-4"><MaterialIcon className="text-xl text-primary">contact_page</MaterialIcon><h3 className="font-headline-md text-label-lg uppercase tracking-wider text-primary">Contact Details</h3></div>
           <div className="divide-y divide-outline-variant"><AppealTableRow label="Telephone Number" value={appealDetails.phone} /><AppealTableRow label="Email Id" value={appealDetails.email} /></div>
         </section>

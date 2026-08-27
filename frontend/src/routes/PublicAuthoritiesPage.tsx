@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
 import type { ReactNode } from "react"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 type Authority = {
@@ -80,7 +81,8 @@ function Highlight({ query, text }: { query: string; text: string }) {
   )
 }
 
-function OfficeCard({ authority, childrenByParent, query }: { authority: Authority; childrenByParent: Map<string, Authority[]>; query: string }) {
+function OfficeCard({ authority, childrenByParent, ministryName, query }: { authority: Authority; childrenByParent: Map<string, Authority[]>; ministryName: string; query: string }) {
+  const { openRequestGuidelines } = useRequestGuidelines()
   const nested = childrenByParent.get(authority.id) ?? []
 
   return (
@@ -97,15 +99,15 @@ function OfficeCard({ authority, childrenByParent, query }: { authority: Authori
             {nested.map((child) => (
               <li className="flex items-start justify-between gap-2" key={child.id}>
                 <span className="min-w-0 break-words text-xs leading-4 text-on-surface-variant"><Highlight query={query} text={child.name} /></span>
-                <Link className="shrink-0 text-xs font-medium text-primary hover:underline" to="/login">File</Link>
+                <button className="shrink-0 text-xs font-medium text-primary hover:underline" onClick={() => openRequestGuidelines({ authority: { name: child.name, ministryName } })} type="button">File</button>
               </li>
             ))}
           </ul>
         ) : null}
       </div>
-      <Link className="mt-4 inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary/90" to="/login">
+      <button className="mt-4 inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary/90" onClick={() => openRequestGuidelines({ authority: { name: authority.name, ministryName } })} type="button">
         File RTI
-      </Link>
+      </button>
     </li>
   )
 }
@@ -113,14 +115,17 @@ function OfficeCard({ authority, childrenByParent, query }: { authority: Authori
 function EntrySection({
   childrenByParent,
   entry,
+  ministryName,
   offices,
   query,
 }: {
   childrenByParent: Map<string, Authority[]>
   entry: Authority
+  ministryName: string
   offices: Authority[]
   query: string
 }) {
+  const { openRequestGuidelines } = useRequestGuidelines()
   const total = (childrenByParent.get(entry.id) ?? []).length
 
   return (
@@ -139,13 +144,13 @@ function EntrySection({
             </p>
           </div>
         </div>
-        <Link className="inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary/90" to="/login">
+        <button className="inline-flex h-8 shrink-0 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary/90" onClick={() => openRequestGuidelines({ authority: { name: entry.name, ministryName } })} type="button">
           File RTI
-        </Link>
+        </button>
       </div>
       {offices.length ? (
         <ul className="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          {offices.map((office) => <OfficeCard authority={office} childrenByParent={childrenByParent} key={office.id} query={query} />)}
+          {offices.map((office) => <OfficeCard authority={office} childrenByParent={childrenByParent} key={office.id} ministryName={ministryName} query={query} />)}
         </ul>
       ) : null}
     </section>
@@ -170,6 +175,7 @@ export function PublicAuthoritiesPage() {
   const [directory, setDirectory] = useState<DirectoryData | null>(null)
   const [loadError, setLoadError] = useState(false)
   const navigate = useNavigate()
+  const { openRequestGuidelines } = useRequestGuidelines()
   const [searchParams] = useSearchParams()
   const [sortBy, setSortBy] = useState("az")
   const [search, setSearch] = useState("")
@@ -412,7 +418,7 @@ export function PublicAuthoritiesPage() {
           {visibleSections.length ? (
             <div className="mt-5 space-y-6">
               {visibleSections.map(({ entry, offices }) => (
-                <EntrySection childrenByParent={childrenByParent} entry={entry} key={entry.id} offices={offices} query={insideQuery} />
+                <EntrySection childrenByParent={childrenByParent} entry={entry} key={entry.id} ministryName={selectedGroup.name} offices={offices} query={insideQuery} />
               ))}
             </div>
           ) : (
@@ -525,9 +531,9 @@ export function PublicAuthoritiesPage() {
                     {match.group.name}
                   </button>
                 </div>
-                <Link className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-on-primary transition-colors hover:bg-primary/90" to="/login">
+                <button className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-on-primary transition-colors hover:bg-primary/90" onClick={() => openRequestGuidelines({ authority: { name: match.authority.name, ministryName: match.group.name } })} type="button">
                   File RTI
-                </Link>
+                </button>
               </li>
             ))}
           </ul>
@@ -545,6 +551,7 @@ export function PublicAuthoritiesPage() {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {pagedGroups.map((group) => {
             const officeCount = group.members.length
+            const filable = group.filable
             const previewNames = group.entries.length > 1
               ? group.entries.slice(0, 3).map((entry) => entry.name)
               : (childrenByParent.get(group.entries[0].id) ?? []).slice(0, 2).map((child) => child.name)
@@ -573,8 +580,8 @@ export function PublicAuthoritiesPage() {
                     {officeCount === 1 ? "View details" : `View all ${officeCount.toLocaleString()} offices`}
                     <MaterialIcon className="text-lg!">arrow_forward</MaterialIcon>
                   </Button>
-                  {group.filable ? (
-                    <Link className="inline-flex h-8 items-center justify-center rounded-lg bg-secondary px-3 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/85" to="/login">File RTI</Link>
+                  {filable ? (
+                    <button className="inline-flex h-8 items-center justify-center rounded-lg bg-secondary px-3 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/85" onClick={() => openRequestGuidelines({ authority: { name: filable.name, ministryName: group.name } })} type="button">File RTI</button>
                   ) : (
                     <span className="text-xs text-outline">File to a department inside</span>
                   )}

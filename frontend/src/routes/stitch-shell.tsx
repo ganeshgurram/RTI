@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import { useAuth } from "@/auth/AuthContext"
 import { Button } from "@/components/ui/button"
-import { mockNotifications, unreadNotificationCount as initialUnreadNotificationCount } from "@/data/mock-notifications"
+import { useNotifications } from "@/notifications/NotificationContext"
 import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
 import {
   Sheet,
@@ -26,10 +26,10 @@ function StitchTopNav() {
   const navigate = useNavigate()
   const { logout, user } = useAuth()
   const { openRequestGuidelines } = useRequestGuidelines()
+  const { markAllAsRead, notifications, unreadCount } = useNotifications()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(initialUnreadNotificationCount)
   const profileMenuRef = useRef<HTMLDetailsElement>(null)
   const notificationMenuRef = useRef<HTMLDivElement>(null)
 
@@ -212,20 +212,23 @@ function StitchTopNav() {
             {user ? (
               <>
                 <div className="group relative" ref={notificationMenuRef}>
-                  <Button aria-expanded={isNotificationMenuOpen} aria-label={`Notifications${unreadNotificationCount ? ` (${unreadNotificationCount} new)` : ""}`} className="relative overflow-visible rounded-full text-on-primary hover:bg-on-primary/10 hover:text-on-primary" onClick={() => setIsNotificationMenuOpen((isOpen) => !isOpen)} size="icon-lg" type="button" variant="ghost">
+                  <Button aria-expanded={isNotificationMenuOpen} aria-label={`Notifications${unreadCount ? ` (${unreadCount} new)` : ""}`} className="relative overflow-visible rounded-full text-on-primary hover:bg-on-primary/10 hover:text-on-primary" onClick={() => setIsNotificationMenuOpen((isOpen) => !isOpen)} size="icon-lg" type="button" variant="ghost">
                     <MaterialIcon>notifications</MaterialIcon>
-                    {unreadNotificationCount ? <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] leading-4 font-bold text-black">{unreadNotificationCount}</span> : null}
+                    {unreadCount ? <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] leading-4 font-bold text-black">{unreadCount}</span> : null}
                   </Button>
                   <div className={`absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm ${isNotificationMenuOpen ? "block" : "hidden"}`}>
                     <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low p-4">
                       <h3 className="text-[14px] font-bold uppercase tracking-wider text-primary-container">Recent Notifications</h3>
-                      <Button className="text-primary hover:text-primary" disabled={!unreadNotificationCount} onClick={() => setUnreadNotificationCount(0)} size="sm" type="button" variant="ghost">Mark all as read</Button>
+                      <Button disabled={!unreadCount} onClick={markAllAsRead} size="sm" type="button">Mark all as read</Button>
                     </div>
                     <div className="divide-y divide-outline-variant/50">
-                      {mockNotifications.slice(0, 3).map((notification) => (
-                        <div className="cursor-pointer p-4 transition-colors hover:bg-surface-container-low" key={notification.id}>
-                          <p className="text-[14px] font-medium text-on-surface">{notification.title}</p>
-                          <p className="mt-1 text-[12px] text-on-surface-variant">{notification.requestId} · {notification.time}</p>
+                      {notifications.slice(0, 3).map((notification) => (
+                        <div className={`flex gap-2.5 p-4 transition-colors hover:bg-surface-container-low ${notification.isRead ? "" : "bg-primary-fixed/25"}`} key={notification.id}>
+                          <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${notification.isRead ? "bg-transparent" : "bg-primary"}`} />
+                          <div className="min-w-0">
+                            <p className={`text-[14px] ${notification.isRead ? "font-medium text-on-surface" : "font-semibold text-primary"}`}>{notification.title}</p>
+                            <p className="mt-1 text-[12px] text-on-surface-variant">{notification.requestId} · {notification.time}</p>
+                          </div>
                         </div>
                       ))}
                     </div>

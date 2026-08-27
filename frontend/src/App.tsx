@@ -19,7 +19,8 @@ import { SubmitFirstAppealPage } from "@/routes/SubmitFirstAppealPage"
 import { AppealSubmissionSuccessPage, RequestSubmissionSuccessPage } from "@/routes/SubmissionSuccessPages"
 import { RequestHistoryPage } from "@/routes/RequestHistoryPage"
 import { StatusPage } from "@/routes/StatusPage"
-import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
+import { NotificationProvider } from "@/notifications/NotificationContext"
+import { useRequestGuidelines, type RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
 import { RequestProvider } from "@/requests/RequestContext"
 
 const router = createBrowserRouter([
@@ -50,7 +51,8 @@ const router = createBrowserRouter([
 function RequestFormRoute() {
   const location = useLocation()
   const { openRequestGuidelines } = useRequestGuidelines()
-  const hasAcceptedGuidelines = Boolean((location.state as { guidelinesAccepted?: boolean } | null)?.guidelinesAccepted)
+  const routeState = location.state as { guidelinesAccepted?: boolean; authority?: RequestAuthority } | null
+  const hasAcceptedGuidelines = Boolean(routeState?.guidelinesAccepted)
 
   useEffect(() => {
     if (!hasAcceptedGuidelines) {
@@ -59,7 +61,7 @@ function RequestFormRoute() {
   }, [hasAcceptedGuidelines])
 
   if (hasAcceptedGuidelines) {
-    return <RequestFormPage />
+    return <RequestFormPage authority={routeState?.authority} />
   }
 
   return (
@@ -110,9 +112,11 @@ function App() {
   return (
     <AuthProvider>
       <RequestProvider>
-        <TooltipProvider>
-          <RouterProvider router={router} />
-        </TooltipProvider>
+        <NotificationProvider>
+          <TooltipProvider>
+            <RouterProvider router={router} />
+          </TooltipProvider>
+        </NotificationProvider>
       </RequestProvider>
     </AuthProvider>
   )

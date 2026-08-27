@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
-import { Link } from "react-router-dom"
 
 import { mockContactDetails } from "@/data/mock-contact"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 function ContactRow({ icon, label, children }: { icon: string; label: string; children: ReactNode }) {
@@ -19,6 +19,8 @@ function ContactRow({ icon, label, children }: { icon: string; label: string; ch
 }
 
 export function ContactUsPage() {
+  const { openRequestGuidelines } = useRequestGuidelines()
+
   return (
     <div className="mx-auto w-full max-w-container-max px-margin-mobile py-stack-lg md:px-margin-desktop md:py-16">
       <header className="mx-auto mb-10 max-w-2xl text-center md:mb-12">
@@ -82,7 +84,7 @@ export function ContactUsPage() {
         </section>
 
         <aside className="flex flex-col items-start self-start rounded-lg border border-surface-variant bg-surface-container-low p-5 text-left text-sm leading-6 text-on-surface-variant md:col-span-12 md:col-start-1 md:p-6">
-          <p><strong className="text-on-surface">Note:</strong> Please do not file RTI applications to the above email addresses. These are strictly for technical support and portal-related assistance. To file an RTI application, please use the <Link className="font-medium text-surface-tint underline underline-offset-2 transition-colors hover:text-primary" to="/login">Submit Request</Link> functionality on the portal.</p>
+          <p><strong className="text-on-surface">Note:</strong> Please do not file RTI applications to the above email addresses. These are strictly for technical support and portal-related assistance. To file an RTI application, please use the <button className="font-medium text-surface-tint underline underline-offset-2 transition-colors hover:text-primary" onClick={() => openRequestGuidelines()} type="button">Submit Request</button> functionality on the portal.</p>
         </aside>
       </div>
     </div>

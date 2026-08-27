@@ -1,3 +1,4 @@
+import { useAuth } from "@/auth/AuthContext"
 import { Button } from "@/components/ui/button"
 import { RequestHistoryTable } from "@/components/RequestHistoryTable"
 import { mockProfile } from "@/data/mock-profile"
@@ -5,24 +6,25 @@ import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 export function RequestHistoryPage() {
+  const { user } = useAuth()
   const { requests } = useRequests()
+  const accountProfile = user?.profile ?? mockProfile
   const metrics = [
     { label: "Total requests", value: String(requests.length), icon: "description" },
     { label: "Pending", value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
     { label: "Replies received", value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
     { label: "Appeals", value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
   ]
-  const mockRequests = requests
 
   return (
     <div className="mx-auto flex w-full max-w-container-max flex-col gap-6 px-margin-mobile py-8 md:px-margin-desktop md:py-10">
       <header className="flex flex-col justify-between gap-5 rounded-xl border border-outline-variant bg-surface-container-lowest p-5 shadow-sm sm:flex-row sm:items-center md:p-6">
         <div className="flex items-center gap-4">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-on-primary">{mockProfile.initials}</div>
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-on-primary">{accountProfile.initials}</div>
           <div>
             <h1 className="font-headline-lg text-2xl text-primary">RTI Request History</h1>
-            <p className="mt-1 text-sm text-on-surface-variant">View and track every RTI application filed by {mockProfile.fullName}.</p>
-            <p className="mt-2 text-xs text-on-surface-variant">Citizen ID: {mockProfile.id} · {mockRequests.length} total requests</p>
+            <p className="mt-1 text-sm text-on-surface-variant">View and track every RTI application filed by {accountProfile.fullName}.</p>
+            <p className="mt-2 text-xs text-on-surface-variant">Citizen ID: {accountProfile.id} · {requests.length} total requests</p>
           </div>
         </div>
         <Button size="lg" type="button" variant="outline"><MaterialIcon>download</MaterialIcon>Download Report</Button>

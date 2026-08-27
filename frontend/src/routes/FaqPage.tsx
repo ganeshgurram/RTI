@@ -173,7 +173,7 @@ export function FaqPage() {
   return (
       <div className="mx-auto w-full max-w-container-max space-y-stack-lg px-margin-mobile py-stack-lg md:px-margin-desktop">
         <section className="mx-auto max-w-3xl space-y-stack-md text-center">
-          <h1 className="font-headline-lg-mobile text-primary md:text-display-lg">Frequently Asked Questions</h1>
+          <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary md:text-display-lg">Frequently Asked Questions</h1>
           <p className="font-body-lg text-on-surface-variant">Find answers to common questions about filing Right to Information requests online.</p>
           <div className="relative mt-stack-md">
             <MaterialIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</MaterialIcon>
@@ -198,7 +198,7 @@ export function FaqPage() {
             {filteredSections.length === 0 && (
               <div className="rounded-lg border border-surface-variant bg-surface-container-lowest p-stack-lg text-center">
                 <MaterialIcon className="mb-3 text-3xl text-muted-foreground">search_off</MaterialIcon>
-                <h2 className="font-headline-md text-foreground">No FAQs found</h2>
+                <h2 className="font-headline-md text-headline-md text-foreground">No FAQs found</h2>
                 <p className="mt-2 font-body-md text-on-surface-variant">
                   Try searching for payment, appeal, status, public authority, OTP, or supporting document.
                 </p>
@@ -210,7 +210,7 @@ export function FaqPage() {
                   <div className="flex size-10 items-center justify-center rounded-full bg-muted text-foreground">
                     <MaterialIcon>{section.icon}</MaterialIcon>
                   </div>
-                  <h2 className="font-headline-md text-foreground">{section.title}</h2>
+                  <h2 className="font-headline-md text-headline-md text-foreground">{section.title}</h2>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {section.items.map(([question, answer], index) => {
@@ -221,7 +221,7 @@ export function FaqPage() {
                     <article className={isOddLastItem ? "rounded-DEFAULT border border-surface-variant bg-surface p-4 md:col-span-2" : "rounded-DEFAULT border border-surface-variant bg-surface p-4"} key={question}>
                       <div className="mb-2 flex items-start gap-3">
                         <MaterialIcon className="mt-0.5 text-muted-foreground">help</MaterialIcon>
-                        <h3 className="font-body-md font-semibold text-on-surface">{question}</h3>
+                        <h3 className="font-body-md text-body-md font-semibold text-on-surface">{question}</h3>
                       </div>
                       <p className="pl-8 font-body-md text-on-surface-variant">{answer}</p>
                     </article>
@@ -234,12 +234,12 @@ export function FaqPage() {
 
           <aside className="space-y-gutter lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-lg bg-primary p-stack-md text-primary-foreground">
-              <h3 className="mb-stack-sm font-headline-md text-primary-foreground">Need Help?</h3>
+              <h3 className="mb-stack-sm font-headline-md text-headline-md text-primary-foreground">Need Help?</h3>
               <p className="mb-stack-md font-body-md opacity-90">If you cannot find the answer you are looking for, contact our support desk.</p>
               <button className="w-full rounded-DEFAULT border border-primary-foreground/20 bg-primary-foreground py-2 font-label-lg text-primary transition-colors hover:bg-primary-foreground/90">Contact Support</button>
             </div>
             <div className="rounded-lg border border-surface-variant bg-surface-container-lowest p-stack-md">
-              <h4 className="mb-2 font-headline-md text-foreground">User Manual</h4>
+              <h4 className="mb-2 font-headline-md text-headline-md text-foreground">User Manual</h4>
               <p className="mb-4 font-body-md text-on-surface-variant">Download the comprehensive guide for using the RTI Online portal.</p>
               <a className="inline-flex items-center font-label-lg text-foreground hover:underline" href="#">Download PDF <MaterialIcon className="ml-1 text-sm">download</MaterialIcon></a>
             </div>

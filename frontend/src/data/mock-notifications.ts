@@ -102,5 +102,3 @@ export const mockNotifications: MockNotification[] = [
     isRead: true,
   },
 ]
-
-export const unreadNotificationCount = mockNotifications.filter((notification) => !notification.isRead).length
