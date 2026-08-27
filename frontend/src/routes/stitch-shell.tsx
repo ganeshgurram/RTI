@@ -88,7 +88,7 @@ function StitchTopNav() {
     }
 
     if (path === "/submit-request") {
-      return ["/submit-request", "/request-submission-success"].includes(location.pathname)
+      return ["/submit-request", "/request-submission-success", "/payment-reconciliation", "/transaction-status"].includes(location.pathname)
     }
 
     if (path === "/submit-first-appeal") {

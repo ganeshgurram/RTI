@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { useAuth } from "@/auth/AuthContext"
 import type { RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
@@ -252,6 +252,7 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
         </div>
         {paymentMessage ? <p className="rounded-md border border-primary-fixed-dim bg-primary-fixed/30 p-3 text-sm font-medium text-primary" role="status">{paymentMessage}</p> : null}
         {submissionError ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{submissionError}</p> : null}
+        {!isBplApplicant ? <Link className="flex w-full items-center gap-2 text-sm font-semibold text-surface-tint hover:underline" to="/payment-reconciliation"><MaterialIcon className="text-lg">receipt_long</MaterialIcon>Payment unsuccessful or status not updated? Reconcile your payment.</Link> : null}
         <div className="flex flex-wrap gap-4 border-t border-surface-variant pt-6">
           <button className={`${isBplApplicant ? "" : "hidden"} rounded bg-primary px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit">Submit</button>
           <button className={`${isBplApplicant ? "hidden" : "flex"} items-center gap-2 rounded bg-surface-tint px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit"><MaterialIcon className="text-[18px]">payments</MaterialIcon>Make Payment</button>

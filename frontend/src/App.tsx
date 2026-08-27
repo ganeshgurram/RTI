@@ -11,6 +11,7 @@ import { HomePage } from "@/routes/HomePage"
 import { LoginPage } from "@/routes/LoginPage"
 import { NotFoundPage } from "@/routes/NotFoundPage"
 import { NotificationsPage } from "@/routes/NotificationsPage"
+import { PaymentReconciliationPage, TransactionStatusPage } from "@/routes/PaymentReconciliationPages"
 import { ProfilePage } from "@/routes/ProfilePage"
 import { PublicAuthoritiesPage } from "@/routes/PublicAuthoritiesPage"
 import { FirstAppealFormPage } from "@/routes/FirstAppealFormPage"
@@ -35,6 +36,8 @@ const router = createBrowserRouter([
       { path: "contact-us", element: <ContactUsPage /> },
       { path: "public-authorities", element: <PublicAuthoritiesPage /> },
       { path: "submit-request", element: <RequestFormRoute /> },
+      { path: "payment-reconciliation", element: <PaymentReconciliationPage /> },
+      { path: "transaction-status", element: <TransactionStatusPage /> },
       { path: "request-submission-success", element: <RequestSubmissionSuccessPage /> },
       { path: "submit-first-appeal", element: <SubmitFirstAppealPage /> },
       { path: "first-appeal-form", element: <FirstAppealFormPage /> },
