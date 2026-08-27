@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/AuthContext"
+import { useTranslation } from "react-i18next"
 import { RequestHistoryTable } from "@/components/RequestHistoryTable"
 import { mockProfile } from "@/data/mock-profile"
 import { useRequests } from "@/requests/RequestContext"
@@ -8,11 +9,12 @@ export function RequestHistoryPage() {
   const { user } = useAuth()
   const { requests } = useRequests()
   const accountProfile = user?.profile ?? mockProfile
+  const { t } = useTranslation()
   const metrics = [
-    { label: "Total requests", value: String(requests.length), icon: "description" },
-    { label: "Pending", value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
-    { label: "Replies received", value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
-    { label: "Appeals", value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
+    { label: t("history.totalRequests"), value: String(requests.length), icon: "description" },
+    { label: t("history.pending"), value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
+    { label: t("history.replies"), value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
+    { label: t("history.appeals"), value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
   ]
 
   return (
@@ -21,8 +23,8 @@ export function RequestHistoryPage() {
         <div className="flex items-center gap-4">
           <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-on-primary">{accountProfile.initials}</div>
           <div>
-            <h1 className="font-headline-lg text-2xl text-primary">RTI Request History</h1>
-            <p className="mt-1 text-sm text-on-surface-variant">View and track every RTI application filed by {accountProfile.fullName}.</p>
+            <h1 className="font-headline-lg text-2xl text-primary">{t("history.title")}</h1>
+            <p className="mt-1 text-sm text-on-surface-variant">{t("history.subtitle", { name: accountProfile.fullName })}</p>
             <p className="mt-2 text-xs text-on-surface-variant">Citizen ID: {accountProfile.id} · {requests.length} total requests</p>
           </div>
         </div>
@@ -39,8 +41,8 @@ export function RequestHistoryPage() {
 
       <section>
         <div className="mb-4">
-          <h2 className="font-headline-lg text-xl text-primary">All Requests</h2>
-          <p className="mt-1 text-sm text-on-surface-variant">Search by request, then filter by the latest application status.</p>
+          <h2 className="font-headline-lg text-xl text-primary">{t("history.allRequests")}</h2>
+          <p className="mt-1 text-sm text-on-surface-variant">{t("history.searchAndFilter")}</p>
         </div>
         <RequestHistoryTable />
       </section>

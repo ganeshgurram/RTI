@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { usePortalLanguage } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import { useNotifications } from "@/notifications/NotificationContext"
 import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
@@ -48,6 +50,8 @@ function StitchTopNav() {
   const { logout, user } = useAuth()
   const { openRequestGuidelines } = useRequestGuidelines()
   const { markAllAsRead, notifications, unreadCount } = useNotifications()
+  const { language, setLanguage } = usePortalLanguage()
+  const { t } = useTranslation()
   const [isScrolled, setIsScrolled] = useState(false)
   const [textScale, setTextScale] = useState(getStoredTextScale)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
@@ -108,18 +112,18 @@ function StitchTopNav() {
   }, [isNotificationMenuOpen])
 
   const links = [
-    { label: "Home", path: "/" },
-    { label: "RTI Request", path: "/submit-request", opensGuidelines: false },
-    { label: "First Appeal", path: "/submit-first-appeal" },
-    { label: "View Status", path: user ? "/request-history" : "/status" },
-    { label: "Payment Reconciliation", path: "/payment-reconciliation" },
+    { label: t("nav.home"), path: "/" },
+    { label: t("nav.request"), path: "/submit-request", opensGuidelines: false },
+    { label: t("nav.firstAppeal"), path: "/submit-first-appeal" },
+    { label: t("nav.viewStatus"), path: user ? "/request-history" : "/status" },
+    { label: t("nav.paymentReconciliation"), path: "/payment-reconciliation" },
   ]
 
   const drawerLinks = [
     ...links,
-    { label: "Second Appeal", path: "/second-appeal" },
-    { label: "FAQs", path: "/faq" },
-    ...(user ? [] : [{ label: "Login", path: "/login" }]),
+    { label: t("nav.secondAppeal"), path: "/second-appeal" },
+    { label: t("nav.faqs"), path: "/faq" },
+    ...(user ? [] : [{ label: t("nav.login"), path: "/login" }]),
   ]
 
   const isActive = (path: string) => {
@@ -142,6 +146,9 @@ function StitchTopNav() {
     return location.pathname === path
   }
 
+  const currentPageLabel = drawerLinks.find((link) => isActive(link.path))?.label
+    ?? (location.pathname === "/profile" ? t("nav.profile") : location.pathname === "/request-history" ? t("nav.requestHistory") : location.pathname === "/notifications" ? t("nav.notifications") : "RTI Online")
+
   const handleLogout = () => {
     logout()
     navigate("/", { replace: true })
@@ -151,14 +158,14 @@ function StitchTopNav() {
     <>
       <div className="relative z-50 w-full bg-primary text-on-primary/70">
         <div className="mx-auto flex h-9 w-full max-w-container-max items-center justify-end gap-1 px-3 text-label-sm md:px-margin-desktop">
-          <span className="mr-1 hidden sm:inline">Text size</span>
-          <button aria-label="Increase text size" className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale >= maxTextScale} onClick={() => setTextScale((current) => clampTextScale(current + textScaleStep))} type="button">A+</button>
-          <button aria-label="Reset text size" className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale === 1} onClick={() => setTextScale(1)} type="button">A</button>
-          <button aria-label="Decrease text size" className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale <= minTextScale} onClick={() => setTextScale((current) => clampTextScale(current - textScaleStep))} type="button">A-</button>
+          <span className="mr-1 hidden sm:inline">{t("nav.textSize")}</span>
+          <button aria-label={t("nav.increaseText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale >= maxTextScale} onClick={() => setTextScale((current) => clampTextScale(current + textScaleStep))} type="button">A+</button>
+          <button aria-label={t("nav.resetText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale === 1} onClick={() => setTextScale(1)} type="button">A</button>
+          <button aria-label={t("nav.decreaseText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale <= minTextScale} onClick={() => setTextScale((current) => clampTextScale(current - textScaleStep))} type="button">A-</button>
           <span aria-hidden="true" className="mx-2 h-4 border-l border-on-primary/30" />
-          <button className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary" type="button">English</button>
+          <button aria-label={t("language.switchToEnglish")} aria-pressed={language === "en"} className={`rounded px-2 py-0.5 transition-colors ${language === "en" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("en")} type="button">{t("language.english")}</button>
           <span aria-hidden="true" className="opacity-50">|</span>
-          <button className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary" type="button">Hindi</button>
+          <button aria-label={t("language.switchToHindi")} aria-pressed={language === "hi"} className={`rounded px-2 py-0.5 transition-colors ${language === "hi" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("hi")} type="button">{t("language.hindi")}</button>
         </div>
       </div>
       <div className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "px-3 pt-3 md:px-6" : "px-0 pt-0"}`}>
@@ -169,7 +176,7 @@ function StitchTopNav() {
               <SheetTrigger
                 render={
                   <button
-                    aria-label="Open navigation menu"
+                    aria-label={t("nav.openMenu")}
                     className="p-1 text-on-primary md:hidden"
                     type="button"
                   />
@@ -189,7 +196,7 @@ function StitchTopNav() {
                       RTI Online
                     </span>
                   </SheetTitle>
-                  <SheetDescription className="sr-only">Navigation</SheetDescription>
+                  <SheetDescription className="sr-only">{t("nav.navigation")}</SheetDescription>
                 </SheetHeader>
                 <nav className="flex flex-col px-4">
                   {drawerLinks.map((link) => {
@@ -199,7 +206,8 @@ function StitchTopNav() {
                           key={link.label}
                           render={
                             <button
-                              className="rounded-md px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                              aria-current={isActive(link.path) ? "page" : undefined}
+                              className={`rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${isActive(link.path) ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"}`}
                               onClick={() => openRequestGuidelines()}
                               type="button"
                             />
@@ -215,7 +223,8 @@ function StitchTopNav() {
                         key={link.label}
                         render={
                         <Link
-                          className="rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                          aria-current={isActive(link.path) ? "page" : undefined}
+                          className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive(link.path) ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"}`}
                           to={link.path}
                         />
                         }
@@ -234,6 +243,7 @@ function StitchTopNav() {
                 RTI Online
               </span>
             </Link>
+            <span className="hidden max-w-32 truncate border-l border-on-primary/30 pl-3 text-sm font-medium text-on-primary/80 sm:inline md:hidden">{currentPageLabel}</span>
           </div>
           <div className="ml-6 hidden h-full items-center gap-3 md:flex">
             {links.map((link) => {
@@ -266,14 +276,14 @@ function StitchTopNav() {
             {user ? (
               <>
                 <div className="group relative" ref={notificationMenuRef}>
-                  <Button aria-expanded={isNotificationMenuOpen} aria-label={`Notifications${unreadCount ? ` (${unreadCount} new)` : ""}`} className="relative overflow-visible rounded-full text-on-primary hover:bg-on-primary/10 hover:text-on-primary" onClick={() => setIsNotificationMenuOpen((isOpen) => !isOpen)} size="icon-lg" type="button" variant="ghost">
+                  <Button aria-expanded={isNotificationMenuOpen} aria-label={`${t("nav.notifications")}${unreadCount ? ` (${unreadCount})` : ""}`} className="relative overflow-visible rounded-full text-on-primary hover:bg-on-primary/10 hover:text-on-primary" onClick={() => setIsNotificationMenuOpen((isOpen) => !isOpen)} size="icon-lg" type="button" variant="ghost">
                     <MaterialIcon>notifications</MaterialIcon>
                     {unreadCount ? <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] leading-4 font-bold text-black">{unreadCount}</span> : null}
                   </Button>
                   <div className={`fixed left-3 right-3 top-[4.5rem] z-50 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72 ${isNotificationMenuOpen ? "block" : "hidden"}`}>
                     <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low p-4">
-                      <h3 className="text-[14px] font-bold uppercase tracking-wider text-primary-container">Recent Notifications</h3>
-                      <Button className={unreadCount ? "" : "invisible"} onClick={markAllAsRead} size="sm" type="button">Mark all as read</Button>
+                      <h3 className="text-[14px] font-bold uppercase tracking-wider text-primary-container">{t("nav.recentNotifications")}</h3>
+                      <Button className={unreadCount ? "" : "invisible"} onClick={markAllAsRead} size="sm" type="button">{t("nav.markAllRead")}</Button>
                     </div>
                     <div className="divide-y divide-outline-variant/50">
                       {notifications.slice(0, 3).map((notification) => (
@@ -286,7 +296,7 @@ function StitchTopNav() {
                         </div>
                       ))}
                     </div>
-                    <div className="border-t border-outline-variant p-3 text-center"><button className="text-[12px] font-semibold text-surface-tint hover:underline" onClick={() => { setIsNotificationMenuOpen(false); navigate("/notifications") }} type="button">View All Notifications</button></div>
+                    <div className="border-t border-outline-variant p-3 text-center"><button className="text-[12px] font-semibold text-surface-tint hover:underline" onClick={() => { setIsNotificationMenuOpen(false); navigate("/notifications") }} type="button">{t("nav.viewAllNotifications")}</button></div>
                   </div>
                 </div>
                 <details className="group relative" onToggle={(event) => setIsProfileMenuOpen(event.currentTarget.open)} open={isProfileMenuOpen} ref={profileMenuRef}>
@@ -298,11 +308,11 @@ function StitchTopNav() {
                   <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest py-1 shadow-sm">
                     <Link className="flex items-center gap-3 px-4 py-3 text-[14px] font-medium text-on-surface transition-colors hover:bg-surface-container-low" onClick={() => setIsProfileMenuOpen(false)} to="/profile">
                       <MaterialIcon className="text-[18px] text-muted-foreground">person</MaterialIcon>
-                      <span><span className="block">Profile</span><span className="block text-xs font-normal text-muted-foreground">Personal and contact details</span></span>
+                      <span><span className="block">{t("nav.profile")}</span><span className="block text-xs font-normal text-muted-foreground">{t("nav.profileDescription")}</span></span>
                     </Link>
                     <Link className="flex items-center gap-3 px-4 py-3 text-[14px] font-medium text-on-surface transition-colors hover:bg-surface-container-low" onClick={() => setIsProfileMenuOpen(false)} to="/request-history">
                       <MaterialIcon className="text-[18px] text-muted-foreground">description</MaterialIcon>
-                      <span><span className="block">RTI Request History</span><span className="block text-xs font-normal text-muted-foreground">Track your submitted applications</span></span>
+                      <span><span className="block">{t("nav.requestHistory")}</span><span className="block text-xs font-normal text-muted-foreground">{t("nav.requestHistoryDescription")}</span></span>
                     </Link>
                     <div className="my-1 border-t border-outline-variant/50" />
                     <button
@@ -311,7 +321,7 @@ function StitchTopNav() {
                       type="button"
                     >
                       <MaterialIcon className="text-[18px] text-muted-foreground">logout</MaterialIcon>
-                      Logout
+                      {t("nav.logout")}
                     </button>
                   </div>
                 </details>
@@ -321,7 +331,7 @@ function StitchTopNav() {
                 className="rounded bg-secondary px-6 py-2 font-label-lg text-label-lg text-on-secondary shadow-sm transition-colors hover:bg-secondary/90"
                 to="/login"
               >
-                {location.pathname === "/login" ? "Sign up" : "Signin/Signup"}
+                {location.pathname === "/login" ? t("nav.signUp") : t("nav.signInOrSignUp")}
               </Link>
             )}
           </div>
@@ -334,17 +344,18 @@ function StitchTopNav() {
 
 function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
   const location = useLocation()
+  const { t } = useTranslation()
   const isFaqActive = activeFaq || location.pathname === "/faq"
 
   return (
     <footer className="mt-auto rounded-t-xl bg-on-surface text-surface-container-lowest" data-site-footer>
       <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-6 px-margin-mobile py-stack-lg md:flex-row md:px-margin-desktop">
         <div className="text-center font-headline-md text-headline-md md:text-left">
-          © {new Date().getFullYear()} RTI Online. All Rights Reserved.
+          © {new Date().getFullYear()} RTI Online. {t("nav.allRightsReserved")}
         </div>
         <div className="flex flex-wrap justify-center gap-6">
           <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/public-authorities">
-            Public Authorities
+            {t("nav.publicAuthorities")}
           </Link>
           <Link
             className={
@@ -354,13 +365,13 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
             }
             to="/faq"
           >
-            FAQs
+            {t("nav.faqs")}
           </Link>
           <a className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" download href="/rti-online-user-manual.pdf">
-            User Manual
+            {t("nav.userManual")}
           </a>
           <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/contact-us">
-            Contact Us
+            {t("nav.contactUs")}
           </Link>
         </div>
       </div>

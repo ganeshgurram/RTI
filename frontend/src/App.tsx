@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { createBrowserRouter, Navigate, RouterProvider, useLocation } from "react-router-dom"
 
 import { AuthProvider, useAuth } from "@/auth/AuthContext"
+import { LanguageProvider } from "@/i18n"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AppLayout } from "@/routes/AppLayout"
 import { ContactUsPage } from "@/routes/ContactUsPage"
@@ -144,17 +145,19 @@ function ProtectedNotifications() {
 
 function App() {
   return (
-    <AuthProvider>
-      <RequestProvider>
-        <PaymentProvider>
-          <NotificationProvider>
-            <TooltipProvider>
-              <RouterProvider router={router} />
-            </TooltipProvider>
-          </NotificationProvider>
-        </PaymentProvider>
-      </RequestProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <RequestProvider>
+          <PaymentProvider>
+            <NotificationProvider>
+              <TooltipProvider>
+                <RouterProvider router={router} />
+              </TooltipProvider>
+            </NotificationProvider>
+          </PaymentProvider>
+        </RequestProvider>
+      </AuthProvider>
+    </LanguageProvider>
   )
 }
 

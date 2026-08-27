@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -88,12 +89,15 @@ function ReadOnlyField({ label, value, description, badge }: { label: string; va
 }
 
 function RadioChoices({ name, options, value, onChange }: { name: string; options: string[]; value: string; onChange: (value: string) => void }) {
+  const { t } = useTranslation()
+  const optionKey: Record<string, string> = { Male: "male", Female: "female", "Third Gender": "thirdGender", Rural: "rural", Urban: "urban", Literate: "literate", Illiterate: "illiterate" }
+
   return (
     <div aria-label={name} className="flex flex-wrap gap-x-5 gap-y-2" role="radiogroup">
       {options.map((option) => (
         <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground" key={option}>
           <input checked={value === option} className="size-4 accent-primary" name={name} onChange={() => onChange(option)} type="radio" value={option} />
-          {option}
+          {t(`requestForm.${optionKey[option] ?? option}`)}
         </label>
       ))}
     </div>
@@ -101,6 +105,8 @@ function RadioChoices({ name, options, value, onChange }: { name: string; option
 }
 
 function PhoneInput({ id, value, onChange, error, required }: { id: string; value: string; onChange: (value: string) => void; error?: string; required?: boolean }) {
+  const { t } = useTranslation()
+
   return (
     <div>
       <div className="flex">
@@ -112,7 +118,7 @@ function PhoneInput({ id, value, onChange, error, required }: { id: string; valu
           inputMode="numeric"
           maxLength={10}
           onChange={(event) => onChange(event.target.value.replace(/\D/g, "").slice(0, 10))}
-          placeholder="Mobile Number"
+          placeholder={t("requestForm.mobile")}
           required={required}
           value={value}
         />
@@ -147,6 +153,7 @@ export function ProfilePage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [didSave, setDidSave] = useState(false)
   const [stateSearch, setStateSearch] = useState("")
+  const { t } = useTranslation()
 
   const updateField = (field: FieldName, value: string) => {
     setDraft((current) => ({ ...current, [field]: value }))
@@ -210,10 +217,10 @@ export function ProfilePage() {
   const initials = profileName.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase()
   const filteredStates = indianStatesAndTerritories.filter((state) => state.toLowerCase().includes(stateSearch.toLowerCase()))
   const requestMetrics = [
-    { label: "Total requests", value: String(requests.length), icon: "description" },
-    { label: "Pending", value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
-    { label: "Replies received", value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
-    { label: "Appeals", value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
+    { label: t("history.totalRequests"), value: String(requests.length), icon: "description" },
+    { label: t("history.pending"), value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
+    { label: t("history.replies"), value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
+    { label: t("history.appeals"), value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
   ]
 
   return (
@@ -226,21 +233,21 @@ export function ProfilePage() {
               <h1 className="font-headline-lg text-2xl text-primary">{profileName}</h1>
               <Badge className="border-state-success/20 bg-state-success/10 text-state-success" variant="outline">{accountProfile.account.status}</Badge>
             </div>
-            <p className="mt-1 text-sm text-on-surface-variant">Applicant Profile · Personal and contact details used for RTI applications</p>
+            <p className="mt-1 text-sm text-on-surface-variant">{t("profile.subtitle")}</p>
             <p className="mt-2 text-xs text-on-surface-variant">Citizen ID: {accountProfile.id} · @{accountProfile.username}</p>
           </div>
         </div>
         {!isEditing ? (
-          <Button onClick={startEditing} size="lg" type="button"><MaterialIcon>edit</MaterialIcon>Edit Profile</Button>
+          <Button onClick={startEditing} size="lg" type="button"><MaterialIcon>edit</MaterialIcon>{t("profile.edit")}</Button>
         ) : (
-          <Badge className="self-start bg-primary-fixed text-primary sm:self-auto" variant="outline">Editing profile</Badge>
+          <Badge className="self-start bg-primary-fixed text-primary sm:self-auto" variant="outline">{t("profile.editing")}</Badge>
         )}
       </header>
 
       {didSave ? (
         <div className="flex items-center gap-2 rounded-lg border border-state-success/25 bg-state-success/10 px-4 py-3 text-sm text-state-success" role="status">
           <MaterialIcon className="text-lg">check_circle</MaterialIcon>
-          Your applicant profile has been updated for this demo.
+          {t("profile.updated")}
         </div>
       ) : null}
 
@@ -257,49 +264,49 @@ export function ProfilePage() {
 
       {isEditing ? (
         <form className="flex flex-col gap-6" noValidate onSubmit={saveProfile}>
-          <ProfileCard description="Your core details for RTI communications." icon="person" title="Basic Information">
+          <ProfileCard description={t("profile.descriptions.core")} icon="person" title={t("profile.basic")}>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <FieldLabel htmlFor="full-name" required>Full Name</FieldLabel>
+                <FieldLabel htmlFor="full-name" required>{t("requestForm.name")}</FieldLabel>
                 <Input aria-invalid={Boolean(errors.fullName)} id="full-name" onChange={(event) => updateField("fullName", event.target.value)} placeholder="Enter your full name" required value={draft.fullName} />
                 <FieldError message={errors.fullName} />
               </div>
               <fieldset>
-                <legend className="mb-2 text-sm font-medium text-foreground">Gender <span aria-hidden="true" className="text-destructive">*</span></legend>
+                <legend className="mb-2 text-sm font-medium text-foreground">{t("requestForm.gender")} <span aria-hidden="true" className="text-destructive">*</span></legend>
                 <RadioChoices name="gender" onChange={(value) => updateField("gender", value)} options={["Male", "Female", "Third Gender"]} value={draft.gender} />
                 <FieldError message={errors.gender} />
               </fieldset>
               <div>
-                <FieldLabel htmlFor="email" required>Email Address</FieldLabel>
+                <FieldLabel htmlFor="email" required>{t("status.emailAddress")}</FieldLabel>
                 <Input aria-invalid={Boolean(errors.email)} id="email" onChange={(event) => updateField("email", event.target.value)} placeholder="user@domain.com" required type="email" value={draft.email} />
                 <FieldError message={errors.email} />
               </div>
               <div>
-                <FieldLabel htmlFor="confirm-email" required>Confirm Email Address</FieldLabel>
+                <FieldLabel htmlFor="confirm-email" required>{t("requestForm.confirmEmail")}</FieldLabel>
                 <Input aria-invalid={Boolean(errors.confirmEmail)} id="confirm-email" onChange={(event) => updateField("confirmEmail", event.target.value)} placeholder="user@domain.com" required type="email" value={draft.confirmEmail} />
                 <FieldError message={errors.confirmEmail} />
               </div>
               <div>
-                <FieldLabel description="Used for SMS alerts and application notifications" htmlFor="mobile" required>Mobile Number</FieldLabel>
+                <FieldLabel description={t("firstAppeal.smsHint")} htmlFor="mobile" required>{t("requestForm.mobile")}</FieldLabel>
                 <PhoneInput error={errors.mobile} id="mobile" onChange={(value) => updateField("mobile", value)} required value={draft.mobile} />
               </div>
             </div>
           </ProfileCard>
 
-          <ProfileCard description="Your residential and postal address for RTI applications." icon="home" title="Address Details">
+          <ProfileCard description={t("profile.descriptions.address")} icon="home" title={t("profile.address")}>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
-                <FieldLabel htmlFor="address" required>Address</FieldLabel>
+                <FieldLabel htmlFor="address" required>{t("requestForm.address")}</FieldLabel>
                 <Textarea aria-invalid={Boolean(errors.address)} id="address" onChange={(event) => updateField("address", event.target.value)} placeholder="House / Flat No., Street, Locality, City" required rows={3} value={draft.address} />
                 <FieldError message={errors.address} />
               </div>
               <div>
-                <FieldLabel htmlFor="pincode" required>PIN Code</FieldLabel>
+                <FieldLabel htmlFor="pincode" required>{t("requestForm.pinCode")}</FieldLabel>
                 <Input aria-invalid={Boolean(errors.pincode)} id="pincode" inputMode="numeric" maxLength={6} onChange={(event) => updateField("pincode", event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="673601" required value={draft.pincode} />
                 <FieldError message={errors.pincode} />
               </div>
               <div>
-                <FieldLabel required>Country</FieldLabel>
+                <FieldLabel required>{t("requestForm.country")}</FieldLabel>
                 <Select onValueChange={(value) => updateField("country", value ?? "India")} value={draft.country}>
                   <SelectTrigger aria-invalid={Boolean(errors.country)} className="w-full"><SelectValue placeholder="Select country" /></SelectTrigger>
                   <SelectContent><SelectItem value="India">India</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
@@ -308,13 +315,13 @@ export function ProfilePage() {
               </div>
               {draft.country === "Other" ? (
                 <div>
-                  <FieldLabel htmlFor="country-name" required>Country Name</FieldLabel>
+                  <FieldLabel htmlFor="country-name" required>{t("profile.countryName")}</FieldLabel>
                   <Input aria-invalid={Boolean(errors.countryName)} id="country-name" onChange={(event) => updateField("countryName", event.target.value)} placeholder="Enter country name" required value={draft.countryName} />
                   <FieldError message={errors.countryName} />
                 </div>
               ) : (
                 <div>
-                  <FieldLabel required>State / Union Territory</FieldLabel>
+                  <FieldLabel required>{t("requestForm.state")}</FieldLabel>
                   <Select onValueChange={(value) => { updateField("state", value ?? ""); setStateSearch("") }} value={draft.state}>
                     <SelectTrigger aria-invalid={Boolean(errors.state)} className="w-full"><SelectValue placeholder="Select state" /></SelectTrigger>
                     <SelectContent>
@@ -328,61 +335,61 @@ export function ProfilePage() {
                 </div>
               )}
               <fieldset>
-                <legend className="mb-2 text-sm font-medium text-foreground">Area Type <span aria-hidden="true" className="text-destructive">*</span></legend>
+                <legend className="mb-2 text-sm font-medium text-foreground">{t("requestForm.areaType")} <span aria-hidden="true" className="text-destructive">*</span></legend>
                 <RadioChoices name="area-type" onChange={(value) => updateField("areaType", value)} options={["Rural", "Urban"]} value={draft.areaType} />
                 <FieldError message={errors.areaType} />
               </fieldset>
             </div>
           </ProfileCard>
 
-          <ProfileCard description="Optional details that help us contact you." icon="contact_phone" title="Additional Information">
+          <ProfileCard description={t("profile.descriptions.additional")} icon="contact_phone" title={t("profile.additional")}>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <fieldset>
-                <legend className="mb-2 text-sm font-medium text-foreground">Educational Status</legend>
+                <legend className="mb-2 text-sm font-medium text-foreground">{t("requestForm.educationalStatus")}</legend>
                 <RadioChoices name="educational-status" onChange={(value) => updateField("educationalStatus", value)} options={["Literate", "Illiterate"]} value={draft.educationalStatus} />
               </fieldset>
               <div>
-                <FieldLabel htmlFor="alternate-phone">Alternate Phone Number</FieldLabel>
+                <FieldLabel htmlFor="alternate-phone">{t("profile.alternatePhone")}</FieldLabel>
                 <PhoneInput error={errors.alternatePhone} id="alternate-phone" onChange={(value) => updateField("alternatePhone", value)} value={draft.alternatePhone} />
               </div>
             </div>
           </ProfileCard>
 
           <div className="flex flex-col-reverse justify-end gap-3 border-t border-outline-variant pt-6 sm:flex-row">
-            <Button onClick={cancelEditing} size="lg" type="button" variant="outline">Cancel</Button>
-            <Button size="lg" type="submit"><MaterialIcon>save</MaterialIcon>Save Changes</Button>
+            <Button onClick={cancelEditing} size="lg" type="button" variant="outline">{t("common.cancel")}</Button>
+            <Button size="lg" type="submit"><MaterialIcon>save</MaterialIcon>{t("profile.save")}</Button>
           </div>
         </form>
       ) : (
         <>
           <section className="grid gap-6 lg:grid-cols-2">
-            <ProfileCard description="Primary details used to identify your RTI applications." icon="person" title="Basic Information">
+            <ProfileCard description={t("profile.descriptions.core")} icon="person" title={t("profile.basic")}>
               <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-                <ReadOnlyField label="Full Name" value={profile.fullName} />
-                <ReadOnlyField label="Gender" value={profile.gender} />
-                <ReadOnlyField badge={<Badge className="border-state-success/20 bg-state-success/10 text-state-success" variant="outline">Verified</Badge>} label="Email Address" value={profile.email} />
-                <ReadOnlyField description="Used for SMS alerts and application notifications" label="Mobile Number" value={`+91 ${profile.mobile}`} />
+                <ReadOnlyField label={t("requestForm.name")} value={profile.fullName} />
+                <ReadOnlyField label={t("requestForm.gender")} value={profile.gender} />
+                <ReadOnlyField badge={<Badge className="border-state-success/20 bg-state-success/10 text-state-success" variant="outline">{t("profile.verified")}</Badge>} label={t("status.emailAddress")} value={profile.email} />
+                <ReadOnlyField description={t("firstAppeal.smsHint")} label={t("requestForm.mobile")} value={`+91 ${profile.mobile}`} />
               </dl>
             </ProfileCard>
 
-            <ProfileCard description="Your residential and postal address for RTI applications." icon="home" title="Address Details">
+            <ProfileCard description={t("profile.descriptions.address")} icon="home" title={t("profile.address")}>
               <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-                <div className="sm:col-span-2"><ReadOnlyField label="Address" value={profile.address} /></div>
-                <ReadOnlyField label="PIN Code" value={profile.pincode} />
-                <ReadOnlyField label="Country" value={profile.country === "Other" ? profile.countryName : profile.country} />
-                <ReadOnlyField label="State / Union Territory" value={profile.country === "India" ? profile.state : "Not applicable"} />
-                <ReadOnlyField label="Area Type" value={profile.areaType} />
+                <div className="sm:col-span-2"><ReadOnlyField label={t("requestForm.address")} value={profile.address} /></div>
+                <ReadOnlyField label={t("requestForm.pinCode")} value={profile.pincode} />
+                <ReadOnlyField label={t("requestForm.country")} value={profile.country === "Other" ? profile.countryName : profile.country} />
+                <ReadOnlyField label={t("requestForm.state")} value={profile.country === "India" ? profile.state : t("profile.notApplicable")} />
+                <ReadOnlyField label={t("requestForm.areaType")} value={profile.areaType} />
               </dl>
             </ProfileCard>
 
-            <ProfileCard description="Additional contact and educational details." icon="contact_phone" title="Additional Information">
+            <ProfileCard description={t("profile.descriptions.additional")} icon="contact_phone" title={t("profile.additional")}>
               <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-                <ReadOnlyField label="Educational Status" value={profile.educationalStatus} />
-                <ReadOnlyField label="Alternate Phone Number" value={profile.alternatePhone ? `+91 ${profile.alternatePhone}` : "Not provided"} />
+                <ReadOnlyField label={t("requestForm.educationalStatus")} value={profile.educationalStatus} />
+                <ReadOnlyField label={t("profile.alternatePhone")} value={profile.alternatePhone ? `+91 ${profile.alternatePhone}` : t("profile.notProvided")} />
               </dl>
             </ProfileCard>
 
-            <ProfileCard description="Your secure access details for this RTI portal." icon="manage_accounts" title="Account Details">
+            <ProfileCard description={t("profile.descriptions.account")} icon="manage_accounts" title={t("profile.account")}>
               <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
                 <ReadOnlyField label="Citizen ID" value={accountProfile.id} />
                 <ReadOnlyField label="Username" value={`@${accountProfile.username}`} />

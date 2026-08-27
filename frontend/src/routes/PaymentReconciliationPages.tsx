@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react"
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -7,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { findTransaction, type PaymentTransaction } from "@/data/mock-transactions"
 import { cn } from "@/lib/utils"
+import { usePortalLanguage } from "@/i18n"
 import { usePayments } from "@/payments/PaymentContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -36,6 +38,7 @@ export function PaymentReconciliationPage() {
   const [captcha, setCaptcha] = useState("")
   const [captchaIndex, setCaptchaIndex] = useState(0)
   const [errors, setErrors] = useState<LookupErrors>({})
+  const { t } = useTranslation()
 
   const activeCaptcha = captchaCodes[captchaIndex]
 
@@ -58,16 +61,16 @@ export function PaymentReconciliationPage() {
     event.preventDefault()
     const nextErrors: LookupErrors = {}
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) nextErrors.email = "Enter the email address used for this payment."
-    if (captcha.trim().toUpperCase() !== activeCaptcha) nextErrors.captcha = "Captcha does not match. Please try again."
+    if (!/^\S+@\S+\.\S+$/.test(email)) nextErrors.email = t("payment.errorEmail")
+    if (captcha.trim().toUpperCase() !== activeCaptcha) nextErrors.captcha = t("payment.errorCaptcha")
 
     const { mobileMismatch, transaction } = findTransaction(payments, email, mobile)
 
     if (!nextErrors.email && !nextErrors.captcha) {
       if (mobileMismatch) {
-        nextErrors.mobile = "This does not match the mobile number used for the payment. Leave it blank if you are unsure."
+        nextErrors.mobile = t("payment.errorMobile")
       } else if (!transaction) {
-        nextErrors.lookup = "No unsuccessful payment matches those details. Check the email address, or contact the helpdesk if the amount was debited."
+        nextErrors.lookup = t("payment.errorLookup")
       }
     }
 
@@ -84,43 +87,43 @@ export function PaymentReconciliationPage() {
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-primary-fixed text-primary">
           <MaterialIcon className="text-2xl">receipt_long</MaterialIcon>
         </div>
-        <h1 className="font-headline-lg text-3xl text-primary md:text-headline-lg">Payment Reconciliation</h1>
-        <p className="mt-3 text-base leading-7 text-on-surface-variant">Reconciliation of unsuccessful RTI request payments. Trace a fee that was debited but did not return a registration number.</p>
+        <h1 className="font-headline-lg text-3xl text-primary md:text-headline-lg">{t("payment.title")}</h1>
+        <p className="mt-3 text-base leading-7 text-on-surface-variant">{t("payment.subtitle")}</p>
       </header>
 
       <div className="mx-auto max-w-3xl">
         <Card className="border border-outline-variant bg-surface-container-lowest shadow-sm">
           <CardHeader className="border-b border-outline-variant/50">
-            <CardTitle className="text-primary">Locate Your Payment</CardTitle>
-            <CardDescription>Enter the email id and mobile number that were used earlier to file the RTI request or appeal.</CardDescription>
-            <p className="mt-2 text-xs text-on-surface-variant">Fields marked with <span className="font-semibold text-destructive">*</span> are mandatory.</p>
+            <CardTitle className="text-primary">{t("payment.locateTitle")}</CardTitle>
+            <CardDescription>{t("payment.locateDescription")}</CardDescription>
+            <p className="mt-2 text-xs text-on-surface-variant">{t("payment.mandatory")}</p>
           </CardHeader>
           <CardContent>
             <form className="grid grid-cols-1 gap-5 md:grid-cols-2" noValidate onSubmit={locateTransaction}>
               <div>
-                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-email">Email Address <span className="text-destructive">*</span></label>
+                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-email">{t("status.emailAddress")} <span className="text-destructive">*</span></label>
                 <Input aria-invalid={Boolean(errors.email)} id="reconciliation-email" onChange={(event) => { setEmail(event.target.value); clearErrors() }} placeholder="user@domain.com" type="email" value={email} />
                 {errors.email ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.email}</p> : null}
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-mobile">Mobile Number <span className="text-on-surface-variant">(optional)</span></label>
+                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-mobile">{t("payment.mobileOptional")}</label>
                 <Input aria-invalid={Boolean(errors.mobile)} id="reconciliation-mobile" maxLength={10} onChange={(event) => { setMobile(event.target.value); clearErrors() }} placeholder="98765 43210" type="tel" value={mobile} />
                 {errors.mobile ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.mobile}</p> : null}
               </div>
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-captcha">Captcha <span className="text-destructive">*</span></label>
+                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-captcha">{t("status.captcha")} <span className="text-destructive">*</span></label>
                 <div className="flex max-w-md gap-2">
-                  <Input aria-invalid={Boolean(errors.captcha)} id="reconciliation-captcha" onChange={(event) => { setCaptcha(event.target.value); clearErrors() }} placeholder="Enter captcha" value={captcha} />
+                  <Input aria-invalid={Boolean(errors.captcha)} id="reconciliation-captcha" onChange={(event) => { setCaptcha(event.target.value); clearErrors() }} placeholder={t("status.enterCaptcha")} value={captcha} />
                   <span aria-label="Captcha code" className="flex h-8 min-w-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary">{activeCaptcha}</span>
-                  <Button aria-label="Refresh captcha" onClick={refreshCaptcha} size="icon" type="button" variant="outline"><MaterialIcon>refresh</MaterialIcon></Button>
+                  <Button aria-label={t("status.refreshCaptcha")} onClick={refreshCaptcha} size="icon" type="button" variant="outline"><MaterialIcon>refresh</MaterialIcon></Button>
                 </div>
-                <p className="mt-1.5 text-xs text-on-surface-variant">All characters are case insensitive.</p>
+                <p className="mt-1.5 text-xs text-on-surface-variant">{t("payment.allCaseInsensitive")}</p>
                 {errors.captcha ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.captcha}</p> : null}
               </div>
               {errors.lookup ? <p className="text-sm font-medium text-destructive md:col-span-2" role="alert">{errors.lookup}</p> : null}
               <div className="mt-2 flex flex-wrap justify-end gap-3 border-t border-outline-variant/50 pb-2 pt-6 md:col-span-2">
-                <Button onClick={resetForm} size="lg" type="button" variant="outline">Reset</Button>
-                <Button size="lg" type="submit"><MaterialIcon>search</MaterialIcon>Locate Payment</Button>
+                <Button onClick={resetForm} size="lg" type="button" variant="outline">{t("requestForm.reset")}</Button>
+                <Button size="lg" type="submit"><MaterialIcon>search</MaterialIcon>{t("payment.locate")}</Button>
               </div>
             </form>
           </CardContent>
@@ -181,10 +184,39 @@ const outcomeViews: Record<"located" | PaymentTransaction["outcome"], OutcomeVie
   },
 }
 
+const hindiOutcomeText: Record<"located" | PaymentTransaction["outcome"], Pick<OutcomeView, "heading" | "summary" | "badge" | "explanation">> = {
+  located: {
+    heading: "लेन-देन मिल गया",
+    summary: "भुगतान का एक हालिया प्रयास आपके विवरण से मेल खाता है।",
+    badge: "बैंक में प्रक्रिया जारी है",
+    explanation: "भुगतान शुरू किया गया था, लेकिन बैंक ने अभी अंतिम पुष्टि नहीं भेजी है। नीचे नवीनतम स्थिति जाँचें और प्रक्रिया पूरी होने तक दोबारा भुगतान न करें।",
+  },
+  confirmed: {
+    heading: "भुगतान की पुष्टि हो गई",
+    summary: "बैंक ने इस भुगतान की पुष्टि कर दी है और एक पंजीकरण नंबर बनाया गया है।",
+    badge: "भुगतान की पुष्टि हुई",
+    explanation: "शुल्क प्राप्त हो गया है और अनुरोध पंजीकृत है। स्थिति जाँचते या अपील दायर करते समय नीचे दिया पंजीकरण नंबर लिखें।",
+  },
+  refunded: {
+    heading: "भुगतान वापस किया गया",
+    summary: "भुगतान पूरा नहीं हुआ और बैंक ने राशि वापस कर दी है।",
+    badge: "रिफंड शुरू किया गया",
+    explanation: "कोई पंजीकरण नंबर नहीं बना, इसलिए कुछ भी दायर नहीं हुआ। राशि 5 से 7 कार्य दिवसों में नीचे दिए रिफंड संदर्भ के साथ स्रोत खाते में लौट आएगी। आप अनुरोध फिर से दायर कर सकते हैं।",
+  },
+  awaitingBank: {
+    heading: "लेन-देन अभी बैंक में है",
+    summary: "बैंक ने अभी इस लेन-देन का निपटारा नहीं किया है।",
+    badge: "बैंक की पुष्टि की प्रतीक्षा है",
+    explanation: "बैंक स्क्रॉल के मिलान के बाद पंजीकरण नंबर बनाए जाते हैं, जिसमें 24 से 48 कार्य घंटे लग सकते हैं। इस बीच दोबारा भुगतान न करें। 48 घंटे बाद स्थिति न बदले तो लेन-देन आईडी के साथ सहायता डेस्क से संपर्क करें।",
+  },
+}
+
 export function TransactionStatusPage() {
   const location = useLocation()
   const [hasCheckedBank, setHasCheckedBank] = useState(false)
   const { payments } = usePayments()
+  const { t } = useTranslation()
+  const { language } = usePortalLanguage()
   const routeState = location.state as { transaction?: PaymentTransaction; transactionId?: string } | null
   const transaction = routeState?.transactionId
     ? payments.find((payment) => payment.transactionId === routeState.transactionId)
@@ -195,7 +227,9 @@ export function TransactionStatusPage() {
     return <Navigate replace to="/payment-reconciliation" />
   }
 
-  const view = outcomeViews[hasCheckedBank ? transaction.outcome : "located"]
+  const outcome = hasCheckedBank ? transaction.outcome : "located"
+  const baseView = outcomeViews[outcome]
+  const view = language === "hi" ? { ...baseView, ...hindiOutcomeText[outcome] } : baseView
 
   return (
     <div className="mx-auto w-full max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12">
@@ -207,7 +241,7 @@ export function TransactionStatusPage() {
           </div>
           <Link className={cn(buttonVariants({ size: "lg", variant: "outline" }))} to="/payment-reconciliation">
             <MaterialIcon>search</MaterialIcon>
-            New Lookup
+            {t("payment.newLookup")}
           </Link>
         </div>
 
@@ -219,7 +253,7 @@ export function TransactionStatusPage() {
                   <MaterialIcon className="text-2xl">{view.icon}</MaterialIcon>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">Transaction ID</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">{t("payment.transactionId")}</p>
                   <p className="mt-1 font-headline-md text-xl text-primary">{transaction.transactionId}</p>
                 </div>
               </div>
@@ -227,34 +261,34 @@ export function TransactionStatusPage() {
             </div>
 
             <dl className="grid justify-around gap-x-8 gap-y-5 py-6 sm:grid-cols-[auto_auto]">
-              <Detail label="Date & Time" value={transaction.attemptedOn} />
-              <Detail label="Amount" value={transaction.amount} />
-              <Detail label="Payment Method" value={transaction.method} />
-              <Detail label="Paid By" value={transaction.applicantName} />
-              <div className="sm:col-span-2"><Detail label="Public Authority" value={transaction.authority} /></div>
-              <Detail label="Paid For" value={transaction.purpose} />
-              {hasCheckedBank && transaction.registrationNumber ? <Detail label="Registration Number" value={transaction.registrationNumber} /> : null}
-              {hasCheckedBank && transaction.refundReference ? <Detail label="Refund Reference" value={transaction.refundReference} /> : null}
+              <Detail label={t("payment.dateTime")} value={transaction.attemptedOn} />
+              <Detail label={t("payment.amount")} value={transaction.amount} />
+              <Detail label={t("payment.paymentMethod")} value={transaction.method} />
+              <Detail label={t("payment.paidBy")} value={transaction.applicantName} />
+              <div className="sm:col-span-2"><Detail label={t("payment.publicAuthority")} value={transaction.authority} /></div>
+              <Detail label={t("payment.paidFor")} value={transaction.purpose} />
+              {hasCheckedBank && transaction.registrationNumber ? <Detail label={t("status.registrationNumber")} value={transaction.registrationNumber} /> : null}
+              {hasCheckedBank && transaction.refundReference ? <Detail label={t("payment.refundReference")} value={transaction.refundReference} /> : null}
             </dl>
 
             <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
-              <p className="text-sm font-semibold text-primary">What does this mean?</p>
+              <p className="text-sm font-semibold text-primary">{t("payment.meaning")}</p>
               <p className="mt-1 text-sm leading-6 text-on-surface-variant">{view.explanation}</p>
             </div>
 
             <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <Link className={cn(buttonVariants({ size: "lg", variant: "outline" }))} to="/">Return Home</Link>
+              <Link className={cn(buttonVariants({ size: "lg", variant: "outline" }))} to="/">{t("payment.returnHome")}</Link>
               <Button disabled={hasCheckedBank} onClick={() => setHasCheckedBank(true)} size="lg" type="button">
                 <MaterialIcon>sync</MaterialIcon>
-                {hasCheckedBank ? "Status Updated" : "Check Latest Status"}
+                {hasCheckedBank ? t("payment.statusUpdated") : t("payment.checkLatest")}
               </Button>
             </div>
           </CardContent>
         </Card>
 
         <p className="mt-6 text-center text-sm text-on-surface-variant">
-          Payment continuously failing or status not updating?{" "}
-          <Link className="font-semibold text-primary hover:underline" to="/contact-us">Contact the helpdesk</Link>
+          {t("payment.contactHelpdesk")}{" "}
+          <Link className="font-semibold text-primary hover:underline" to="/contact-us">{t("payment.contactLink")}</Link>
         </p>
       </div>
     </div>

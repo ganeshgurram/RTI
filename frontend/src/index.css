@@ -4,6 +4,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/noto-sans-devanagari";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -210,6 +211,22 @@
     --surface-container-low: var(--muted);
     --on-secondary-container: var(--secondary-foreground);
     --tertiary-fixed: var(--muted);
+}
+
+:root[data-language="hi"] {
+    --font-sans: "Noto Sans Devanagari Variable", sans-serif;
+    --font-label: "Noto Sans Devanagari Variable", sans-serif;
+    --font-body: "Noto Sans Devanagari Variable", sans-serif;
+    --font-headline: "Noto Sans Devanagari Variable", sans-serif;
+    --font-display: "Noto Sans Devanagari Variable", sans-serif;
+    --font-label-sm: "Noto Sans Devanagari Variable", sans-serif;
+    --font-label-lg: "Noto Sans Devanagari Variable", sans-serif;
+    --font-body-md: "Noto Sans Devanagari Variable", sans-serif;
+    --font-body-lg: "Noto Sans Devanagari Variable", sans-serif;
+    --font-headline-md: "Noto Sans Devanagari Variable", sans-serif;
+    --font-headline-lg: "Noto Sans Devanagari Variable", sans-serif;
+    --font-headline-lg-mobile: "Noto Sans Devanagari Variable", sans-serif;
+    --font-display-lg: "Noto Sans Devanagari Variable", sans-serif;
 }
 
 .dark {

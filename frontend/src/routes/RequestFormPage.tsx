@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
 import type { PaymentRequestDraft } from "@/data/mock-transactions"
@@ -21,7 +22,7 @@ function FormSection({
   title: string
 }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-surface-variant bg-surface-container-lowest">
+    <section className="rounded-lg border border-surface-variant bg-surface-container-lowest">
       <div className="flex items-center gap-2 border-b border-surface-variant bg-surface-container-low px-6 py-4">
         <MaterialIcon>{icon}</MaterialIcon>
         <h2 className="font-headline-md text-headline-md text-primary">{title}</h2>
@@ -102,6 +103,7 @@ function SearchableDirectorySelect({
   placeholder: string
   value: string
 }) {
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const matchingOptions = useMemo(() => {
@@ -160,8 +162,8 @@ function SearchableDirectorySelect({
               {option.ministryName ? <span className="mt-0.5 text-xs text-on-surface-variant">{option.ministryName}</span> : null}
             </button>
           ))}
-          {!visibleOptions.length ? <p className="px-3 py-6 text-center text-sm text-on-surface-variant">No matching option found.</p> : null}
-          {matchingOptions.length > visibleOptions.length ? <p className="px-3 py-2 text-xs text-on-surface-variant">Showing the first 100 matches. Keep typing to narrow the list.</p> : null}
+          {!visibleOptions.length ? <p className="px-3 py-6 text-center text-sm text-on-surface-variant">{t("requestForm.noMatches")}</p> : null}
+          {matchingOptions.length > visibleOptions.length ? <p className="px-3 py-2 text-xs text-on-surface-variant">{t("requestForm.firstMatches")}</p> : null}
         </div>
       ) : null}
     </div>
@@ -184,6 +186,7 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
   const captchaCode = captchaCodes[captchaIndex]
   const applicantProfile = user?.profile ?? null
   const profileMobile = applicantProfile?.mobile.replace(/\D/g, "")
+  const { t } = useTranslation()
 
   useEffect(() => {
     let isCurrent = true
@@ -225,12 +228,12 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
     const enteredCaptcha = String(formData.get("captcha") ?? "").trim()
 
     if (email.toLowerCase() !== confirmedEmail.toLowerCase()) {
-      setSubmissionError("Email addresses do not match.")
+      setSubmissionError(t("requestForm.errorEmailMismatch"))
       return
     }
 
     if (enteredCaptcha !== captchaCode) {
-      setSubmissionError("The security code does not match. Please try again.")
+      setSubmissionError(t("requestForm.errorSecurity"))
       return
     }
 
@@ -239,7 +242,7 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
     ))
 
     if (!selectedAuthorityOption) {
-      setSubmissionError("Select a Ministry/Department and Public Authority from the directory.")
+      setSubmissionError(t("requestForm.errorAuthority"))
       return
     }
 
@@ -270,130 +273,130 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
   return (
     <form className="mx-auto w-full max-w-container-max space-y-stack-lg px-margin-mobile py-stack-lg md:px-margin-desktop md:py-8" onReset={resetRequest} onSubmit={submitRequest}>
       <header className="mb-stack-md">
-        <h1 className="mb-2 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">Online RTI Request Form</h1>
+        <h1 className="mb-2 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("requestForm.title")}</h1>
         <p className="text-body-md text-on-surface-variant">
-          Please fill in all mandatory fields marked with an asterisk (<span className="text-error">*</span>).
+          {t("requestForm.mandatoryNote", { asterisk: "*" })}
         </p>
-        {applicantProfile ? <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">check_circle</MaterialIcon>Your personal details have been filled from your applicant profile. You can edit them for this request if needed.</p> : null}
-        {authority ? <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">account_balance</MaterialIcon>Filing to {authority.name}, selected from the Public Authorities directory. You can change it below.</p> : null}
+        {applicantProfile ? <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">check_circle</MaterialIcon>{t("requestForm.profileFilled")}</p> : null}
+        {authority ? <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">account_balance</MaterialIcon>{t("requestForm.filingTo", { authority: authority.name })}</p> : null}
       </header>
 
-      <FormSection icon="account_balance" title="Public Authority Details">
+      <FormSection icon="account_balance" title={t("requestForm.authorityDetails")}>
         <div className="grid grid-cols-1 gap-gutter p-6 md:grid-cols-2">
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-ministry">Ministry/Department/Apex body<Required /></label>
-            <SearchableDirectorySelect disabled={!directory} id="request-ministry" name="ministry" onOptionSelect={(option) => { setSelectedMinistry(option.label); setSelectedAuthority("") }} onValueChange={(value) => { setSelectedMinistry(value); setSelectedAuthority("") }} options={ministryOptions} placeholder={directory ? "Search Ministry/Department" : "Loading directory..."} value={selectedMinistry} />
+            <label className={labelClassName} htmlFor="request-ministry">{t("requestForm.ministry")}<Required /></label>
+            <SearchableDirectorySelect disabled={!directory} id="request-ministry" name="ministry" onOptionSelect={(option) => { setSelectedMinistry(option.label); setSelectedAuthority("") }} onValueChange={(value) => { setSelectedMinistry(value); setSelectedAuthority("") }} options={ministryOptions} placeholder={directory ? t("requestForm.searchMinistry") : t("requestForm.loadingDirectory")} value={selectedMinistry} />
           </div>
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-authority">Select Public Authority<Required /></label>
-            <SearchableDirectorySelect disabled={!directory} id="request-authority" name="authority" onOptionSelect={(option) => { setSelectedAuthority(option.label); setSelectedMinistry(option.ministryName ?? "") }} onValueChange={setSelectedAuthority} options={authoritiesForSelectedMinistry} placeholder={directory ? "Search Public Authority" : "Loading directory..."} value={selectedAuthority} />
+            <label className={labelClassName} htmlFor="request-authority">{t("requestForm.selectAuthority")}<Required /></label>
+            <SearchableDirectorySelect disabled={!directory} id="request-authority" name="authority" onOptionSelect={(option) => { setSelectedAuthority(option.label); setSelectedMinistry(option.ministryName ?? "") }} onValueChange={setSelectedAuthority} options={authoritiesForSelectedMinistry} placeholder={directory ? t("requestForm.searchAuthority") : t("requestForm.loadingDirectory")} value={selectedAuthority} />
           </div>
-          {hasDirectoryError ? <p className="text-sm font-medium text-error md:col-span-2" role="alert">The Public Authorities directory could not be loaded. Please refresh the page and try again.</p> : null}
+          {hasDirectoryError ? <p className="text-sm font-medium text-error md:col-span-2" role="alert">{t("requestForm.directoryError")}</p> : null}
         </div>
       </FormSection>
 
-      <FormSection icon="person" title="Personal Details of RTI Applicant">
+      <FormSection icon="person" title={t("requestForm.personalDetails")}>
         <div className="grid grid-cols-1 gap-gutter p-6 md:grid-cols-2">
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-email">Email-ID<Required /></label>
-            <input className={inputClassName} defaultValue={user?.email} id="request-email" name="email" placeholder="Enter Email-ID" required type="email" />
+            <label className={labelClassName} htmlFor="request-email">{t("requestForm.email")}<Required /></label>
+            <input className={inputClassName} defaultValue={user?.email} id="request-email" name="email" placeholder={t("requestForm.enterEmail")} required type="email" />
           </div>
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-mobile">Mobile Number<Required /></label>
+            <label className={labelClassName} htmlFor="request-mobile">{t("requestForm.mobile")}<Required /></label>
             <div className="flex gap-2">
               <span className="inline-flex h-10 items-center rounded border border-outline-variant bg-surface-container-low px-3 text-body-md text-on-surface-variant">+91</span>
-              <input className={`${inputClassName} flex-1`} defaultValue={profileMobile} id="request-mobile" maxLength={10} name="mobile" pattern="[0-9]{10}" placeholder="Enter 10 digit mobile number" required type="tel" />
+              <input className={`${inputClassName} flex-1`} defaultValue={profileMobile} id="request-mobile" maxLength={10} name="mobile" pattern="[0-9]{10}" placeholder={t("requestForm.enterMobile")} required type="tel" />
             </div>
           </div>
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-confirm-email">Confirm Email-ID<Required /></label>
-            <input className={inputClassName} defaultValue={user?.email} id="request-confirm-email" name="confirmEmail" placeholder="Re-enter Email-ID" required type="email" />
+            <label className={labelClassName} htmlFor="request-confirm-email">{t("requestForm.confirmEmail")}<Required /></label>
+            <input className={inputClassName} defaultValue={user?.email} id="request-confirm-email" name="confirmEmail" placeholder={t("requestForm.reenterEmail")} required type="email" />
           </div>
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-name">Name<Required /></label>
-            <input className={inputClassName} defaultValue={user?.fullName} id="request-name" name="fullName" placeholder="Enter Full Name" required type="text" />
+            <label className={labelClassName} htmlFor="request-name">{t("requestForm.name")}<Required /></label>
+            <input className={inputClassName} defaultValue={user?.fullName} id="request-name" name="fullName" placeholder={t("requestForm.enterName")} required type="text" />
           </div>
           <fieldset className="space-y-1">
-            <legend className={labelClassName}>Gender<Required /></legend>
+            <legend className={labelClassName}>{t("requestForm.gender")}<Required /></legend>
             <div className="flex h-10 flex-wrap items-center gap-x-4 gap-y-1">
               {['Male', 'Female', 'Third Gender'].map((gender) => (
                 <label className="inline-flex items-center text-body-md" key={gender}>
                   <input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.gender === gender} name="request-gender" required type="radio" value={gender} />
-                  <span className="ml-2">{gender}</span>
+                  <span className="ml-2">{t(`requestForm.${gender === "Male" ? "male" : gender === "Female" ? "female" : "thirdGender"}`)}</span>
                 </label>
               ))}
             </div>
           </fieldset>
           <div className="space-y-1 md:col-span-2">
-            <label className={labelClassName} htmlFor="request-address-line-1">Address<Required /></label>
+            <label className={labelClassName} htmlFor="request-address-line-1">{t("requestForm.address")}<Required /></label>
             <div className="space-y-2">
-              <input className={inputClassName} defaultValue={applicantProfile?.address.line1} id="request-address-line-1" name="addressLine1" placeholder="Line 1" required type="text" />
-              <input className={inputClassName} defaultValue={applicantProfile?.address.line2} placeholder="Line 2" type="text" />
-              <input className={inputClassName} defaultValue={applicantProfile ? `${applicantProfile.address.city}, ${applicantProfile.address.district}` : undefined} placeholder="Line 3" type="text" />
+              <input className={inputClassName} defaultValue={applicantProfile?.address.line1} id="request-address-line-1" name="addressLine1" placeholder={t("requestForm.line", { number: 1 })} required type="text" />
+              <input className={inputClassName} defaultValue={applicantProfile?.address.line2} placeholder={t("requestForm.line", { number: 2 })} type="text" />
+              <input className={inputClassName} defaultValue={applicantProfile ? `${applicantProfile.address.city}, ${applicantProfile.address.district}` : undefined} placeholder={t("requestForm.line", { number: 3 })} type="text" />
             </div>
           </div>
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-pincode">Pin code<Required /></label>
-            <input className={inputClassName} defaultValue={applicantProfile?.address.pincode} id="request-pincode" inputMode="numeric" maxLength={6} name="pincode" pattern="[0-9]{6}" placeholder="Enter 6 digit PIN code" required type="text" />
+            <label className={labelClassName} htmlFor="request-pincode">{t("requestForm.pinCode")}<Required /></label>
+            <input className={inputClassName} defaultValue={applicantProfile?.address.pincode} id="request-pincode" inputMode="numeric" maxLength={6} name="pincode" pattern="[0-9]{6}" placeholder={t("requestForm.enterPin")} required type="text" />
           </div>
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-country">Country<Required /></label>
-            <select className={selectClassName} defaultValue={applicantProfile?.country ?? "India"} id="request-country" name="country" required><option>India</option><option>Other</option></select>
+            <label className={labelClassName} htmlFor="request-country">{t("requestForm.country")}<Required /></label>
+            <select className={selectClassName} defaultValue={applicantProfile?.country ?? "India"} id="request-country" name="country" required><option value="India">{t("requestForm.india")}</option><option value="Other">{t("requestForm.other")}</option></select>
           </div>
           <div className="space-y-1">
-            <label className={labelClassName} htmlFor="request-state">State<Required /></label>
-            <select className={selectClassName} defaultValue={applicantProfile?.address.state ?? ""} id="request-state" name="state" required><option disabled value="">Select State</option><option>Delhi</option><option>Kerala</option><option>Maharashtra</option><option>Tamil Nadu</option></select>
+            <label className={labelClassName} htmlFor="request-state">{t("requestForm.state")}<Required /></label>
+            <select className={selectClassName} defaultValue={applicantProfile?.address.state ?? ""} id="request-state" name="state" required><option disabled value="">{t("requestForm.selectState")}</option><option>Delhi</option><option>Kerala</option><option>Maharashtra</option><option>Tamil Nadu</option></select>
           </div>
           <fieldset className="space-y-1">
-            <legend className={labelClassName}>Status</legend>
+            <legend className={labelClassName}>{t("requestForm.areaType")}</legend>
             <div className="flex h-10 items-center gap-4">
-              {['Rural', 'Urban'].map((status) => <label className="inline-flex items-center text-body-md" key={status}><input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.areaType === status} name="request-area" type="radio" value={status} /><span className="ml-2">{status}</span></label>)}
+              {['Rural', 'Urban'].map((status) => <label className="inline-flex items-center text-body-md" key={status}><input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.areaType === status} name="request-area" type="radio" value={status} /><span className="ml-2">{t(`requestForm.${status === "Rural" ? "rural" : "urban"}`)}</span></label>)}
             </div>
           </fieldset>
           <fieldset className="space-y-1">
-            <legend className={labelClassName}>Educational Status</legend>
+            <legend className={labelClassName}>{t("requestForm.educationalStatus")}</legend>
             <div className="flex h-10 items-center gap-4">
-              {['Literate', 'Illiterate'].map((status) => <label className="inline-flex items-center text-body-md" key={status}><input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.educationalStatus === status} name="request-education" type="radio" value={status} /><span className="ml-2">{status}</span></label>)}
+              {['Literate', 'Illiterate'].map((status) => <label className="inline-flex items-center text-body-md" key={status}><input className="size-4 border-outline-variant text-primary focus:ring-primary" defaultChecked={applicantProfile?.educationalStatus === status} name="request-education" type="radio" value={status} /><span className="ml-2">{t(`requestForm.${status === "Literate" ? "literate" : "illiterate"}`)}</span></label>)}
             </div>
           </fieldset>
         </div>
       </FormSection>
 
-      <FormSection icon="description" title="Request Details">
+      <FormSection icon="description" title={t("requestForm.requestDetails")}>
         <div className="space-y-6 p-6">
           <div className="grid grid-cols-1 gap-gutter md:grid-cols-2">
             <div className="space-y-1">
-              <label className={labelClassName} htmlFor="request-citizenship">Citizenship<Required /></label>
-              <select className={selectClassName} defaultValue={applicantProfile?.citizenship ?? "Indian"} id="request-citizenship" name="citizenship" required><option>Indian</option><option>Other</option></select>
+              <label className={labelClassName} htmlFor="request-citizenship">{t("requestForm.citizenship")}<Required /></label>
+              <select className={selectClassName} defaultValue={applicantProfile?.citizenship ?? "Indian"} id="request-citizenship" name="citizenship" required><option value="Indian">{t("requestForm.indian")}</option><option value="Other">{t("requestForm.other")}</option></select>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-gutter border-t border-surface-variant pt-6 md:grid-cols-2">
             <div className="space-y-1">
-              <label className={labelClassName} htmlFor="request-bpl">Is the Applicant Below Poverty Line ?<Required /></label>
+              <label className={labelClassName} htmlFor="request-bpl">{t("requestForm.bplQuestion")}<Required /></label>
               <select className={selectClassName} id="request-bpl" name="bpl" onChange={(event) => setIsBplApplicant(event.target.value === "Yes")} value={isBplApplicant ? "Yes" : "No"}>
-                <option>No</option>
-                <option>Yes</option>
+                <option value="No">{t("requestForm.no")}</option>
+                <option value="Yes">{t("requestForm.yes")}</option>
               </select>
             </div>
             <div className={`${isBplApplicant ? "grid" : "hidden"} gap-gutter rounded-lg border border-surface-variant bg-surface-container-low p-4 md:col-span-2 md:grid-cols-2`}>
-              <p className="text-label-sm text-error italic md:col-span-2">(Proof of BPL may be provided as an attachment)</p>
-              <div className="space-y-1"><label className={labelClassName} htmlFor="request-bpl-card">BPL Card No.<Required /></label><input className={inputClassName} disabled={!isBplApplicant} id="request-bpl-card" required={isBplApplicant} type="text" /></div>
-              <div className="space-y-1"><label className={labelClassName} htmlFor="request-bpl-year">Year of Issue<Required /></label><input className={inputClassName} disabled={!isBplApplicant} id="request-bpl-year" inputMode="numeric" required={isBplApplicant} type="text" /></div>
-              <div className="space-y-1"><label className={labelClassName} htmlFor="request-bpl-authority">Issuing Authority<Required /></label><input className={inputClassName} disabled={!isBplApplicant} id="request-bpl-authority" required={isBplApplicant} type="text" /></div>
+              <p className="text-label-sm text-error italic md:col-span-2">{t("requestForm.bplProof")}</p>
+              <div className="space-y-1"><label className={labelClassName} htmlFor="request-bpl-card">{t("requestForm.bplCard")}<Required /></label><input className={inputClassName} disabled={!isBplApplicant} id="request-bpl-card" required={isBplApplicant} type="text" /></div>
+              <div className="space-y-1"><label className={labelClassName} htmlFor="request-bpl-year">{t("requestForm.issueYear")}<Required /></label><input className={inputClassName} disabled={!isBplApplicant} id="request-bpl-year" inputMode="numeric" required={isBplApplicant} type="text" /></div>
+              <div className="space-y-1"><label className={labelClassName} htmlFor="request-bpl-authority">{t("requestForm.issuingAuthority")}<Required /></label><input className={inputClassName} disabled={!isBplApplicant} id="request-bpl-authority" required={isBplApplicant} type="text" /></div>
             </div>
-            {isBplApplicant ? <div className="rounded-lg border border-secondary/35 bg-secondary/10 p-4 md:col-span-2"><p className="flex items-center gap-2 text-body-md font-semibold text-on-surface"><MaterialIcon className="text-secondary">verified</MaterialIcon>No RTI fee is required for BPL applicants.</p></div> : null}
+            {isBplApplicant ? <div className="rounded-lg border border-secondary/35 bg-secondary/10 p-4 md:col-span-2"><p className="flex items-center gap-2 text-body-md font-semibold text-on-surface"><MaterialIcon className="text-secondary">verified</MaterialIcon>{t("requestForm.noFeeBpl")}</p></div> : null}
             <div className={`${isBplApplicant ? "hidden" : ""} rounded-lg border border-error-container bg-error-container/20 p-4 md:col-span-2`}>
-              <p className="flex items-center gap-2 text-body-md font-semibold text-error"><MaterialIcon>info</MaterialIcon>You are required to pay the RTI fee of ₹ 10</p>
+              <p className="flex items-center gap-2 text-body-md font-semibold text-error"><MaterialIcon>info</MaterialIcon>{t("requestForm.feeRequired")}</p>
             </div>
           </div>
           <div className="space-y-4 border-t border-surface-variant pt-6">
-            <label className={labelClassName} htmlFor="request-text">Text for RTI Request application<Required /></label>
-            <p className="rounded border border-primary-fixed-dim bg-primary-fixed/30 p-2 text-label-sm text-surface-tint">Note:- Only alphabets A-Z a-z number 0-9 and special characters , . - _ ( ) / @ : &amp; ? \ % are allowed in Text for RTI Request application.</p>
-            <textarea className="min-h-48 w-full rounded border border-outline-variant bg-surface-container-lowest p-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="request-text" maxLength={3000} name="requestText" placeholder="Enter Text for RTI Request application upto 3000 characters" required rows={8} />
+            <label className={labelClassName} htmlFor="request-text">{t("requestForm.requestText")}<Required /></label>
+            <p className="rounded border border-primary-fixed-dim bg-primary-fixed/30 p-2 text-label-sm text-surface-tint">{t("requestForm.requestTextNote")}</p>
+            <textarea className="min-h-48 w-full rounded border border-outline-variant bg-surface-container-lowest p-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="request-text" maxLength={3000} name="requestText" placeholder={t("requestForm.requestTextPlaceholder")} required rows={8} />
           </div>
           <div className={`${isBplApplicant ? "block" : "hidden"} space-y-2 border-t border-surface-variant pt-6`}>
-            <label className={labelClassName} htmlFor="request-document">Supporting document <span className="font-normal text-label-sm text-on-surface-variant">(only pdf upto 1 MB)</span><Required /></label>
-            <p className="text-label-sm text-error italic">(Upload the proof of BPL status if applicable)</p>
+            <label className={labelClassName} htmlFor="request-document">{t("requestForm.supportingDocument")} <span className="font-normal text-label-sm text-on-surface-variant">({t("requestForm.pdfLimit")})</span><Required /></label>
+            <p className="text-label-sm text-error italic">{t("requestForm.bplUpload")}</p>
             <input accept=".pdf" className="block w-full cursor-pointer rounded border border-outline-variant bg-surface-container-lowest text-body-md text-on-surface-variant file:mr-4 file:border-0 file:bg-surface-container file:px-4 file:py-2 file:font-label-lg file:text-primary hover:file:bg-surface-container-high" disabled={!isBplApplicant} id="request-document" required={isBplApplicant} type="file" />
           </div>
         </div>
@@ -401,11 +404,11 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
 
       <section className="space-y-6 rounded-lg border border-surface-variant bg-surface-container-lowest p-6">
         <div className="max-w-md space-y-2">
-          <label className={labelClassName} htmlFor="request-captcha">Enter security code<Required /></label>
+          <label className={labelClassName} htmlFor="request-captcha">{t("requestForm.securityCode")}<Required /></label>
           <div className="flex items-center gap-3">
-            <input className={`${inputClassName} h-12 flex-1`} id="request-captcha" name="captcha" placeholder="Enter code" required type="text" />
+            <input className={`${inputClassName} h-12 flex-1`} id="request-captcha" name="captcha" placeholder={t("requestForm.enterCode")} required type="text" />
             <div className="flex shrink-0 items-center">
-              <button aria-label="Refresh security code" className="flex size-12 cursor-pointer items-center justify-center rounded-l border border-r-0 border-primary bg-primary text-on-primary transition-colors hover:bg-primary/85 active:translate-y-px" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title="Refresh security code" type="button">
+              <button aria-label={t("requestForm.refreshSecurity")} className="flex size-12 cursor-pointer items-center justify-center rounded-l border border-r-0 border-primary bg-primary text-on-primary transition-colors hover:bg-primary/85 active:translate-y-px" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title={t("requestForm.refreshSecurity")} type="button">
                 <MaterialIcon className="text-lg!">refresh</MaterialIcon>
               </button>
               <div className="flex h-12 items-center rounded-r border border-outline-variant bg-surface-variant px-4 font-mono text-headline-md font-bold tracking-[0.2em] text-on-surface sm:px-6">{captchaCode}</div>
@@ -414,11 +417,11 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
         </div>
         {paymentMessage ? <p className="rounded-md border border-primary-fixed-dim bg-primary-fixed/30 p-3 text-sm font-medium text-primary" role="status">{paymentMessage}</p> : null}
         {submissionError ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{submissionError}</p> : null}
-        {!isBplApplicant ? <Link className="flex w-full items-center gap-2 text-sm font-semibold text-surface-tint hover:underline" to="/payment-reconciliation"><MaterialIcon className="text-lg">receipt_long</MaterialIcon>Payment unsuccessful or status not updated? Reconcile your payment.</Link> : null}
+        {!isBplApplicant ? <Link className="flex w-full items-center gap-2 text-sm font-semibold text-surface-tint hover:underline" to="/payment-reconciliation"><MaterialIcon className="text-lg">receipt_long</MaterialIcon>{t("requestForm.paymentHelp")}</Link> : null}
         <div className="flex flex-wrap gap-4 border-t border-surface-variant pt-6">
-          <button className={`${isBplApplicant ? "" : "hidden"} rounded bg-primary px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit">Submit</button>
-          <button className={`${isBplApplicant ? "hidden" : "flex"} items-center gap-2 rounded bg-surface-tint px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit"><MaterialIcon className="text-[18px]">payments</MaterialIcon>Make Payment</button>
-          <button className="rounded border border-outline-variant bg-surface-container px-8 py-3 font-label-lg text-on-surface transition-colors hover:bg-surface-container-high" type="reset">Reset</button>
+          <button className={`${isBplApplicant ? "" : "hidden"} rounded bg-primary px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit">{t("requestForm.submit")}</button>
+          <button className={`${isBplApplicant ? "hidden" : "flex"} items-center gap-2 rounded bg-surface-tint px-8 py-3 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container`} type="submit"><MaterialIcon className="text-[18px]">payments</MaterialIcon>{t("requestForm.makePayment")}</button>
+          <button className="rounded border border-outline-variant bg-surface-container px-8 py-3 font-label-lg text-on-surface transition-colors hover:bg-surface-container-high" type="reset">{t("requestForm.reset")}</button>
         </div>
       </section>
     </form>

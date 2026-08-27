@@ -1,5 +1,6 @@
 import { type FormEvent, type ReactNode, useState } from "react"
 import { Navigate, useLocation, useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
 import { useRequests } from "@/requests/RequestContext"
@@ -56,6 +57,7 @@ export function FirstAppealFormPage() {
   // signed-in profile and are left blank when there is none.
   const appellantProfile = user?.profile ?? null
   const appellantMobile = request.applicantPhone.replace(/\D/g, "").slice(-10)
+  const { t } = useTranslation()
 
   const submitAppeal = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -86,61 +88,61 @@ export function FirstAppealFormPage() {
   return (
     <main className="mx-auto w-full max-w-container-max px-margin-mobile py-8 md:px-margin-desktop">
       <header className="mb-8">
-        <h1 className="mb-2 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">Online RTI First Appeal Form</h1>
-        <p className="flex items-center gap-1 text-body-md text-on-surface-variant"><MaterialIcon className="text-sm text-error">info</MaterialIcon>Note: Fields marked with * are Mandatory.</p>
-        <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">gavel</MaterialIcon>Appealing against {request.id} — {request.subject}.</p>
+        <h1 className="mb-2 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("firstAppeal.title")}</h1>
+        <p className="flex items-center gap-1 text-body-md text-on-surface-variant"><MaterialIcon className="text-sm text-error">info</MaterialIcon>{t("firstAppeal.mandatoryNote")}</p>
+        <p className="mt-2 flex items-center gap-2 text-sm text-state-success"><MaterialIcon className="text-lg">gavel</MaterialIcon>{t("firstAppeal.appealingAgainst", { id: request.id, subject: request.subject })}</p>
       </header>
 
       <form className="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm" onSubmit={submitAppeal}>
-        <AppealSection title="Public Authority Details">
-          <AppealRow label="Select Ministry/Department/Apex body" required>
+        <AppealSection title={t("firstAppeal.publicAuthorityDetails")}>
+          <AppealRow label={t("requestForm.ministry")} required>
             <div className="flex items-center gap-2"><select className={fieldClassName} defaultValue={request.authority} disabled><option>{request.authority}</option></select><HelpIcon title="The authority the original request was filed with" /></div>
           </AppealRow>
         </AppealSection>
 
-        <AppealSection title="Personal Details of Appellant">
-          <AppealRow label="Request Registration Number" required>
+        <AppealSection title={t("firstAppeal.appellantDetails")}>
+          <AppealRow label={t("firstAppeal.registrationNumber")} required>
             <div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-2/3`} defaultValue={request.id} readOnly type="text" /><HelpIcon title="Registration Number of the original request" /></div>
           </AppealRow>
-          <AppealRow label="Request Registration Date" required>
+          <AppealRow label={t("firstAppeal.requestDate")} required>
             <div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-1/3`} defaultValue={request.submittedOn} readOnly type="text" /><HelpIcon title="Date when original request was filed" /></div>
           </AppealRow>
-          <AppealRow label="Name"><input className={`${fieldClassName} md:w-2/3`} defaultValue={request.applicantName} readOnly type="text" /></AppealRow>
-          <AppealRow label="Gender">
+          <AppealRow label={t("requestForm.name")}><input className={`${fieldClassName} md:w-2/3`} defaultValue={request.applicantName} readOnly type="text" /></AppealRow>
+          <AppealRow label={t("requestForm.gender")}>
             <div className="flex flex-wrap gap-4">
-              {['Male', 'Female', 'Third gender'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.gender ?? "Male") === option} name="appeal-gender" type="radio" value={option} />{option}</label>)}
+              {['Male', 'Female', 'Third gender'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.gender ?? "Male") === option} name="appeal-gender" type="radio" value={option} />{t(`requestForm.${option === "Male" ? "male" : option === "Female" ? "female" : "thirdGender"}`)}</label>)}
             </div>
           </AppealRow>
-          <AppealRow label="Address" required>
+          <AppealRow label={t("requestForm.address")} required>
             <div className="space-y-2"><div className="flex items-center gap-2"><input className={fieldClassName} defaultValue={appellantProfile?.address.line1 ?? ""} type="text" /><HelpIcon title="Address line 1" /></div><input className={fieldClassName} defaultValue={appellantProfile?.address.line2 ?? ""} type="text" /><input className={fieldClassName} defaultValue={appellantProfile ? `${appellantProfile.address.city}, ${appellantProfile.address.district}` : ""} type="text" /></div>
           </AppealRow>
-          <AppealRow label="Pincode"><div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.pincode ?? ""} inputMode="numeric" type="text" /><HelpIcon title="Postal code" /></div></AppealRow>
-          <AppealRow label="Country"><div className="flex gap-4">{['India', 'Other'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.country ?? "India") === option} name="appeal-country" type="radio" value={option} />{option}</label>)}</div></AppealRow>
-          <AppealRow label="State"><select className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.state ?? ""}><option disabled value="">Select State</option>{stateOptions.map((option) => <option key={option}>{option}</option>)}</select></AppealRow>
-          <AppealRow label="Status"><div className="flex gap-4">{['Rural', 'Urban'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.areaType ?? "Urban") === option} name="appeal-area" type="radio" value={option} />{option}</label>)}</div></AppealRow>
-          <AppealRow label="Educational Status"><div className="flex gap-4">{['Literate', 'Illiterate'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.educationalStatus ?? "Literate") === option} name="appeal-education" type="radio" value={option} />{option}</label>)}</div></AppealRow>
-          <AppealRow hint="(For receiving SMS alerts)" label="Mobile Number"><div className="flex items-center gap-2"><div className="flex w-full md:w-2/3"><input className="w-16 rounded-l border border-r-0 border-outline-variant bg-surface-container-lowest px-3 py-2 text-center text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue="+91" type="text" /><input className="flex-grow rounded-r border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue={appellantMobile} name="mobile" type="tel" /></div><HelpIcon title="Mobile number" /></div></AppealRow>
-          <AppealRow label="Email-Id" required><div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-2/3`} defaultValue={request.applicantEmail} name="email" type="email" /><HelpIcon title="Email address" /></div></AppealRow>
+          <AppealRow label={t("requestForm.pinCode")}><div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.pincode ?? ""} inputMode="numeric" type="text" /><HelpIcon title={t("requestForm.pinCode")} /></div></AppealRow>
+          <AppealRow label={t("requestForm.country")}><div className="flex gap-4">{['India', 'Other'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.country ?? "India") === option} name="appeal-country" type="radio" value={option} />{t(`requestForm.${option === "India" ? "india" : "other"}`)}</label>)}</div></AppealRow>
+          <AppealRow label={t("requestForm.state")}><select className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.state ?? ""}><option disabled value="">{t("requestForm.selectState")}</option>{stateOptions.map((option) => <option key={option}>{option}</option>)}</select></AppealRow>
+          <AppealRow label={t("requestForm.areaType")}><div className="flex gap-4">{['Rural', 'Urban'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.areaType ?? "Urban") === option} name="appeal-area" type="radio" value={option} />{t(`requestForm.${option === "Rural" ? "rural" : "urban"}`)}</label>)}</div></AppealRow>
+          <AppealRow label={t("requestForm.educationalStatus")}><div className="flex gap-4">{['Literate', 'Illiterate'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.educationalStatus ?? "Literate") === option} name="appeal-education" type="radio" value={option} />{t(`requestForm.${option === "Literate" ? "literate" : "illiterate"}`)}</label>)}</div></AppealRow>
+          <AppealRow hint={t("firstAppeal.smsHint")} label={t("requestForm.mobile")}><div className="flex items-center gap-2"><div className="flex w-full md:w-2/3"><input className="w-16 rounded-l border border-r-0 border-outline-variant bg-surface-container-lowest px-3 py-2 text-center text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue="+91" type="text" /><input className="flex-grow rounded-r border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue={appellantMobile} name="mobile" type="tel" /></div><HelpIcon title={t("requestForm.mobile")} /></div></AppealRow>
+          <AppealRow label={t("requestForm.email")} required><div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-2/3`} defaultValue={request.applicantEmail} name="email" type="email" /><HelpIcon title={t("status.emailAddress")} /></div></AppealRow>
         </AppealSection>
 
-        <AppealSection title="Appeal Details">
-          <AppealRow hint="(Only Indian citizens can file RTI Request application)" label="Citizenship"><select className={`${fieldClassName} md:w-1/3`} defaultValue="Indian" disabled><option>Indian</option></select></AppealRow>
-          <AppealRow label="Is the Applicant Below Poverty Line ?" required><select className={`${fieldClassName} md:w-1/3`} defaultValue="No"><option>Yes</option><option>No</option></select></AppealRow>
-          <AppealRow label="Ground For Appeal" required><select className={`${fieldClassName} md:w-2/3`} defaultValue="" required><option disabled value="">-- Select --</option><option>Refused access to information requested</option><option>No response within the time limit</option><option>Unreasonable amount of fee required to pay</option><option>Provided incomplete, misleading or false information</option><option>Any other ground</option></select></AppealRow>
+        <AppealSection title={t("firstAppeal.appealDetails")}>
+          <AppealRow label={t("requestForm.citizenship")}><select className={`${fieldClassName} md:w-1/3`} defaultValue="Indian" disabled><option>{t("requestForm.indian")}</option></select></AppealRow>
+          <AppealRow label={t("requestForm.bplQuestion")} required><select className={`${fieldClassName} md:w-1/3`} defaultValue="No"><option>{t("requestForm.yes")}</option><option>{t("requestForm.no")}</option></select></AppealRow>
+          <AppealRow label={t("firstAppeal.ground")} required><select className={`${fieldClassName} md:w-2/3`} defaultValue="" required><option disabled value="">{t("firstAppeal.select")}</option><option>{t("firstAppeal.refused")}</option><option>{t("firstAppeal.noResponse")}</option><option>{t("firstAppeal.unreasonableFee")}</option><option>{t("firstAppeal.incompleteInfo")}</option><option>{t("firstAppeal.otherGround")}</option></select></AppealRow>
           <div className="rounded border border-outline-variant bg-surface p-4">
-            <p className="mb-2 text-label-sm text-on-surface-variant">(Enter Text for RTI first appeal application upto 500 characters)</p>
-            <p className="mb-4 flex items-center gap-1 text-label-sm font-medium italic text-surface-tint"><span className="font-bold not-italic text-error">Note:-</span>Only alphabets A-Z a-z number 0-9 and special characters , . - _ ( ) / @ : &amp; \ ? % are allowed in Text for RTI first appeal application.</p>
-            <AppealRow label="Text for RTI first appeal application" required><textarea className={`${fieldClassName} min-h-36 resize-y`} maxLength={500} rows={6} /></AppealRow>
+            <p className="mb-2 text-label-sm text-on-surface-variant">{t("firstAppeal.appealTextHint")}</p>
+            <p className="mb-4 flex items-center gap-1 text-label-sm font-medium italic text-surface-tint">{t("firstAppeal.appealTextNote")}</p>
+            <AppealRow label={t("firstAppeal.appealText")} required><textarea className={`${fieldClassName} min-h-36 resize-y`} maxLength={500} rows={6} /></AppealRow>
           </div>
-          <AppealRow hint="(only pdf upto 1 MB)" label="Supporting document"><input accept=".pdf" className="block w-full cursor-pointer text-sm text-on-surface-variant file:mr-4 file:rounded file:border file:border-outline-variant file:bg-surface-container file:px-4 file:py-2 file:font-label-lg file:text-on-surface hover:file:bg-surface-container-high md:w-2/3" type="file" /></AppealRow>
-          <AppealRow label="Enter security code" required>
-            <div className="flex items-center gap-4"><div className="flex flex-col items-center"><div className="rounded border border-outline-variant bg-surface-variant px-6 py-2 font-mono text-headline-md tracking-[0.2em] text-on-surface">{captchaCodes[captchaIndex]}</div><button className="mt-1 text-label-sm text-surface-tint hover:underline" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} type="button">Refresh</button></div><input className={`${fieldClassName} w-32 text-center`} type="text" /></div>
+          <AppealRow hint={t("requestForm.pdfLimit")} label={t("requestForm.supportingDocument")}><input accept=".pdf" className="block w-full cursor-pointer text-sm text-on-surface-variant file:mr-4 file:rounded file:border file:border-outline-variant file:bg-surface-container file:px-4 file:py-2 file:font-label-lg file:text-on-surface hover:file:bg-surface-container-high md:w-2/3" type="file" /></AppealRow>
+          <AppealRow label={t("firstAppeal.securityCode")} required>
+            <div className="flex items-center gap-4"><div className="flex flex-col items-center"><div className="rounded border border-outline-variant bg-surface-variant px-6 py-2 font-mono text-headline-md tracking-[0.2em] text-on-surface">{captchaCodes[captchaIndex]}</div><button className="mt-1 text-label-sm text-surface-tint hover:underline" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} type="button">{t("firstAppeal.refresh")}</button></div><input className={`${fieldClassName} w-32 text-center`} type="text" /></div>
           </AppealRow>
         </AppealSection>
 
         <div className="flex justify-center gap-4 border-t border-outline-variant bg-surface-container-low px-6 py-4">
-          <button className="rounded bg-surface-tint px-8 py-2 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary" type="submit">Submit</button>
-          <button className="rounded bg-surface-tint px-8 py-2 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary" type="reset">Reset</button>
+          <button className="rounded bg-surface-tint px-8 py-2 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary" type="submit">{t("firstAppeal.submit")}</button>
+          <button className="rounded bg-surface-tint px-8 py-2 font-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary" type="reset">{t("firstAppeal.reset")}</button>
         </div>
       </form>
     </main>

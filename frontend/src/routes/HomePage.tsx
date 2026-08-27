@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 import {
   Card,
@@ -14,20 +15,20 @@ import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDial
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const actionCards = [
-  ["description", "Submit Request", "File a new RTI application online to seek information from Ministries/Departments of the Government of India.", "Start Application", "bg-secondary text-secondary-foreground"],
-  ["gavel", "Submit First Appeal", "File a first appeal if you are not satisfied with the reply to your RTI application or have not received a response.", "File Appeal", "bg-secondary text-secondary-foreground"],
-  ["manage_search", "View Status", "Track the current status of your previously submitted RTI application or first appeal using your registration number.", "View Status", "bg-secondary text-secondary-foreground"],
-  ["balance", "Submit Second Appeal", "Submit a second appeal to the Commission if you are not satisfied with the decision of the First Appellate Authority.", "Submit Second Appeal", "bg-secondary text-secondary-foreground"],
+  { icon: "description", key: "request", destination: "/submit-request", iconClass: "bg-secondary text-secondary-foreground" },
+  { icon: "gavel", key: "firstAppeal", destination: "/submit-first-appeal", iconClass: "bg-secondary text-secondary-foreground" },
+  { icon: "manage_search", key: "status", iconClass: "bg-secondary text-secondary-foreground" },
+  { icon: "balance", key: "secondAppeal", destination: "/second-appeal", iconClass: "bg-secondary text-secondary-foreground" },
 ]
 
 const flowchartWidth = 1120
 const flowchartHeight = 970
 
 const steps = [
-  ["person", "1. Citizen Submits Request", "Applicant files RTI request online and pays the prescribed fee through the secure portal.", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
-  ["account_balance", "2. Nodal Officer Receives", "Nodal Officer of the concerned Ministry/Department receives and validates the request.", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
-  ["assignment_ind", "3. Forwarded to CPIO", "The request is assigned to the Central Public Information Officer (CPIO) for processing.", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
-  ["mark_email_read", "4. CPIO Responds", "CPIO provides the requested information to the citizen within the statutory 30-day period.", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
+  ["person", "home.lifecycle.steps.citizenTitle", "home.lifecycle.steps.citizenDescription", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
+  ["account_balance", "home.lifecycle.steps.nodalTitle", "home.lifecycle.steps.nodalDescription", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
+  ["assignment_ind", "home.lifecycle.steps.cpioTitle", "home.lifecycle.steps.cpioDescription", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
+  ["mark_email_read", "home.lifecycle.steps.respondsTitle", "home.lifecycle.steps.respondsDescription", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
 ]
 
 type FlowNodeTone = "action" | "complaint" | "logic" | "notSatisfied" | "satisfied"
@@ -56,11 +57,11 @@ function FlowNode({
   )
 }
 
-function TimeNode({ days, className }: { days: number; className: string }) {
+function TimeNode({ days, daysLabel, className }: { days: number; daysLabel: string; className: string }) {
   return (
     <div className={`absolute flex w-[100px] items-center gap-2 ${className}`}>
       <span className="flex size-10 items-center justify-center rounded-full bg-on-surface text-sm font-bold text-surface-container-lowest shadow-sm">{days}</span>
-      <span className="text-sm font-medium text-on-surface-variant">Days</span>
+      <span className="text-sm font-medium text-on-surface-variant">{daysLabel}</span>
     </div>
   )
 }
@@ -86,6 +87,7 @@ function FlowEdge({ path, arrow = true }: { path: string; arrow?: boolean }) {
 export function HomePage() {
   const { user } = useAuth()
   const { openRequestGuidelines } = useRequestGuidelines()
+  const { t } = useTranslation()
   const flowchartFrameRef = useRef<HTMLDivElement>(null)
   const stepperFrameRef = useRef<HTMLDivElement>(null)
   const [flowchartScale, setFlowchartScale] = useState(1)
@@ -134,32 +136,25 @@ export function HomePage() {
         <section className="relative -mt-25 overflow-hidden bg-primary-container pb-24 pt-41 text-on-primary md:pb-32 md:pt-49">
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(var(--primary-foreground)_1px,transparent_1px)] [background-size:24px_24px]" />
           <div className="relative z-10 mx-auto flex max-w-container-max flex-col items-center px-margin-mobile text-center md:px-margin-desktop">
-            <h1 className="mb-4 max-w-4xl font-display-lg text-headline-lg-mobile font-bold tracking-tight text-shadow md:text-display-lg">Right to Information Online</h1>
+            <h1 className="mb-4 max-w-4xl font-display-lg text-headline-lg-mobile font-bold tracking-tight text-shadow md:text-display-lg">{t("home.title")}</h1>
             <p className="mx-auto mb-10 max-w-2xl font-body-lg text-body-lg text-on-primary-container opacity-90 md:text-xl">
-              An initiative of Department of Personnel & Training, Government of India, empowering citizens to seek information and promote transparency in governance.
+              {t("home.subtitle")}
             </p>
             <div className="mx-auto flex w-full max-w-md flex-col justify-center gap-4 sm:flex-row">
               <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-8 py-3 font-label-lg text-label-lg text-on-secondary shadow-md transition-colors hover:bg-secondary/90 sm:w-auto" onClick={() => openRequestGuidelines()} type="button">
-                Submit a Request <MaterialIcon className="text-sm">arrow_forward</MaterialIcon>
+                {t("home.submitRequest")} <MaterialIcon className="text-sm">arrow_forward</MaterialIcon>
               </button>
               <Link className="w-full rounded-lg border border-surface-container-highest/30 bg-surface-container/10 px-8 py-3 font-label-lg text-label-lg text-on-primary backdrop-blur-sm transition-colors hover:bg-surface-container/20 sm:w-auto" to={viewStatusPath}>
-                View Status
+                {t("nav.viewStatus")}
               </Link>
             </div>
           </div>
         </section>
         <section className="relative z-20 mx-auto -mt-10 mb-20 max-w-container-max px-margin-mobile md:px-margin-desktop">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {actionCards.map(([icon, title, body, cta, iconClass]) => {
-              const destination = title === "Submit Request"
-                ? "/submit-request"
-                : title === "Submit First Appeal"
-                  ? "/submit-first-appeal"
-                : title === "View Status"
-                  ? viewStatusPath
-                  : title === "Submit Second Appeal"
-                    ? "/second-appeal"
-                    : null
+            {actionCards.map(({ icon, key, destination: staticDestination, iconClass }) => {
+              const destination = key === "status" ? viewStatusPath : staticDestination
+              const title = t(`home.actions.${key}.title`)
               const cardContent = (
                 <>
                   <div className="absolute left-0 top-0 h-1 w-full origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
@@ -171,9 +166,9 @@ export function HomePage() {
                     </div>
                     <h3 className="font-headline-md text-headline-md text-primary">{title}</h3>
                   </div>
-                  <p className="mb-4 flex-grow font-body-md text-body-md text-on-surface-variant">{body}</p>
+                  <p className="mb-4 flex-grow font-body-md text-body-md text-on-surface-variant">{t(`home.actions.${key}.description`)}</p>
                   <div className="flex items-center gap-1 font-label-lg text-label-lg text-foreground transition-all group-hover:gap-2">
-                    {cta} <MaterialIcon className="text-sm">arrow_right_alt</MaterialIcon>
+                    {t(`home.actions.${key}.cta`)} <MaterialIcon className="text-sm">arrow_right_alt</MaterialIcon>
                   </div>
                 </>
               )
@@ -194,8 +189,8 @@ export function HomePage() {
         <section className="border-t border-surface-variant bg-surface py-20">
           <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
             <div className="mb-16 text-center">
-              <h2 className="mb-4 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">RTI Request Life Cycle</h2>
-              <p className="mx-auto max-w-2xl font-body-md text-body-md text-on-surface-variant">Understanding the process of your Right to Information application from submission to resolution.</p>
+              <h2 className="mb-4 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("home.lifecycle.sectionTitle")}</h2>
+              <p className="mx-auto max-w-2xl font-body-md text-body-md text-on-surface-variant">{t("home.lifecycle.sectionDescription")}</p>
             </div>
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
               <div className="lg:col-span-12" ref={stepperFrameRef}>
@@ -210,15 +205,15 @@ export function HomePage() {
                           <div className={`z-10 flex size-12 items-center justify-center rounded-full border-2 transition-colors ${className}`}>
                             <MaterialIcon className="text-2xl">{icon}</MaterialIcon>
                           </div>
-                          <h4 className="mt-3 font-label-lg text-xs leading-tight text-primary">{title}</h4>
-                          <p className="mt-2 text-[11px] leading-4 text-on-surface-variant">{body}</p>
+                          <h4 className="mt-3 font-label-lg text-xs leading-tight text-primary">{t(title)}</h4>
+                          <p className="mt-2 text-[11px] leading-4 text-on-surface-variant">{t(body)}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-5">
-                    {steps.map(([icon, title, body, className], index) => (
+                      {steps.map(([icon, title, body, className], index) => (
                       <div className="relative flex items-start gap-4" key={title}>
                         {index < steps.length - 1 && (
                           <div aria-hidden="true" className="absolute bottom-[-20px] left-6 top-12 z-0 w-px bg-outline-variant" />
@@ -227,8 +222,8 @@ export function HomePage() {
                           <MaterialIcon className="text-2xl">{icon}</MaterialIcon>
                         </div>
                         <div className="min-w-0 pt-1">
-                          <h4 className="font-headline-md text-base leading-tight text-primary">{title}</h4>
-                          <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">{body}</p>
+                          <h4 className="font-headline-md text-base leading-tight text-primary">{t(title)}</h4>
+                          <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">{t(body)}</p>
                         </div>
                       </div>
                     ))}
@@ -240,10 +235,10 @@ export function HomePage() {
                   <CardHeader className="gap-3 border-b border-outline-variant px-6 py-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <CardTitle className="font-headline-md text-xl text-primary">RTI Request Lifecycle</CardTitle>
-                        <CardDescription className="mt-1 text-sm text-on-surface-variant">Timeline and escalation process under the Right to Information framework.</CardDescription>
+                        <CardTitle className="font-headline-md text-xl text-primary">{t("home.lifecycle.cardTitle")}</CardTitle>
+                        <CardDescription className="mt-1 text-sm text-on-surface-variant">{t("home.lifecycle.cardDescription")}</CardDescription>
                       </div>
-                      <Badge className="border-primary/20 bg-primary-fixed text-primary" variant="outline">Process map</Badge>
+                      <Badge className="border-primary/20 bg-primary-fixed text-primary" variant="outline">{t("home.lifecycle.processMap")}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="overflow-hidden p-0">
@@ -297,40 +292,40 @@ export function HomePage() {
                           <FlowEdge path="M 535 885 V 895 H 560 V 910" />
                         </svg>
 
-                        <FlowNode className="left-[455px] top-[22px] w-[210px]" label="RTI Request" />
+                        <FlowNode className="left-[455px] top-[22px] w-[210px]" label={t("home.lifecycle.graph.request")} />
 
-                        <TimeNode className="left-[93px] top-[100px]" days={30} />
-                        <FlowNode className="left-[43px] top-[160px] w-[140px]" label="Reply" />
-                        <StatusNode className="left-[33px] top-[225px] w-[160px]" label="Satisfied" status="satisfied" />
+                        <TimeNode className="left-[93px] top-[100px]" days={30} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[43px] top-[160px] w-[140px]" label={t("home.lifecycle.graph.reply")} />
+                        <StatusNode className="left-[33px] top-[225px] w-[160px]" label={t("home.lifecycle.graph.satisfied")} status="satisfied" />
 
-                        <TimeNode className="left-[540px] top-[100px]" days={5} />
-                        <FlowNode className="left-[490px] top-[160px] w-[140px]" label="Transfer" />
-                        <TimeNode className="left-[375px] top-[245px]" days={30} />
-                        <FlowNode className="left-[330px] top-[300px] w-[130px]" label="Reply" />
-                        <StatusNode className="left-[310px] top-[355px] w-[170px]" label="Not Satisfied" status="notSatisfied" />
-                        <TimeNode className="left-[375px] top-[415px]" days={30} />
+                        <TimeNode className="left-[540px] top-[100px]" days={5} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[490px] top-[160px] w-[140px]" label={t("home.lifecycle.graph.transfer")} />
+                        <TimeNode className="left-[375px] top-[245px]" days={30} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[330px] top-[300px] w-[130px]" label={t("home.lifecycle.graph.reply")} />
+                        <StatusNode className="left-[310px] top-[355px] w-[170px]" label={t("home.lifecycle.graph.notSatisfied")} status="notSatisfied" />
+                        <TimeNode className="left-[375px] top-[415px]" days={30} daysLabel={t("home.lifecycle.graph.days")} />
 
-                        <TimeNode className="left-[657px] top-[245px]" days={30} />
-                        <FlowNode className="left-[605px] top-[300px] w-[144px]" label="No Reply" />
+                        <TimeNode className="left-[657px] top-[245px]" days={30} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[605px] top-[300px] w-[144px]" label={t("home.lifecycle.graph.noReply")} />
 
-                        <TimeNode className="left-[915px] top-[100px]" days={30} />
-                        <FlowNode className="left-[865px] top-[160px] w-[140px]" label="No Reply" />
-                        <FlowNode className="left-[735px] top-[380px] w-[70px]" label="And" tone="logic" />
-                        <TimeNode className="left-[658px] top-[480px]" days={30} />
-                        <FlowNode className="left-[860px] top-[480px] w-[120px]" label={"No Time\nLimit"} tone="logic" />
-                        <FlowNode className="left-[800px] top-[535px] w-[240px]" label="Section 18 Complaint to CIC" tone="complaint" />
+                        <TimeNode className="left-[915px] top-[100px]" days={30} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[865px] top-[160px] w-[140px]" label={t("home.lifecycle.graph.noReply")} />
+                        <FlowNode className="left-[735px] top-[380px] w-[70px]" label={t("home.lifecycle.graph.and")} tone="logic" />
+                        <TimeNode className="left-[658px] top-[480px]" days={30} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[860px] top-[480px] w-[120px]" label={t("home.lifecycle.graph.noTimeLimit")} tone="logic" />
+                        <FlowNode className="left-[800px] top-[535px] w-[240px]" label={t("home.lifecycle.graph.complaint")} tone="complaint" />
 
-                        <FlowNode className="left-[465px] top-[550px] w-[190px]" label="First Appeal" />
-                        <TimeNode className="left-[385px] top-[620px]" days={45} />
-                        <FlowNode className="left-[335px] top-[680px] w-[140px]" label="Decision" />
-                        <StatusNode className="left-[255px] top-[785px] w-[150px]" label="Satisfied" status="satisfied" />
-                        <StatusNode className="left-[450px] top-[785px] w-[170px]" label="Not Satisfied" status="notSatisfied" />
-                        <TimeNode className="left-[515px] top-[845px]" days={90} />
+                        <FlowNode className="left-[465px] top-[550px] w-[190px]" label={t("home.lifecycle.graph.firstAppeal")} />
+                        <TimeNode className="left-[385px] top-[620px]" days={45} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[335px] top-[680px] w-[140px]" label={t("home.lifecycle.graph.decision")} />
+                        <StatusNode className="left-[255px] top-[785px] w-[150px]" label={t("home.lifecycle.graph.satisfied")} status="satisfied" />
+                        <StatusNode className="left-[450px] top-[785px] w-[170px]" label={t("home.lifecycle.graph.notSatisfied")} status="notSatisfied" />
+                        <TimeNode className="left-[515px] top-[845px]" days={90} daysLabel={t("home.lifecycle.graph.days")} />
 
-                        <TimeNode className="left-[700px] top-[620px]" days={45} />
-                        <FlowNode className="left-[645px] top-[680px] w-[150px]" label="No Decision" />
-                        <TimeNode className="left-[700px] top-[750px]" days={90} />
-                        <FlowNode className="left-[420px] top-[910px] w-[280px]" label="Second Appeal to CIC / SIC" />
+                        <TimeNode className="left-[700px] top-[620px]" days={45} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[645px] top-[680px] w-[150px]" label={t("home.lifecycle.graph.noDecision")} />
+                        <TimeNode className="left-[700px] top-[750px]" days={90} daysLabel={t("home.lifecycle.graph.days")} />
+                        <FlowNode className="left-[420px] top-[910px] w-[280px]" label={t("home.lifecycle.graph.secondAppeal")} />
                       </div>
                       </div>
                     </div>
