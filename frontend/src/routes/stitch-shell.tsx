@@ -73,6 +73,7 @@ function StitchTopNav() {
     { label: "Submit Request", path: "/submit-request", opensGuidelines: false },
     { label: "Submit First Appeal", path: "/submit-first-appeal" },
     { label: "View Status", path: user ? "/request-history" : "/status" },
+    { label: "Payment Reconciliation", path: "/payment-reconciliation" },
   ]
 
   const drawerLinks = [
@@ -88,7 +89,11 @@ function StitchTopNav() {
     }
 
     if (path === "/submit-request") {
-      return ["/submit-request", "/request-submission-success", "/payment-reconciliation", "/transaction-status"].includes(location.pathname)
+      return ["/submit-request", "/request-submission-success"].includes(location.pathname)
+    }
+
+    if (path === "/payment-reconciliation") {
+      return ["/payment-reconciliation", "/transaction-status"].includes(location.pathname)
     }
 
     if (path === "/submit-first-appeal") {

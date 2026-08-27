@@ -1,115 +1,256 @@
 import { useState, type FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"
 
+import { Badge } from "@/components/ui/badge"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { findTransaction, type PaymentTransaction } from "@/data/mock-transactions"
+import { cn } from "@/lib/utils"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const captchaCodes = ["C8T9P", "M4K7Q", "R2V6N"]
 
+type LookupErrors = {
+  email?: string
+  mobile?: string
+  captcha?: string
+  lookup?: string
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">{label}</dt>
+      <dd className="mt-1 text-sm leading-6 text-on-surface">{value}</dd>
+    </div>
+  )
+}
+
 export function PaymentReconciliationPage() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState("")
+  const [mobile, setMobile] = useState("")
+  const [captcha, setCaptcha] = useState("")
   const [captchaIndex, setCaptchaIndex] = useState(0)
-  const [error, setError] = useState("")
-  const captchaCode = captchaCodes[captchaIndex]
+  const [errors, setErrors] = useState<LookupErrors>({})
+
+  const activeCaptcha = captchaCodes[captchaIndex]
+
+  const clearErrors = () => setErrors({})
 
   const refreshCaptcha = () => {
     setCaptchaIndex((current) => (current + 1) % captchaCodes.length)
-    setError("")
+    setCaptcha("")
+    setErrors((current) => ({ ...current, captcha: undefined }))
+  }
+
+  const resetForm = () => {
+    setEmail("")
+    setMobile("")
+    setCaptcha("")
+    clearErrors()
   }
 
   const locateTransaction = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const email = String(formData.get("email") ?? "").trim()
-    const captcha = String(formData.get("captcha") ?? "").trim()
+    const nextErrors: LookupErrors = {}
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setError("Enter the email address used for your RTI request or appeal.")
-      return
+    if (!/^\S+@\S+\.\S+$/.test(email)) nextErrors.email = "Enter the email address used for this payment."
+    if (captcha.trim().toUpperCase() !== activeCaptcha) nextErrors.captcha = "Captcha does not match. Please try again."
+
+    const { mobileMismatch, transaction } = findTransaction(email, mobile)
+
+    if (!nextErrors.email && !nextErrors.captcha) {
+      if (mobileMismatch) {
+        nextErrors.mobile = "This does not match the mobile number used for the payment. Leave it blank if you are unsure."
+      } else if (!transaction) {
+        nextErrors.lookup = "No unsuccessful payment matches those details. Check the email address, or contact the helpdesk if the amount was debited."
+      }
     }
 
-    if (captcha.toUpperCase() !== captchaCode) {
-      setError("The security code does not match. Please try again.")
-      return
-    }
+    setErrors(nextErrors)
 
-    setError("")
-    navigate("/transaction-status")
+    if (!Object.keys(nextErrors).length && transaction) {
+      navigate("/transaction-status", { state: { transaction } })
+    }
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-container-max flex-1 items-center justify-center overflow-hidden bg-surface-container-lowest px-margin-mobile py-stack-lg md:px-margin-desktop">
-      <div className="mt-8 flex w-full max-w-3xl flex-col items-center">
-        <header className="mb-8 w-full text-center">
-          <h1 className="mb-2 font-headline text-3xl font-semibold text-primary">Payment Reconciliation</h1>
-          <p className="text-base text-on-surface-variant">Reconciliation of unsuccessful RTI request payments</p>
-        </header>
+    <div className="mx-auto w-full max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12">
+      <header className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-primary-fixed text-primary">
+          <MaterialIcon className="text-2xl">receipt_long</MaterialIcon>
+        </div>
+        <h1 className="font-headline-lg text-3xl text-primary md:text-headline-lg">Payment Reconciliation</h1>
+        <p className="mt-3 text-base leading-7 text-on-surface-variant">Reconciliation of unsuccessful RTI request payments. Trace a fee that was debited but did not return a registration number.</p>
+      </header>
 
-        <section className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm md:p-8">
-          <div className="mb-6 space-y-2">
-            <p className="text-sm text-on-surface-variant">Note: Fields marked with <span className="font-bold text-error">*</span> are Mandatory.</p>
-            <p className="text-sm font-medium text-green-700">Enter email id, mobile number that was used earlier to file RTI request/appeal.</p>
-          </div>
-
-          <form className="flex w-full flex-col gap-6" noValidate onReset={() => setError("")} onSubmit={locateTransaction}>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface" htmlFor="reconciliation-email"><span className="mr-1 text-error">*</span>Enter Email Id (For receiving OTP)</label>
-              <input className="w-full rounded-md border border-outline-variant bg-surface-container-lowest px-4 py-3 text-sm text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="reconciliation-email" name="email" placeholder="e.g user@domain.com" type="email" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface" htmlFor="reconciliation-mobile">Mobile Number</label>
-              <div className="flex items-center gap-2">
-                <input className="w-full rounded-md border border-outline-variant bg-surface-container-lowest px-4 py-3 text-sm text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="reconciliation-mobile" maxLength={10} name="mobile" placeholder="Enter Mobile Number" type="tel" />
-                <span aria-label="Mobile number help" className="cursor-help text-xl text-outline" title="Use the mobile number entered when you filed the request or appeal"><MaterialIcon>help</MaterialIcon></span>
+      <div className="mx-auto max-w-3xl">
+        <Card className="border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <CardHeader className="border-b border-outline-variant/50">
+            <CardTitle className="text-primary">Locate Your Payment</CardTitle>
+            <CardDescription>Enter the email id and mobile number that were used earlier to file the RTI request or appeal.</CardDescription>
+            <p className="mt-2 text-xs text-on-surface-variant">Fields marked with <span className="font-semibold text-destructive">*</span> are mandatory.</p>
+          </CardHeader>
+          <CardContent>
+            <form className="grid grid-cols-1 gap-5 md:grid-cols-2" noValidate onSubmit={locateTransaction}>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-email">Email Address <span className="text-destructive">*</span></label>
+                <Input aria-invalid={Boolean(errors.email)} id="reconciliation-email" onChange={(event) => { setEmail(event.target.value); clearErrors() }} placeholder="user@domain.com" type="email" value={email} />
+                {errors.email ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.email}</p> : null}
               </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-on-surface" htmlFor="reconciliation-captcha"><span className="mr-1 text-error">*</span>Enter Security code</label>
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div aria-label="Security code" className="rounded-md border border-outline-variant bg-surface px-4 py-3 font-mono text-xl font-semibold tracking-[0.22em] text-on-surface">{captchaCode}</div>
-                  <input className="w-40 rounded-md border border-outline-variant bg-surface-container-lowest px-4 py-3 text-sm uppercase text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="reconciliation-captcha" name="captcha" placeholder="Enter code" type="text" />
-                  <button aria-label="Refresh security code" className="flex items-center justify-center rounded-full p-2 text-primary transition-colors hover:bg-surface hover:text-primary-container" onClick={refreshCaptcha} type="button"><MaterialIcon>refresh</MaterialIcon></button>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-mobile">Mobile Number <span className="text-on-surface-variant">(optional)</span></label>
+                <Input aria-invalid={Boolean(errors.mobile)} id="reconciliation-mobile" maxLength={10} onChange={(event) => { setMobile(event.target.value); clearErrors() }} placeholder="98765 43210" type="tel" value={mobile} />
+                {errors.mobile ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.mobile}</p> : null}
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-captcha">Captcha <span className="text-destructive">*</span></label>
+                <div className="flex max-w-md gap-2">
+                  <Input aria-invalid={Boolean(errors.captcha)} id="reconciliation-captcha" onChange={(event) => { setCaptcha(event.target.value); clearErrors() }} placeholder="Enter captcha" value={captcha} />
+                  <span aria-label="Captcha code" className="flex h-8 min-w-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary">{activeCaptcha}</span>
+                  <Button aria-label="Refresh captcha" onClick={refreshCaptcha} size="icon" type="button" variant="outline"><MaterialIcon>refresh</MaterialIcon></Button>
                 </div>
-                <span className="text-xs text-on-surface-variant">(All Characters are Case insensitive)</span>
+                <p className="mt-1.5 text-xs text-on-surface-variant">All characters are case insensitive.</p>
+                {errors.captcha ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.captcha}</p> : null}
               </div>
-            </div>
-            {error ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{error}</p> : null}
-            <div className="mt-6 flex justify-center gap-4 border-t border-outline-variant pt-6">
-              <button className="rounded-md bg-primary px-8 py-3 text-sm font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit">Submit</button>
-              <button className="rounded-md border border-outline-variant bg-surface-container-lowest px-8 py-3 text-sm font-semibold text-primary transition-colors hover:bg-surface" type="reset">Reset</button>
-            </div>
-          </form>
-        </section>
+              {errors.lookup ? <p className="text-sm font-medium text-destructive md:col-span-2" role="alert">{errors.lookup}</p> : null}
+              <div className="mt-2 flex flex-wrap justify-end gap-3 border-t border-outline-variant/50 pb-2 pt-6 md:col-span-2">
+                <Button onClick={resetForm} size="lg" type="button" variant="outline">Reset</Button>
+                <Button size="lg" type="submit"><MaterialIcon>search</MaterialIcon>Locate Payment</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-    </main>
+    </div>
   )
+}
+
+type OutcomeView = {
+  icon: string
+  heading: string
+  summary: string
+  badge: string
+  /** Mirrors the statusClass strings on mock requests, so a payment reads like any other status. */
+  badgeClass: string
+  iconClass: string
+  explanation: string
+}
+
+/** "located" is what the applicant sees before asking the bank; the rest are the bank's answers. */
+const outcomeViews: Record<"located" | PaymentTransaction["outcome"], OutcomeView> = {
+  located: {
+    icon: "hourglass_top",
+    heading: "Transaction Located",
+    summary: "A recent payment attempt matches your details.",
+    badge: "Processing with bank",
+    badgeClass: "bg-primary-fixed text-primary border-primary/20",
+    iconClass: "bg-primary-fixed text-primary",
+    explanation: "The payment was initiated but the bank has not sent final confirmation yet. Check the latest status below. Please do not pay again while this is processing.",
+  },
+  confirmed: {
+    icon: "check_circle",
+    heading: "Payment Confirmed",
+    summary: "The bank has confirmed this payment and a registration number has been generated.",
+    badge: "Payment confirmed",
+    badgeClass: "bg-state-success/10 text-state-success border-state-success/25",
+    iconClass: "bg-state-success/10 text-state-success",
+    explanation: "The fee has been received and the request is registered. Quote the registration number below when you check its status or file an appeal.",
+  },
+  refunded: {
+    icon: "undo",
+    heading: "Payment Reversed",
+    summary: "The payment did not go through and the bank has reversed the amount.",
+    badge: "Refund initiated",
+    badgeClass: "bg-state-error/10 text-state-error border-state-error/25",
+    iconClass: "bg-state-error/10 text-state-error",
+    explanation: "No registration number was generated, so nothing was filed. The amount returns to the source account within 5 to 7 working days against the refund reference below. You can safely file the request again.",
+  },
+  awaitingBank: {
+    icon: "schedule",
+    heading: "Still With The Bank",
+    summary: "The bank has not settled this transaction yet.",
+    badge: "Awaiting bank confirmation",
+    badgeClass: "bg-state-warning/12 text-state-warning border-state-warning/30",
+    iconClass: "bg-state-warning/12 text-state-warning",
+    explanation: "Registration numbers are generated after the bank scroll is reconciled, which takes 24 to 48 working hours. Please do not pay again in the meantime. If nothing changes after 48 hours, contact the helpdesk with the transaction ID below.",
+  },
 }
 
 export function TransactionStatusPage() {
-  const [isConfirmed, setIsConfirmed] = useState(false)
-  const statusLabel = isConfirmed ? "Payment Confirmed" : "Processing with Bank"
+  const location = useLocation()
+  const [hasCheckedBank, setHasCheckedBank] = useState(false)
+  const transaction = (location.state as { transaction?: PaymentTransaction } | null)?.transaction
+
+  // Reached without a lookup, so there is no transaction to report on.
+  if (!transaction) {
+    return <Navigate replace to="/payment-reconciliation" />
+  }
+
+  const view = outcomeViews[hasCheckedBank ? transaction.outcome : "located"]
 
   return (
-    <main className="flex flex-1 items-center justify-center p-margin-mobile md:p-margin-desktop">
-      <section className="w-full max-w-2xl overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <header className="flex items-center gap-4 border-b border-outline-variant bg-surface-container-low px-6 py-6 md:px-8">
-          <div className={`flex size-12 items-center justify-center rounded-full ${isConfirmed ? "bg-green-100 text-green-700" : "bg-secondary-container text-on-secondary-container"}`}><MaterialIcon>{isConfirmed ? "check_circle" : "hourglass_top"}</MaterialIcon></div>
-          <div><h1 className="text-2xl font-bold text-on-surface">{isConfirmed ? "Payment Confirmed" : "Transaction Located"}</h1><p className="mt-1 text-sm text-on-surface-variant">{isConfirmed ? "Your bank has confirmed the payment for this RTI request." : "We found a recent payment attempt matching your details."}</p></div>
-        </header>
-        <div className="p-6 md:p-8">
-          <section className="mb-8 overflow-hidden rounded-lg border border-outline-variant">
-            <div className="flex flex-col gap-3 border-b border-outline-variant bg-surface px-6 py-4 sm:flex-row sm:items-center sm:justify-between"><span className="text-sm font-semibold uppercase tracking-wider text-on-surface-variant">Transaction Details</span><span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${isConfirmed ? "bg-green-100 text-green-700" : "bg-secondary-container text-on-secondary-container"}`}><span className={`size-2 rounded-full ${isConfirmed ? "bg-green-700" : "bg-secondary"}`} />{statusLabel}</span></div>
-            <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2"><TransactionDetail label="Transaction ID" value="TXN_9823410" /><TransactionDetail label="Date & Time" value="24 Oct 2024, 11:30 AM" /><TransactionDetail label="Amount" value="₹ 10.00" /><TransactionDetail label="Payment Method" value="Net Banking" /></div>
-          </section>
-          <section className="mb-8 flex items-start gap-4 rounded-lg bg-surface-container p-6"><MaterialIcon className="mt-0.5 text-surface-tint">info</MaterialIcon><div><h2 className="mb-1 font-semibold text-on-surface">What does this mean?</h2><p className="text-sm leading-relaxed text-on-surface-variant">{isConfirmed ? "Your payment has been confirmed. You can return to the application and complete the request submission." : "Your payment has been initiated but we have not yet received final confirmation from your bank. You can check the latest status manually below. Please avoid making a duplicate payment while this is processing."}</p></div></section>
-          <div className="flex flex-col gap-4 sm:flex-row"><button className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary-container px-6 py-3 font-bold text-on-primary transition-colors hover:bg-primary" onClick={() => setIsConfirmed(true)} type="button"><MaterialIcon>sync</MaterialIcon>{isConfirmed ? "Status Updated" : "Check Latest Status"}</button><Link className="flex flex-1 items-center justify-center rounded-lg border-2 border-outline px-6 py-3 font-semibold text-on-surface transition-colors hover:bg-surface-container" to="/">Return Home</Link></div>
-          <div className="mt-8 border-t border-outline-variant pt-6 text-center"><p className="text-sm text-on-surface-variant">Payment continuously failing or status not updating? <Link className="inline-flex items-center gap-1 font-semibold text-surface-tint hover:underline" to="/contact-us">Contact Helpdesk <MaterialIcon className="text-[16px]">arrow_forward</MaterialIcon></Link></p></div>
+    <div className="mx-auto w-full max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <h1 className="font-headline-md text-xl text-primary">{view.heading}</h1>
+            <p className="mt-1 text-sm text-on-surface-variant">{view.summary}</p>
+          </div>
+          <Link className={cn(buttonVariants({ size: "lg", variant: "outline" }))} to="/payment-reconciliation">
+            <MaterialIcon>search</MaterialIcon>
+            New Lookup
+          </Link>
         </div>
-      </section>
-    </main>
-  )
-}
 
-function TransactionDetail({ label, value }: { label: string; value: string }) {
-  return <div><span className="mb-1 block text-sm font-medium text-outline">{label}</span><span className="block text-lg font-semibold text-on-surface">{value}</span></div>
+        <Card className="border border-outline-variant bg-surface-container-lowest shadow-sm">
+          <CardContent className="pt-4">
+            <div className="flex flex-col gap-4 border-b border-outline-variant/50 pb-5 sm:flex-row sm:items-center sm:justify-around">
+              <div className="flex items-center gap-3">
+                <div className={`flex size-12 shrink-0 items-center justify-center rounded-full ${view.iconClass}`}>
+                  <MaterialIcon className="text-2xl">{view.icon}</MaterialIcon>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">Transaction ID</p>
+                  <p className="mt-1 font-headline-md text-xl text-primary">{transaction.transactionId}</p>
+                </div>
+              </div>
+              <Badge className={view.badgeClass} variant="outline">{view.badge}</Badge>
+            </div>
+
+            <dl className="grid justify-around gap-x-8 gap-y-5 py-6 sm:grid-cols-[auto_auto]">
+              <Detail label="Date & Time" value={transaction.attemptedOn} />
+              <Detail label="Amount" value={transaction.amount} />
+              <Detail label="Payment Method" value={transaction.method} />
+              <Detail label="Paid By" value={transaction.applicantName} />
+              <div className="sm:col-span-2"><Detail label="Public Authority" value={transaction.authority} /></div>
+              <Detail label="Paid For" value={transaction.purpose} />
+              {hasCheckedBank && transaction.registrationNumber ? <Detail label="Registration Number" value={transaction.registrationNumber} /> : null}
+              {hasCheckedBank && transaction.refundReference ? <Detail label="Refund Reference" value={transaction.refundReference} /> : null}
+            </dl>
+
+            <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
+              <p className="text-sm font-semibold text-primary">What does this mean?</p>
+              <p className="mt-1 text-sm leading-6 text-on-surface-variant">{view.explanation}</p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <Link className={cn(buttonVariants({ size: "lg", variant: "outline" }))} to="/">Return Home</Link>
+              <Button disabled={hasCheckedBank} onClick={() => setHasCheckedBank(true)} size="lg" type="button">
+                <MaterialIcon>sync</MaterialIcon>
+                {hasCheckedBank ? "Status Updated" : "Check Latest Status"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <p className="mt-6 text-center text-sm text-on-surface-variant">
+          Payment continuously failing or status not updating?{" "}
+          <Link className="font-semibold text-primary hover:underline" to="/contact-us">Contact the helpdesk</Link>
+        </p>
+      </div>
+    </div>
+  )
 }

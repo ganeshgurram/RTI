@@ -55,6 +55,7 @@
     --color-secondary-container: var(--secondary-container);
     --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
     --color-state-error: var(--state-error);
+    --color-state-warning: var(--state-warning);
     --color-surface-container-high: var(--surface-container-high);
     --color-inverse-surface: var(--inverse-surface);
     --color-inverse-on-surface: var(--inverse-on-surface);
@@ -194,7 +195,8 @@
     --on-primary-fixed: var(--foreground);
     --on-tertiary: var(--primary-foreground);
     --on-secondary-fixed-variant: var(--secondary-foreground);
-    --state-success: var(--primary);
+    --state-success: oklch(0.53 0.13 150);
+    --state-warning: oklch(0.56 0.12 70);
     --on-primary: var(--primary-foreground);
     --primary-container: var(--primary);
     --tertiary-container: var(--primary);
@@ -223,6 +225,8 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
+    --state-success: oklch(0.75 0.16 152);
+    --state-warning: oklch(0.78 0.15 78);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
