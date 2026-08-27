@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 
+import { useAuth } from "@/auth/AuthContext"
 import { mockProfile, mockRequests } from "@/data/mock-profile"
 
 export type RtiRequest = (typeof mockRequests)[number] & {
@@ -118,4 +119,20 @@ export function useRequests() {
   }
 
   return context
+}
+
+/**
+ * The requests belonging to the signed-in account. Use this for account views such as RTI Request
+ * History; the public lookups on View Status and the appeal pages must keep searching every request.
+ */
+export function useAccountRequests() {
+  const { requests } = useRequests()
+  const { user } = useAuth()
+
+  return useMemo(() => {
+    if (!user) return []
+
+    const accountEmail = user.email.trim().toLowerCase()
+    return requests.filter((request) => request.applicantEmail.trim().toLowerCase() === accountEmail)
+  }, [requests, user])
 }

@@ -11,6 +11,10 @@ import { MaterialIcon } from "@/routes/stitch-shell"
 const inputClassName = "h-10 w-full rounded border border-outline-variant bg-surface-container-lowest px-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary"
 const selectClassName = `${inputClassName} cursor-pointer`
 const labelClassName = "block text-label-lg font-semibold text-on-surface"
+// Matches the security check on Payment Reconciliation: a quiet code chip beside the input, with
+// the refresh as an outline icon button on the right.
+const captchaCodeClassName = "flex h-10 min-w-24 shrink-0 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary"
+const captchaRefreshClassName = "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-on-surface outline-none transition-all hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px"
 
 function FormSection({
   children,
@@ -405,14 +409,12 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
       <section className="space-y-6 rounded-lg border border-surface-variant bg-surface-container-lowest p-6">
         <div className="max-w-md space-y-2">
           <label className={labelClassName} htmlFor="request-captcha">{t("requestForm.securityCode")}<Required /></label>
-          <div className="flex items-center gap-3">
-            <input className={`${inputClassName} h-12 flex-1`} id="request-captcha" name="captcha" placeholder={t("requestForm.enterCode")} required type="text" />
-            <div className="flex shrink-0 items-center">
-              <button aria-label={t("requestForm.refreshSecurity")} className="flex size-12 cursor-pointer items-center justify-center rounded-l border border-r-0 border-primary bg-primary text-on-primary transition-colors hover:bg-primary/85 active:translate-y-px" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title={t("requestForm.refreshSecurity")} type="button">
-                <MaterialIcon className="text-lg!">refresh</MaterialIcon>
-              </button>
-              <div className="flex h-12 items-center rounded-r border border-outline-variant bg-surface-variant px-4 font-mono text-headline-md font-bold tracking-[0.2em] text-on-surface sm:px-6">{captchaCode}</div>
-            </div>
+          <div className="flex items-center gap-2">
+            <input className={`${inputClassName} flex-1`} id="request-captcha" name="captcha" placeholder={t("requestForm.enterCode")} required type="text" />
+            <span aria-label={t("requestForm.securityCode")} className={captchaCodeClassName}>{captchaCode}</span>
+            <button aria-label={t("requestForm.refreshSecurity")} className={captchaRefreshClassName} onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title={t("requestForm.refreshSecurity")} type="button">
+              <MaterialIcon className="text-lg">refresh</MaterialIcon>
+            </button>
           </div>
         </div>
         {paymentMessage ? <p className="rounded-md border border-primary-fixed-dim bg-primary-fixed/30 p-3 text-sm font-medium text-primary" role="status">{paymentMessage}</p> : null}

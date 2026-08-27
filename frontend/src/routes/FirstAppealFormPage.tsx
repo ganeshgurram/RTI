@@ -8,6 +8,10 @@ import { MaterialIcon } from "@/routes/stitch-shell"
 
 const fieldClassName = "w-full rounded border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-surface-container-low disabled:text-on-surface-variant"
 const labelClassName = "text-label-lg font-semibold text-on-surface"
+// Matches the security check on Payment Reconciliation: a quiet code chip beside the input, with
+// the refresh as an outline icon button on the right.
+const captchaCodeClassName = "flex h-10 min-w-24 shrink-0 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary"
+const captchaRefreshClassName = "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-on-surface outline-none transition-all hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px"
 const stateOptions = ["Delhi", "Kerala", "Maharashtra", "Tamil Nadu"]
 
 function AppealRow({ children, label, hint, required = false }: { children: ReactNode; label: string; hint?: string; required?: boolean }) {
@@ -136,7 +140,13 @@ export function FirstAppealFormPage() {
           </div>
           <AppealRow hint={t("requestForm.pdfLimit")} label={t("requestForm.supportingDocument")}><input accept=".pdf" className="block w-full cursor-pointer text-sm text-on-surface-variant file:mr-4 file:rounded file:border file:border-outline-variant file:bg-surface-container file:px-4 file:py-2 file:font-label-lg file:text-on-surface hover:file:bg-surface-container-high md:w-2/3" type="file" /></AppealRow>
           <AppealRow label={t("firstAppeal.securityCode")} required>
-            <div className="flex items-center gap-4"><div className="flex flex-col items-center"><div className="rounded border border-outline-variant bg-surface-variant px-6 py-2 font-mono text-headline-md tracking-[0.2em] text-on-surface">{captchaCodes[captchaIndex]}</div><button className="mt-1 text-label-sm text-surface-tint hover:underline" onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} type="button">{t("firstAppeal.refresh")}</button></div><input className={`${fieldClassName} w-32 text-center`} type="text" /></div>
+            <div className="flex max-w-md items-center gap-2">
+              <input className={`${fieldClassName} h-10 flex-1`} placeholder={t("requestForm.enterCode")} type="text" />
+              <span aria-label={t("firstAppeal.securityCode")} className={captchaCodeClassName}>{captchaCodes[captchaIndex]}</span>
+              <button aria-label={t("firstAppeal.refresh")} className={captchaRefreshClassName} onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title={t("firstAppeal.refresh")} type="button">
+                <MaterialIcon className="text-lg">refresh</MaterialIcon>
+              </button>
+            </div>
           </AppealRow>
         </AppealSection>
 

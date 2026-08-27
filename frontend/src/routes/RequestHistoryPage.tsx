@@ -1,13 +1,16 @@
+import { Link } from "react-router-dom"
 import { useAuth } from "@/auth/AuthContext"
 import { useTranslation } from "react-i18next"
 import { RequestHistoryTable } from "@/components/RequestHistoryTable"
+import { buttonVariants } from "@/components/ui/button"
 import { mockProfile } from "@/data/mock-profile"
-import { useRequests } from "@/requests/RequestContext"
+import { useAccountRequests } from "@/requests/RequestContext"
+import { cn } from "@/lib/utils"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 export function RequestHistoryPage() {
   const { user } = useAuth()
-  const { requests } = useRequests()
+  const requests = useAccountRequests()
   const accountProfile = user?.profile ?? mockProfile
   const { t } = useTranslation()
   const metrics = [
@@ -44,7 +47,20 @@ export function RequestHistoryPage() {
           <h2 className="font-headline-lg text-xl text-primary">{t("history.allRequests")}</h2>
           <p className="mt-1 text-sm text-on-surface-variant">{t("history.searchAndFilter")}</p>
         </div>
-        <RequestHistoryTable />
+        {requests.length ? (
+          <RequestHistoryTable requests={requests} />
+        ) : (
+          <div className="flex flex-col items-center rounded-xl border border-outline-variant bg-surface-container-lowest px-6 py-14 text-center shadow-sm">
+            <span className="flex size-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
+              <MaterialIcon className="text-3xl">description</MaterialIcon>
+            </span>
+            <h3 className="mt-4 font-headline-md text-lg text-primary">{t("history.emptyTitle")}</h3>
+            <p className="mt-2 max-w-md text-sm leading-6 text-on-surface-variant">{t("history.emptyBody")}</p>
+            <Link className={cn(buttonVariants({ size: "lg" }), "mt-6")} to="/submit-request">
+              <MaterialIcon>edit_document</MaterialIcon>{t("history.emptyCta")}
+            </Link>
+          </div>
+        )}
       </section>
     </div>
   )

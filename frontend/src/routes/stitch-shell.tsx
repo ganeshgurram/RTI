@@ -123,7 +123,7 @@ function StitchTopNav() {
     ...links,
     { label: t("nav.secondAppeal"), path: "/second-appeal" },
     { label: t("nav.faqs"), path: "/faq" },
-    ...(user ? [] : [{ label: t("nav.login"), path: "/login" }]),
+    ...(user ? [] : [{ label: t("nav.login"), path: "/login" }, { label: t("nav.signUp"), path: "/signup" }]),
   ]
 
   const isActive = (path: string) => {
@@ -329,9 +329,9 @@ function StitchTopNav() {
             ) : (
               <Link
                 className="rounded bg-secondary px-6 py-2 font-label-lg text-label-lg text-on-secondary shadow-sm transition-colors hover:bg-secondary/90"
-                to="/login"
+                to={location.pathname === "/login" ? "/signup" : "/login"}
               >
-                {location.pathname === "/login" ? t("nav.signUp") : t("nav.signInOrSignUp")}
+                {location.pathname === "/login" ? t("nav.signUp") : location.pathname === "/signup" ? t("nav.signIn") : t("nav.signInOrSignUp")}
               </Link>
             )}
           </div>

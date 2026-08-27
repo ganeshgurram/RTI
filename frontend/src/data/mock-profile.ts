@@ -71,6 +71,8 @@ export const digiLockerMockProfile = {
   },
 }
 
+export type ApplicantProfile = typeof mockProfile
+
 export const mockProfileMetrics = [
   { label: "Total requests", value: "12", icon: "description" },
   { label: "Pending", value: "3", icon: "hourglass_top" },

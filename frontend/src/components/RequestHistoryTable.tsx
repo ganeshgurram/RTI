@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRequests } from "@/requests/RequestContext"
+import { useRequests, type RtiRequest } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
-export function RequestHistoryTable() {
-  const { requests } = useRequests()
+/** Defaults to every request; account views pass their own scoped list. */
+export function RequestHistoryTable({ requests: scopedRequests }: { requests?: RtiRequest[] } = {}) {
+  const { requests: allRequests } = useRequests()
+  const requests = scopedRequests ?? allRequests
   const [requestSearch, setRequestSearch] = useState("")
   const [requestStatus, setRequestStatus] = useState("all")
   const [requestPage, setRequestPage] = useState(1)

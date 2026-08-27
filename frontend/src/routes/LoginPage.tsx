@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from "react"
-import { Navigate, useLocation, useNavigate } from "react-router-dom"
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
@@ -51,7 +51,7 @@ export function LoginPage() {
     event.preventDefault()
 
     if (captcha.replaceAll(" ", "").toUpperCase() !== activeCaptcha) {
-      setError(t("login.securityMismatch"))
+      setError("login.securityMismatch")
       return
     }
 
@@ -111,7 +111,7 @@ export function LoginPage() {
                   </div>
                 </Field>
 
-                {error ? <p className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">{error}</p> : null}
+                {error ? <p className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">{t(error)}</p> : null}
 
                 <Field>
                   <Button className="h-10 w-full" type="submit">{t("login.signIn")}</Button>
@@ -125,6 +125,11 @@ export function LoginPage() {
                     {t("login.signInDigiLocker")}
                   </Button>
                 </Field>
+
+                <FieldDescription className="text-center">
+                  {t("login.newHere")}{" "}
+                  <Link className="font-medium text-surface-tint underline-offset-4 hover:underline" to="/signup">{t("login.createAccount")}</Link>
+                </FieldDescription>
               </FieldGroup>
             </form>
           </CardContent>

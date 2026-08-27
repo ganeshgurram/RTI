@@ -20,6 +20,7 @@ import { FirstAppealFormPage } from "@/routes/FirstAppealFormPage"
 import { RequestFormPage } from "@/routes/RequestFormPage"
 import { SubmitFirstAppealPage } from "@/routes/SubmitFirstAppealPage"
 import { SecondAppealPage } from "@/routes/SecondAppealPage"
+import { SignupPage } from "@/routes/SignupPage"
 import { AppealSubmissionSuccessPage, RequestSubmissionSuccessPage } from "@/routes/SubmissionSuccessPages"
 import { RequestHistoryPage } from "@/routes/RequestHistoryPage"
 import { StatusPage } from "@/routes/StatusPage"
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
+      { path: "signup", element: <SignupPage /> },
       { path: "digilocker-authorize", element: <DigiLockerAuthorizationPage /> },
       { path: "faq", element: <FaqPage /> },
       { path: "contact-us", element: <ContactUsPage /> },

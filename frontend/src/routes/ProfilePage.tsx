@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/auth/AuthContext"
 import { mockProfile } from "@/data/mock-profile"
-import { useRequests } from "@/requests/RequestContext"
+import { useAccountRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const indianStatesAndTerritories = [
@@ -76,11 +76,13 @@ function FieldError({ message }: { message?: string }) {
 }
 
 function ReadOnlyField({ label, value, description, badge }: { label: string; value: string; description?: string; badge?: ReactNode }) {
+  const { t } = useTranslation()
+
   return (
     <div>
       <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-1 flex flex-wrap items-center gap-2 text-sm leading-relaxed text-foreground">
-        <span>{value}</span>
+        <span className={value.trim() ? undefined : "text-muted-foreground"}>{value.trim() || t("profile.notProvided")}</span>
         {badge}
       </dd>
       {description ? <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p> : null}
@@ -145,7 +147,7 @@ function ProfileCard({ title, description, icon, children }: { title: string; de
 
 export function ProfilePage() {
   const { user } = useAuth()
-  const { requests } = useRequests()
+  const requests = useAccountRequests()
   const accountProfile = user?.profile ?? mockProfile
   const [profile, setProfile] = useState<ApplicantForm>(() => createInitialApplicant(accountProfile))
   const [draft, setDraft] = useState<ApplicantForm>(() => createInitialApplicant(accountProfile))

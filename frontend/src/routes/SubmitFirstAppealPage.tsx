@@ -7,6 +7,11 @@ import { MaterialIcon } from "@/routes/stitch-shell"
 
 const codes = ["726958", "318402", "604791"]
 
+// Matches the security check on Payment Reconciliation: a quiet code chip beside the input, with
+// the refresh as an outline icon button on the right.
+const captchaCodeClassName = "flex h-10 min-w-24 shrink-0 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary"
+const captchaRefreshClassName = "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-on-surface outline-none transition-all hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px"
+
 type LookupErrors = {
   registrationNumber?: string
   email?: string
@@ -95,11 +100,11 @@ export function SubmitFirstAppealPage() {
             <div className="flex flex-col gap-stack-sm pt-stack-sm md:flex-row md:gap-gutter">
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-captcha"><span className="text-error">*</span> {t("firstAppeal.securityCode")}</label>
               <div className="flex flex-grow flex-col gap-stack-sm">
-                <div className="flex items-center gap-stack-md">
-                  <div aria-label={t("firstAppeal.securityCode")} className="relative overflow-hidden rounded-md border border-outline-variant bg-surface-container-high px-4 py-2 font-mono text-headline-md tracking-[0.2em] text-on-surface">{activeCaptcha}</div>
-                  <button className="flex items-center gap-1 text-sm font-label-lg text-surface-tint underline transition-colors hover:text-primary" onClick={refreshCaptcha} type="button"><MaterialIcon className="text-[16px]">refresh</MaterialIcon>{t("firstAppeal.refresh")}</button>
+                <div className="flex max-w-md items-center gap-2">
+                  <input aria-invalid={Boolean(errors.captcha)} className="h-10 flex-1 rounded-md border border-outline-variant bg-surface px-3 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-captcha" onChange={(event) => { setCaptcha(event.target.value); setErrors((current) => ({ ...current, captcha: undefined })) }} placeholder={t("requestForm.enterCode")} type="text" value={captcha} />
+                  <span aria-label={t("firstAppeal.securityCode")} className={captchaCodeClassName}>{activeCaptcha}</span>
+                  <button aria-label={t("firstAppeal.refresh")} className={captchaRefreshClassName} onClick={refreshCaptcha} title={t("firstAppeal.refresh")} type="button"><MaterialIcon className="text-lg">refresh</MaterialIcon></button>
                 </div>
-                <input aria-invalid={Boolean(errors.captcha)} className="w-48 rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-captcha" onChange={(event) => { setCaptcha(event.target.value); setErrors((current) => ({ ...current, captcha: undefined })) }} placeholder={t("requestForm.enterCode")} type="text" value={captcha} />
                 {errors.captcha ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.captcha}</p> : null}
               </div>
             </div>
