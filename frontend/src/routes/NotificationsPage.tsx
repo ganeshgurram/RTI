@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -6,13 +7,10 @@ import { type NotificationFilter } from "@/data/mock-notifications"
 import { useNotifications } from "@/notifications/NotificationContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
-const filters: { value: NotificationFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "unread", label: "Unread" },
-  { value: "read", label: "Read" },
-]
+const filters: NotificationFilter[] = ["all", "unread", "read"]
 
 export function NotificationsPage() {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<NotificationFilter>("all")
   const { markAllAsRead, markAsRead, notifications: notificationItems, unreadCount } = useNotifications()
   const notifications = useMemo(
@@ -31,30 +29,30 @@ export function NotificationsPage() {
       <section aria-labelledby="notification-list-heading">
         <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <h2 className="font-headline-lg text-xl text-primary" id="notification-list-heading">All notifications</h2>
-            <p className="mt-1 text-sm text-on-surface-variant">Unread updates are highlighted until you view them.</p>
+            <h2 className="font-headline-lg text-xl text-primary" id="notification-list-heading">{t("notifications.title")}</h2>
+            <p className="mt-1 text-sm text-on-surface-variant">{t("notifications.subtitle")}</p>
           </div>
         </div>
         {/* Mark all as read sits beside the filters but outside the group, so screen readers do
             not announce it as a fourth filter. */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div aria-label="Filter notifications" className="flex flex-wrap gap-2" role="group">
+          <div aria-label={t("notifications.filterLabel")} className="flex flex-wrap gap-2" role="group">
             {filters.map((item) => (
               <Button
-                aria-pressed={filter === item.value}
-                key={item.value}
-                onClick={() => setFilter(item.value)}
+                aria-pressed={filter === item}
+                key={item}
+                onClick={() => setFilter(item)}
                 size="sm"
                 type="button"
-                variant={filter === item.value ? "default" : "outline"}
+                variant={filter === item ? "default" : "outline"}
               >
-                {item.label} ({filterCount(item.value)})
+                {t(`notifications.${item}`)} ({filterCount(item)})
               </Button>
             ))}
           </div>
           <Button className={unreadCount ? "" : "invisible"} onClick={markAllAsRead} size="sm" type="button">
             <MaterialIcon>done_all</MaterialIcon>
-            Mark all as read
+            {t("notifications.markAllRead")}
           </Button>
         </div>
 
@@ -70,7 +68,7 @@ export function NotificationsPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className={`text-sm ${notification.isRead ? "font-medium text-on-surface" : "font-semibold text-primary"}`}>{notification.title}</h3>
-                  {!notification.isRead ? <Badge className="border-primary/20 bg-primary text-on-primary" variant="outline">New</Badge> : <span className="text-xs text-on-surface-variant">Read</span>}
+                  {!notification.isRead ? <Badge className="border-primary/20 bg-primary text-on-primary" variant="outline">{t("notifications.newBadge")}</Badge> : <span className="text-xs text-on-surface-variant">{t("notifications.readBadge")}</span>}
                 </div>
                 <p className="mt-1.5 text-sm leading-6 text-on-surface-variant">{notification.description}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant">
@@ -81,11 +79,11 @@ export function NotificationsPage() {
               </div>
               {!notification.isRead ? (
                 <div className="flex shrink-0 items-start gap-2">
-                  <span aria-label="Unread notification" className="mt-2 size-2 rounded-full bg-primary" />
+                  <span aria-label={t("notifications.unreadDot")} className="mt-2 size-2 rounded-full bg-primary" />
                   <Button className="hidden sm:inline-flex" onClick={() => markAsRead(notification.id)} size="sm" type="button">
-                    Mark as read
+                    {t("notifications.markRead")}
                   </Button>
-                  <Button aria-label={`Mark ${notification.title} as read`} className="sm:hidden" onClick={() => markAsRead(notification.id)} size="icon-sm" type="button">
+                  <Button aria-label={t("notifications.markNamedRead", { title: notification.title })} className="sm:hidden" onClick={() => markAsRead(notification.id)} size="icon-sm" type="button">
                     <MaterialIcon>done</MaterialIcon>
                   </Button>
                 </div>

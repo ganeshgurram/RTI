@@ -370,6 +370,174 @@ const resources = {
       profile: {
         subtitle: "Applicant Profile · Personal and contact details used for RTI applications", edit: "Edit Profile", editing: "Editing profile", updated: "Your applicant profile has been updated for this demo.", basic: "Basic Information", address: "Address Details", additional: "Additional Information", account: "Account Details", verified: "Verified", alternatePhone: "Alternate Phone Number", countryName: "Country Name", notApplicable: "Not applicable", notProvided: "Not provided", save: "Save Changes", descriptions: { core: "Your core details for RTI communications.", address: "Your residential and postal address for RTI applications.", additional: "Optional details that help us contact you.", account: "Your secure access details for this RTI portal." },
       },
+      notFound: {
+        title: "Page not found", body: "The route does not exist in the RTI prototype.", home: "Return home",
+      },
+      mockPayment: {
+        title: "Mock Payment Gateway", description: "This is a prototype simulation. No money will be charged and no bank is contacted.", amount: "Amount", authority: "Public Authority", applicant: "Applicant", outcomeLegend: "Demo payment outcome", back: "Back to form", complete: "Complete mock payment",
+        outcomes: { confirmed: { label: "Payment successful", description: "Creates the RTI ID immediately, as a successful payment callback would." }, awaitingBank: { label: "Bank confirmation pending", description: "Stores the payment attempt without an RTI ID, ready to check in Payment Reconciliation." }, refunded: { label: "Payment failed / refunded", description: "Stores a reversed payment attempt and does not create an RTI request." } },
+      },
+      notifications: {
+        title: "All notifications", subtitle: "Unread updates are highlighted until you view them.", filterLabel: "Filter notifications", all: "All", unread: "Unread", read: "Read", markAllRead: "Mark all as read", newBadge: "New", readBadge: "Read", markRead: "Mark as read", markNamedRead: "Mark {{title}} as read", unreadDot: "Unread notification",
+      },
+      contact: {
+        title: "Contact Us", intro: "We are here to assist you with any queries regarding the RTI Online portal. Please reach out to the appropriate contact for your needs.", supportTitle: "Technical Support & General Queries", supportBody: "For technical issues, payment queries, or general assistance with using the RTI Online portal.", emailLabel: "Email Address", helplineLabel: "Helpline Number", officialTitle: "Official Contact", officialBody: "For official correspondence or escalation of unresolved technical issues.", noteLabel: "Note:", noteBefore: "Please do not file RTI applications to the above email addresses. These are strictly for technical support and portal-related assistance. To file an RTI application, please use the ", noteLink: "Submit Request", noteAfter: " functionality on the portal.",
+      },
+      digilocker: {
+        badge: "Secure demo authorization", title: "Authorize DigiLocker access", titleComplete: "Authorization complete", description: "DigiLocker will share the selected profile details with RTI Online to set up your applicant profile.", descriptionComplete: "Your mock DigiLocker profile has been shared securely with RTI Online. Taking you to your Applicant Profile…", completeHeading: "RTI Online can now use your shared details.", redirecting: "Redirecting to your profile…", connectionLabel: "Authorization connection", selectedDocuments: "Your selected documents", applicantProfile: "Applicant profile", fetching: "Securely fetching your selected details…", sharedTitle: "Details requested by RTI Online", sharedSubtitle: "Only these mock profile details will be shared.", detailCount: "{{count}} details", disclaimer: "This is a prototype simulation. No real DigiLocker account, document, or personal data is accessed or shared.", authorizing: "Authorizing…", authorize: "Authorize and continue",
+        fields: { fullName: "Full name", dateOfBirth: "Date of birth", email: "Email address", mobile: "Mobile number", address: "Address" },
+      },
+      success: {
+        requestTitle: "Your RTI Request filed successfully.", requestSubtitle: "Please note down the details of registration for future reference. A confirmation email has been sent to your registered address.", appealTitle: "Your RTI Appeal filed successfully.", appealSubtitle: "Please note down the details of registration for future reference.", registrationDetails: "Registration Details", registrationNumber: "Registration Number", name: "Name", dateOfFiling: "Date of Filing", filedWith: "Request filed with", appealAgainst: "Appeal against request", contactDetails: "Contact Details", phone: "Telephone Number", email: "Email Id", statusLabel: "Status: {{status}}", copy: "Copy Registration Number", copied: "Registration number copied", copiedShort: "Copied", save: "Save", printRequest: "Print Registration Details", printAppeal: "Print Appeal Details", returnDashboard: "Return to Dashboard",
+        receiptRequest: "RTI Request Registration Details", receiptAppeal: "RTI First Appeal Registration Details",
+      },
+      faq: {
+        "title": "Frequently Asked Questions",
+        "subtitle": "Find answers to common questions about filing Right to Information requests online.",
+        "searchLabel": "Search FAQs",
+        "searchPlaceholder": "Search FAQs...",
+        "resultsOne": "Showing {{count}} result for \"{{query}}\"",
+        "resultsOther": "Showing {{count}} results for \"{{query}}\"",
+        "noResultsTitle": "No FAQs found",
+        "noResultsBody": "Try searching for payment, appeal, status, public authority, OTP, or supporting document.",
+        "needHelp": "Need Help?",
+        "needHelpBody": "If you cannot find the answer you are looking for, contact our support desk.",
+        "contactSupport": "Contact Support",
+        "userManual": "User Manual",
+        "userManualBody": "Download the comprehensive guide for using the RTI Online portal.",
+        "downloadPdf": "Download PDF",
+        "sections": {
+          "filing": {
+            "title": "Request Scope & Filing",
+            "items": [
+              {
+                "q": "To which Public Authority can I file a request through this portal?",
+                "a": "An applicant who desires to obtain information under the RTI Act, 2005 can make a request through this RTI Online Portal to the Central Ministries/Departments and other Central Public Authorities mentioned in ONLINE RTI request form."
+              },
+              {
+                "q": "How do I write my application for seeking the information as per RTI Act 2005?",
+                "a": "The text of the application may be written in the prescribed column of the RTI request form. At present, the text of the application is confined up to 3000 characters only. In case, the text of an application contains more than 3000 characters, it can be uploaded as a PDF attachment in the \"Supporting Document\" column of the form."
+              },
+              {
+                "q": "What will happen to my application if I select a wrong Public Authority in the RTI request form?",
+                "a": "In case the RTI application is not meant for the Public authority which has been selected by the applicant, the \"Nodal Officer\" of the said public authority would transfer the application electronically to the \"Nodal Officer\" of the concerned Central Public authority, if aligned to this portal and physically to that Central Public authority which is not aligned to this portal, under section 6(3) of the RTI Act. It may be noted that RTI applications filed through this portal for the state public authorities, including NCT of Delhi, would be returned, without any refund of fee"
+              },
+              {
+                "q": "Can I file RTI application for state public authorities through this portal?",
+                "a": "No. This Portal is exclusively meant for Public Authorities under Central Govt. only."
+              },
+              {
+                "q": "Is it mandatory to create user account on RTI online web portal?",
+                "a": "No. You can directly file your RTI on \"Submit Request\" tab."
+              }
+            ]
+          },
+          "fees": {
+            "title": "Fees & Payment",
+            "items": [
+              {
+                "q": "How do I make the payment for RTI fee?",
+                "a": "After filling the first page of the RTI request form, a non-BPL applicant has to click on \"Make Payment\" button for payment of the prescribed RTI fee. The applicant can pay the prescribed RTI fee through the following modes: (i) Internet banking through SBI payment gateway and its associated banks. (ii) Using ATM-cum-Debit card of State Bank of India. (iii) Credit/Debit card of Master/Visa. (iv) UPI It may be noted that no RTI fee is required to be paid by a citizen who is below poverty line, as per RTI Rules, 2012. However, the BPL applicant must attach a copy of the certificate issued by the appropriate government in this regard, along with the application."
+              },
+              {
+                "q": "Will I be informed about the additional fee (if any) is required to pay?",
+                "a": "In case additional fee representing the cost is required for providing information, the CPIO will intimate the same, which can be viewed by the applicant through \"View Status\" option in the RTI Online Portal and an e-mail alert or SMS or both will also be sent to the applicant for the same. For payment of additional fee online, the applicant needs to use the option 'View Status' in the RTI Online Portal and on providing the registration number of the request, option for \"Make Payment\" will be available."
+              },
+              {
+                "q": "What should I do if amount is deducted from my account but registration number is not generated?",
+                "a": "Use \"Payment Reconciliation\" feature Please do not attempt to make payment repeatedly or try to submit request once again. Kindly wait for the 24 to 48 working hours as registration number will be generated after reconciliation. If it is not generated within stipulated time frame then kindly send an e-mail at helprtionline-dopt[at]nic[dot]in with your transaction details. However, in cases of unsuccessful RTI payment requests, if the requester wishes to check the payment status before 48 hours, it can be verified using the \"Payment Reconciliation\" feature."
+              },
+              {
+                "q": "What if the Registration Number is not received on my Email or Mobile No. even after 48 working Hours?",
+                "a": "Registration Number are generated after reconciliation of bank scrolls for cases whose numbers are not generated instantly after the payment. This procedure may take 24 to 48 working hours. If someones still does not receive the Registration Number, They may contact their respective bank for refund of amount."
+              },
+              {
+                "q": "What are the reasons for my RTI payment failing?",
+                "a": "The major reasons for failure are due to Business declines, Business Decline are as under: 1. Customer has set e-Commerce flag as Disabled for Debit / Credit Card. 2. Customer either closed the internet browser or not proceeded further with the transaction resulting into session timeout. 3. Wrong OTP or no OTP entered by customer. 4. Wrong details of cards entered by customers like Card No, CVV, expiry date. 5. Insufficient balance in customer's account. 6. Customer cancelled the transaction and reinitiated with different mode of payment (say from Debit card to UPI etc.). 7. Customer received collect request for payment in UPI app, but not completed the payment within time limit."
+              }
+            ]
+          },
+          "appeals": {
+            "title": "Appeals",
+            "items": [
+              {
+                "q": "How do I file an appeal with First Appellate Authority?",
+                "a": "For making an appeal to the first Appellate Authority, the applicant has to select the option \"Submit First Appeal\" in the RTI Online Portal and fill up the form that will appear. The registration number and e-mail ID of the original application is required for filing the first appeal."
+              },
+              {
+                "q": "Do I need to make any payment for filing an appeal?",
+                "a": "As per RTI Act, no fee has to be paid for first appeal."
+              },
+              {
+                "q": "What should I do when portal is not allowing me to file the first appeal?",
+                "a": "This may happen under following two situation: 1) When your RTI application has been physically transferred to other public authority, which is not aligned to this portal. In such a case, you are required to file your appeal in physical mode to the concerned public authority. 2) Another case can be if your RTI application has not been replied to by CPIO and 30 days period has not lapsed. In such a case, you may file first appeal only after completion of stipulated time period of 30 days."
+              },
+              {
+                "q": "Can I file online first appeal for any RTI application filed physically in the first place ?",
+                "a": "No,Online first appeal can only be filed against previously filed online RTI application."
+              },
+              {
+                "q": "If the RTI application is filed manually , then is it possible to file 1st appeal on line?",
+                "a": "Manual applications can be lodged into RTI Online portal by CPIOs and can be disposed off by CPIO online. In this context, if applicant provides email id/Mobile No. in the application form and CPIO lodges this RTI application in the portal , then the actions taken by CPIO will be conveyed to applicant automatically through e-mail and Mobile SMS. Then applicant can file 1st appeal with the help of registration number conveyed ."
+              }
+            ]
+          },
+          "status": {
+            "title": "Status, Receipts & Account History",
+            "items": [
+              {
+                "q": "Do I get any receipt for online filing of RTI application?",
+                "a": "On submission of an application, a unique registration number will be issued, which may be referred by the applicant for any future reference. It may be noted that the application filed through this RTI Online Portal will reach electronically to the \"Nodal Officer\" of the said Ministry/Department and \"Not\" to the CPIO of the concerned Ministry/Department. The Nodal Officer will transmit the RTI application electronically to the concerned CPIO."
+              },
+              {
+                "q": "Do I get any SMS from RTI Online Portal?",
+                "a": "Though optional, the mobile number can be provided by the applicant/ appellant in order to receive SMS alerts."
+              },
+              {
+                "q": "What can I do if I forgot my login credentials?",
+                "a": "You can go to View History column to see your past RTI requests/appeals."
+              },
+              {
+                "q": "How much time RTI request/appeal retain at this portal?",
+                "a": "In the View History/View Status citizen can see RTI Cases retained for a period of 3 years."
+              },
+              {
+                "q": "Why RTI application filed by me is not reflecting in my user account history?",
+                "a": "If you have opted to file RTI or First Appeal directly i.e without logging into your user account, then in such cases you will not be able to see the filed RTI or Appeal in your registered account's history. However you can always check its status in \"View Status\" with the provided Reg. Nos."
+              },
+              {
+                "q": "Why I have received multiple RTI registration numbers, even though I have filed single RTI application ?",
+                "a": "This is the case where in your RTI application has been forwarded to multiple CPIOs since the information sought lies with more than one PIO."
+              },
+              {
+                "q": "How can I View Status/Reply of my RTI Application or First Appeal?",
+                "a": "Status/Reply of the RTI Application or First appeal filed online can be viewed by the applicant by clicking on \"View Status\"."
+              },
+              {
+                "q": "Why this OTP feature is introduced in view status option?",
+                "a": "RTI Application may contain personal information of the Applicant and if any third person gets the registration number and email id, then the person can view this personal information. So, in order to protect personal information of the applicant, according to cyber security norms, this OTP validating feature has been introduced. In view status option while OTPs are promptly dispatched from the NIC email domain, delays may occasionally occur due to high traffic on either NIC server or external email services like Gmail or Yahoo. Importantly, OTPs do not expire until they are used, meaning users can access the status of their applications as soon as the OTP arrives."
+              }
+            ]
+          },
+          "help": {
+            "title": "Documents, Help & Troubleshooting",
+            "items": [
+              {
+                "q": "How to upload a supporting document if an alert comes as \"SUPPORTING DOCUMENTS REQUIRED FROM APPLICANT\"?",
+                "a": "When a Public Authority request for supporting document, an alert is sent to the applicant to his/her Mobile or Email Id. In such situation, the applicant is requested to visit the RTI Online Website and enter the details in 'View Status'. Once the detail is entered, the current status of the RTI application is shown along with the option for uploading the supporting document."
+              },
+              {
+                "q": "What queries can be raised with Helpline Email helprtionline-dopt(at)nic(dot)in ?",
+                "a": "Helpline mail id is exclusively meant for queries or problem being faced while filing the online RTI through this portal. Please do not send mail to this helpline for any other matter or asking for any other details. The reply is limited to RTI online portal of Central Government only."
+              },
+              {
+                "q": "What should I do when my browser show certificate error while opening RTI online portal?",
+                "a": "You should ignore the certificate error and proceed forward. Kindly select, Mozilla Firefox - I understand the risk add exception. Google Chrome - Proceed Anyway. Internet Explorer - Continue to this website"
+              }
+            ]
+          }
+        }
+      },
     },
   },
   hi: {
@@ -511,7 +679,7 @@ const resources = {
         refreshSecurity: "सुरक्षा जाँच रीफ़्रेश करें",
         signIn: "साइन इन करें",
         orContinue: "या इसके साथ जारी रखें",
-        signInDigiLocker: "डिजिलॉकर से साइन इन करें",
+        signInDigiLocker: "DigiLocker से साइन इन करें",
         prototypeNote: "यह प्रोटोटाइप केवल मॉक खाता डेटा का उपयोग करता है।",
         secureSession: "सुरक्षित डेमो सत्र",
         securityMismatch: "सुरक्षा जाँच मेल नहीं खाती। कृपया फिर से प्रयास करें।",
@@ -734,6 +902,174 @@ const resources = {
       },
       profile: {
         subtitle: "आवेदक प्रोफ़ाइल · आरटीआई आवेदनों में उपयोग होने वाले व्यक्तिगत और संपर्क विवरण", edit: "प्रोफ़ाइल संपादित करें", editing: "प्रोफ़ाइल संपादित की जा रही है", updated: "इस डेमो के लिए आपकी आवेदक प्रोफ़ाइल अपडेट कर दी गई है।", basic: "मूल जानकारी", address: "पता विवरण", additional: "अतिरिक्त जानकारी", account: "खाता विवरण", verified: "सत्यापित", alternatePhone: "वैकल्पिक फोन नंबर", countryName: "देश का नाम", notApplicable: "लागू नहीं", notProvided: "उपलब्ध नहीं", save: "परिवर्तन सहेजें", descriptions: { core: "आरटीआई संचार के लिए आपके मूल विवरण।", address: "आरटीआई आवेदनों के लिए आपका आवासीय और डाक पता।", additional: "वैकल्पिक विवरण जो हमसे संपर्क करने में सहायक हैं।", account: "इस आरटीआई पोर्टल के लिए आपके सुरक्षित प्रवेश विवरण।" },
+      },
+      notFound: {
+        title: "पृष्ठ नहीं मिला", body: "यह पथ आरटीआई प्रोटोटाइप में मौजूद नहीं है।", home: "मुख्य पृष्ठ पर लौटें",
+      },
+      mockPayment: {
+        title: "नमूना भुगतान गेटवे", description: "यह एक प्रोटोटाइप सिमुलेशन है। कोई शुल्क नहीं लिया जाएगा और किसी बैंक से संपर्क नहीं किया जाता।", amount: "राशि", authority: "लोक प्राधिकरण", applicant: "आवेदक", outcomeLegend: "डेमो भुगतान परिणाम", back: "फ़ॉर्म पर वापस जाएँ", complete: "नमूना भुगतान पूर्ण करें",
+        outcomes: { confirmed: { label: "भुगतान सफल", description: "सफल भुगतान की तरह आरटीआई आईडी तुरंत बनाता है।" }, awaitingBank: { label: "बैंक पुष्टि लंबित", description: "भुगतान प्रयास आरटीआई आईडी के बिना सहेजता है, जिसे भुगतान समाधान में देखा जा सकता है।" }, refunded: { label: "भुगतान विफल / वापस", description: "पलटा हुआ भुगतान प्रयास सहेजता है और आरटीआई अनुरोध नहीं बनाता।" } },
+      },
+      notifications: {
+        title: "सभी सूचनाएँ", subtitle: "अपठित अपडेट देखे जाने तक उजागर रहते हैं।", filterLabel: "सूचनाएँ फ़िल्टर करें", all: "सभी", unread: "अपठित", read: "पढ़ी गई", markAllRead: "सभी को पढ़ा हुआ चिह्नित करें", newBadge: "नया", readBadge: "पढ़ी गई", markRead: "पढ़ा हुआ चिह्नित करें", markNamedRead: "{{title}} को पढ़ा हुआ चिह्नित करें", unreadDot: "अपठित सूचना",
+      },
+      contact: {
+        title: "संपर्क करें", intro: "आरटीआई ऑनलाइन पोर्टल से जुड़े किसी भी प्रश्न में हम आपकी सहायता के लिए उपलब्ध हैं। कृपया अपनी आवश्यकता के अनुसार उपयुक्त संपर्क सूत्र से संपर्क करें।", supportTitle: "तकनीकी सहायता और सामान्य प्रश्न", supportBody: "तकनीकी समस्याओं, भुगतान संबंधी प्रश्नों या पोर्टल के उपयोग में सामान्य सहायता के लिए।", emailLabel: "ईमेल पता", helplineLabel: "हेल्पलाइन नंबर", officialTitle: "आधिकारिक संपर्क", officialBody: "आधिकारिक पत्राचार या अनसुलझी तकनीकी समस्याओं को आगे बढ़ाने के लिए।", noteLabel: "ध्यान दें:", noteBefore: "कृपया उपरोक्त ईमेल पतों पर आरटीआई आवेदन न भेजें। ये केवल तकनीकी सहायता और पोर्टल संबंधी सहायता के लिए हैं। आरटीआई आवेदन दायर करने के लिए कृपया पोर्टल पर ", noteLink: "अनुरोध जमा करें", noteAfter: " सुविधा का उपयोग करें।",
+      },
+      digilocker: {
+        badge: "सुरक्षित डेमो प्राधिकृति", title: "DigiLocker पहुँच को अधिकृत करें", titleComplete: "प्राधिकृति पूर्ण", description: "DigiLocker आपकी आवेदक प्रोफ़ाइल बनाने के लिए चयनित विवरण आरटीआई ऑनलाइन के साथ साझा करेगा।", descriptionComplete: "आपकी नमूना DigiLocker प्रोफ़ाइल आरटीआई ऑनलाइन के साथ सुरक्षित रूप से साझा कर दी गई है। आपको आवेदक प्रोफ़ाइल पर ले जाया जा रहा है…", completeHeading: "आरटीआई ऑनलाइन अब आपके साझा किए गए विवरण उपयोग कर सकता है।", redirecting: "आपकी प्रोफ़ाइल पर भेजा जा रहा है…", connectionLabel: "प्राधिकृति कनेक्शन", selectedDocuments: "आपके चयनित दस्तावेज़", applicantProfile: "आवेदक प्रोफ़ाइल", fetching: "आपके चयनित विवरण सुरक्षित रूप से प्राप्त किए जा रहे हैं…", sharedTitle: "आरटीआई ऑनलाइन द्वारा मांगे गए विवरण", sharedSubtitle: "केवल ये नमूना प्रोफ़ाइल विवरण साझा किए जाएंगे।", detailCount: "{{count}} विवरण", disclaimer: "यह एक प्रोटोटाइप सिमुलेशन है। किसी वास्तविक DigiLocker खाते, दस्तावेज़ या व्यक्तिगत डेटा तक पहुँच या साझाकरण नहीं होता।", authorizing: "अधिकृत किया जा रहा है…", authorize: "अधिकृत करके आगे बढ़ें",
+        fields: { fullName: "पूरा नाम", dateOfBirth: "जन्म तिथि", email: "ईमेल पता", mobile: "मोबाइल नंबर", address: "पता" },
+      },
+      success: {
+        requestTitle: "आपका आरटीआई अनुरोध सफलतापूर्वक दायर कर दिया गया।", requestSubtitle: "भविष्य के संदर्भ के लिए कृपया पंजीकरण विवरण नोट कर लें। आपके पंजीकृत पते पर एक पुष्टिकरण ईमेल भेज दिया गया है।", appealTitle: "आपकी आरटीआई अपील सफलतापूर्वक दायर कर दी गई।", appealSubtitle: "भविष्य के संदर्भ के लिए कृपया पंजीकरण विवरण नोट कर लें।", registrationDetails: "पंजीकरण विवरण", registrationNumber: "पंजीकरण संख्या", name: "नाम", dateOfFiling: "दायर करने की तिथि", filedWith: "अनुरोध जिसके पास दायर किया गया", appealAgainst: "अनुरोध के विरुद्ध अपील", contactDetails: "संपर्क विवरण", phone: "दूरभाष संख्या", email: "ईमेल आईडी", statusLabel: "स्थिति: {{status}}", copy: "पंजीकरण संख्या कॉपी करें", copied: "पंजीकरण संख्या कॉपी हो गई", copiedShort: "कॉपी हो गई", save: "सहेजें", printRequest: "पंजीकरण विवरण प्रिंट करें", printAppeal: "अपील विवरण प्रिंट करें", returnDashboard: "डैशबोर्ड पर लौटें",
+        receiptRequest: "आरटीआई अनुरोध पंजीकरण विवरण", receiptAppeal: "आरटीआई प्रथम अपील पंजीकरण विवरण",
+      },
+      faq: {
+        "title": "अक्सर पूछे जाने वाले प्रश्न",
+        "subtitle": "ऑनलाइन सूचना का अधिकार अनुरोध दायर करने से जुड़े सामान्य प्रश्नों के उत्तर पाएँ।",
+        "searchLabel": "अंग्रेज़ी में प्रश्न खोजें",
+        "searchPlaceholder": "अंग्रेज़ी में खोजें, जैसे payment या appeal...",
+        "resultsOne": "\"{{query}}\" के लिए {{count}} परिणाम दिखाया जा रहा है",
+        "resultsOther": "\"{{query}}\" के लिए {{count}} परिणाम दिखाए जा रहे हैं",
+        "noResultsTitle": "कोई प्रश्न नहीं मिला",
+        "noResultsBody": "खोज अंग्रेज़ी में करें — payment, appeal, status, public authority, OTP या supporting document आज़माकर देखें।",
+        "needHelp": "सहायता चाहिए?",
+        "needHelpBody": "यदि आपको अपना उत्तर न मिले, तो हमारे सहायता डेस्क से संपर्क करें।",
+        "contactSupport": "सहायता से संपर्क करें",
+        "userManual": "उपयोगकर्ता पुस्तिका",
+        "userManualBody": "आरटीआई ऑनलाइन पोर्टल के उपयोग की विस्तृत मार्गदर्शिका डाउनलोड करें।",
+        "downloadPdf": "पीडीएफ़ डाउनलोड करें",
+        "sections": {
+          "filing": {
+            "title": "अनुरोध का दायरा और दाखिल करना",
+            "items": [
+              {
+                "q": "इस पोर्टल के माध्यम से मैं किस लोक प्राधिकरण को अनुरोध भेज सकता हूँ?",
+                "a": "जो आवेदक आरटीआई अधिनियम, 2005 के अंतर्गत जानकारी प्राप्त करना चाहता है, वह इस आरटीआई ऑनलाइन पोर्टल के माध्यम से केंद्रीय मंत्रालयों/विभागों तथा ऑनलाइन आरटीआई अनुरोध फ़ॉर्म में उल्लिखित अन्य केंद्रीय लोक प्राधिकरणों को अनुरोध भेज सकता है।"
+              },
+              {
+                "q": "आरटीआई अधिनियम 2005 के अनुसार जानकारी माँगने के लिए मैं अपना आवेदन कैसे लिखूँ?",
+                "a": "आवेदन का पाठ आरटीआई अनुरोध फ़ॉर्म के निर्धारित कॉलम में लिखा जा सकता है। वर्तमान में आवेदन का पाठ केवल 3000 अक्षरों तक सीमित है। यदि आवेदन का पाठ 3000 अक्षरों से अधिक है, तो उसे फ़ॉर्म के \"सहायक दस्तावेज़\" कॉलम में पीडीएफ़ संलग्नक के रूप में अपलोड किया जा सकता है।"
+              },
+              {
+                "q": "यदि मैं आरटीआई अनुरोध फ़ॉर्म में ग़लत लोक प्राधिकरण चुन लूँ तो मेरे आवेदन का क्या होगा?",
+                "a": "यदि आरटीआई आवेदन उस लोक प्राधिकरण के लिए नहीं है जिसे आवेदक ने चुना है, तो उस लोक प्राधिकरण का \"नोडल अधिकारी\" आरटीआई अधिनियम की धारा 6(3) के अंतर्गत आवेदन को संबंधित केंद्रीय लोक प्राधिकरण के \"नोडल अधिकारी\" को इलेक्ट्रॉनिक रूप से अंतरित करेगा, यदि वह इस पोर्टल से जुड़ा है; और यदि वह इस पोर्टल से नहीं जुड़ा है तो भौतिक रूप से भेजेगा। ध्यान दें कि दिल्ली राष्ट्रीय राजधानी क्षेत्र सहित राज्य लोक प्राधिकरणों के लिए इस पोर्टल से दायर आरटीआई आवेदन बिना शुल्क वापसी के लौटा दिए जाएँगे।"
+              },
+              {
+                "q": "क्या मैं इस पोर्टल के माध्यम से राज्य लोक प्राधिकरणों के लिए आरटीआई आवेदन दायर कर सकता हूँ?",
+                "a": "नहीं। यह पोर्टल केवल केंद्र सरकार के अधीन लोक प्राधिकरणों के लिए है।"
+              },
+              {
+                "q": "क्या आरटीआई ऑनलाइन पोर्टल पर उपयोगकर्ता खाता बनाना अनिवार्य है?",
+                "a": "नहीं। आप सीधे \"अनुरोध जमा करें\" टैब पर अपनी आरटीआई दायर कर सकते हैं।"
+              }
+            ]
+          },
+          "fees": {
+            "title": "शुल्क और भुगतान",
+            "items": [
+              {
+                "q": "आरटीआई शुल्क का भुगतान मैं कैसे करूँ?",
+                "a": "आरटीआई अनुरोध फ़ॉर्म का पहला पृष्ठ भरने के बाद, ग़ैर-बीपीएल आवेदक को निर्धारित आरटीआई शुल्क के भुगतान के लिए \"भुगतान करें\" बटन पर क्लिक करना होता है। आवेदक निम्नलिखित माध्यमों से निर्धारित आरटीआई शुल्क का भुगतान कर सकता है: (i) एसबीआई पेमेंट गेटवे और उससे संबद्ध बैंकों के माध्यम से इंटरनेट बैंकिंग। (ii) भारतीय स्टेट बैंक के एटीएम-सह-डेबिट कार्ड से। (iii) Master/Visa के क्रेडिट/डेबिट कार्ड से। (iv) यूपीआई। ध्यान दें कि आरटीआई नियम, 2012 के अनुसार ग़रीबी रेखा से नीचे के नागरिक से कोई आरटीआई शुल्क नहीं लिया जाता। हालाँकि बीपीएल आवेदक को आवेदन के साथ समुचित सरकार द्वारा जारी प्रमाणपत्र की प्रति संलग्न करनी होगी।"
+              },
+              {
+                "q": "यदि अतिरिक्त शुल्क देना हो तो क्या मुझे इसकी सूचना दी जाएगी?",
+                "a": "यदि जानकारी उपलब्ध कराने की लागत के रूप में अतिरिक्त शुल्क अपेक्षित है, तो सीपीआईओ इसकी सूचना देगा, जिसे आवेदक आरटीआई ऑनलाइन पोर्टल में \"स्थिति देखें\" विकल्प से देख सकता है; साथ ही आवेदक को ई-मेल अलर्ट या एसएमएस अथवा दोनों भेजे जाएँगे। अतिरिक्त शुल्क के ऑनलाइन भुगतान के लिए आवेदक को पोर्टल में 'स्थिति देखें' विकल्प का उपयोग करना होगा और अनुरोध की पंजीकरण संख्या देने पर \"भुगतान करें\" विकल्प उपलब्ध हो जाएगा।"
+              },
+              {
+                "q": "यदि मेरे खाते से राशि कट गई हो पर पंजीकरण संख्या न बनी हो तो मैं क्या करूँ?",
+                "a": "\"भुगतान समाधान\" सुविधा का उपयोग करें। कृपया बार-बार भुगतान करने या अनुरोध दोबारा जमा करने का प्रयास न करें। कृपया 24 से 48 कार्य घंटे प्रतीक्षा करें, क्योंकि समाधान के बाद पंजीकरण संख्या बन जाएगी। यदि निर्धारित समय में यह न बने तो कृपया अपने लेनदेन विवरण के साथ helprtionline-dopt[at]nic[dot]in पर ई-मेल भेजें। असफल आरटीआई भुगतान अनुरोधों में यदि आवेदक 48 घंटे से पहले भुगतान स्थिति देखना चाहे, तो इसे \"भुगतान समाधान\" सुविधा से सत्यापित किया जा सकता है।"
+              },
+              {
+                "q": "यदि 48 कार्य घंटों के बाद भी मेरे ईमेल या मोबाइल नंबर पर पंजीकरण संख्या न मिले तो क्या करूँ?",
+                "a": "जिन मामलों में भुगतान के तुरंत बाद संख्या नहीं बनती, उनमें बैंक स्क्रॉल के समाधान के बाद पंजीकरण संख्या बनाई जाती है। इस प्रक्रिया में 24 से 48 कार्य घंटे लग सकते हैं। यदि फिर भी पंजीकरण संख्या प्राप्त न हो, तो राशि वापसी के लिए अपने संबंधित बैंक से संपर्क करें।"
+              },
+              {
+                "q": "मेरा आरटीआई भुगतान विफल होने के क्या कारण हो सकते हैं?",
+                "a": "विफलता के प्रमुख कारण बिज़नेस डिक्लाइन होते हैं, जो इस प्रकार हैं: 1. ग्राहक ने डेबिट/क्रेडिट कार्ड के लिए ई-कॉमर्स फ़्लैग अक्षम कर रखा हो। 2. ग्राहक ने ब्राउज़र बंद कर दिया हो या लेनदेन आगे न बढ़ाया हो, जिससे सत्र समाप्त हो गया। 3. ग्राहक ने ग़लत ओटीपी डाला हो या ओटीपी न डाला हो। 4. ग्राहक ने कार्ड संख्या, सीवीवी, समाप्ति तिथि जैसे ग़लत विवरण भरे हों। 5. ग्राहक के खाते में अपर्याप्त शेष राशि हो। 6. ग्राहक ने लेनदेन रद्द कर किसी अन्य माध्यम से दोबारा शुरू किया हो (जैसे डेबिट कार्ड से यूपीआई)। 7. ग्राहक को यूपीआई ऐप में भुगतान का कलेक्ट अनुरोध मिला हो, पर समय-सीमा में भुगतान पूरा न किया हो।"
+              }
+            ]
+          },
+          "appeals": {
+            "title": "अपीलें",
+            "items": [
+              {
+                "q": "प्रथम अपीलीय प्राधिकारी के पास अपील मैं कैसे दायर करूँ?",
+                "a": "प्रथम अपीलीय प्राधिकारी के पास अपील करने के लिए आवेदक को आरटीआई ऑनलाइन पोर्टल में \"प्रथम अपील जमा करें\" विकल्प चुनकर सामने आने वाला फ़ॉर्म भरना होता है। प्रथम अपील दायर करने के लिए मूल आवेदन की पंजीकरण संख्या और ई-मेल आईडी आवश्यक है।"
+              },
+              {
+                "q": "क्या अपील दायर करने के लिए मुझे कोई भुगतान करना होगा?",
+                "a": "आरटीआई अधिनियम के अनुसार प्रथम अपील के लिए कोई शुल्क नहीं देना होता।"
+              },
+              {
+                "q": "जब पोर्टल मुझे प्रथम अपील दायर नहीं करने दे रहा हो तो मैं क्या करूँ?",
+                "a": "ऐसा दो स्थितियों में हो सकता है: 1) जब आपका आरटीआई आवेदन किसी ऐसे अन्य लोक प्राधिकरण को भौतिक रूप से अंतरित कर दिया गया हो जो इस पोर्टल से नहीं जुड़ा है। ऐसी स्थिति में आपको संबंधित लोक प्राधिकरण के पास भौतिक रूप से अपील दायर करनी होगी। 2) दूसरी स्थिति यह हो सकती है कि सीपीआईओ ने आपके आरटीआई आवेदन का उत्तर न दिया हो और 30 दिन की अवधि पूरी न हुई हो। ऐसी स्थिति में आप 30 दिन की निर्धारित अवधि पूरी होने के बाद ही प्रथम अपील दायर कर सकते हैं।"
+              },
+              {
+                "q": "क्या भौतिक रूप से दायर किसी आरटीआई आवेदन के लिए मैं ऑनलाइन प्रथम अपील दायर कर सकता हूँ?",
+                "a": "नहीं, ऑनलाइन प्रथम अपील केवल पहले से ऑनलाइन दायर आरटीआई आवेदन के विरुद्ध ही की जा सकती है।"
+              },
+              {
+                "q": "यदि आरटीआई आवेदन मैन्युअल रूप से दायर किया गया हो, तो क्या प्रथम अपील ऑनलाइन दायर करना संभव है?",
+                "a": "मैन्युअल आवेदन सीपीआईओ द्वारा आरटीआई ऑनलाइन पोर्टल में दर्ज किए जा सकते हैं और सीपीआईओ द्वारा ऑनलाइन निपटाए जा सकते हैं। इस संदर्भ में, यदि आवेदक आवेदन फ़ॉर्म में ईमेल आईडी/मोबाइल नंबर देता है और सीपीआईओ इस आरटीआई आवेदन को पोर्टल में दर्ज करता है, तो सीपीआईओ द्वारा की गई कार्रवाई आवेदक को ई-मेल और मोबाइल एसएमएस से स्वतः सूचित की जाएगी। इसके बाद आवेदक सूचित पंजीकरण संख्या की सहायता से प्रथम अपील दायर कर सकता है।"
+              }
+            ]
+          },
+          "status": {
+            "title": "स्थिति, रसीदें और खाता इतिहास",
+            "items": [
+              {
+                "q": "आरटीआई आवेदन ऑनलाइन दायर करने पर क्या मुझे कोई रसीद मिलती है?",
+                "a": "आवेदन जमा करने पर एक विशिष्ट पंजीकरण संख्या जारी की जाएगी, जिसका उपयोग आवेदक भविष्य के किसी भी संदर्भ के लिए कर सकता है। ध्यान दें कि इस आरटीआई ऑनलाइन पोर्टल से दायर आवेदन संबंधित मंत्रालय/विभाग के \"नोडल अधिकारी\" तक इलेक्ट्रॉनिक रूप से पहुँचेगा, न कि सीधे संबंधित मंत्रालय/विभाग के सीपीआईओ तक। नोडल अधिकारी आरटीआई आवेदन को संबंधित सीपीआईओ को इलेक्ट्रॉनिक रूप से भेजेगा।"
+              },
+              {
+                "q": "क्या मुझे आरटीआई ऑनलाइन पोर्टल से कोई एसएमएस मिलता है?",
+                "a": "यद्यपि यह वैकल्पिक है, आवेदक/अपीलकर्ता एसएमएस अलर्ट प्राप्त करने के लिए अपना मोबाइल नंबर दे सकता है।"
+              },
+              {
+                "q": "यदि मैं अपने लॉगिन विवरण भूल जाऊँ तो क्या कर सकता हूँ?",
+                "a": "आप अपने पिछले आरटीआई अनुरोध/अपीलें देखने के लिए इतिहास देखें कॉलम में जा सकते हैं।"
+              },
+              {
+                "q": "आरटीआई अनुरोध/अपील इस पोर्टल पर कितने समय तक रहते हैं?",
+                "a": "इतिहास देखें/स्थिति देखें में नागरिक 3 वर्ष की अवधि तक संरक्षित आरटीआई मामले देख सकते हैं।"
+              },
+              {
+                "q": "मेरे द्वारा दायर आरटीआई आवेदन मेरे खाता इतिहास में क्यों नहीं दिख रहा?",
+                "a": "यदि आपने आरटीआई या प्रथम अपील सीधे, अर्थात अपने खाते में लॉगिन किए बिना दायर करना चुना है, तो ऐसी स्थिति में दायर की गई आरटीआई या अपील आपके पंजीकृत खाते के इतिहास में नहीं दिखेगी। हालाँकि आप दी गई पंजीकरण संख्या से \"स्थिति देखें\" में इसकी स्थिति हमेशा देख सकते हैं।"
+              },
+              {
+                "q": "एक ही आरटीआई आवेदन दायर करने पर भी मुझे कई पंजीकरण संख्याएँ क्यों मिलीं?",
+                "a": "यह वह स्थिति है जिसमें आपका आरटीआई आवेदन कई सीपीआईओ को अग्रेषित किया गया है, क्योंकि माँगी गई जानकारी एक से अधिक पीआईओ के पास है।"
+              },
+              {
+                "q": "अपने आरटीआई आवेदन या प्रथम अपील की स्थिति/उत्तर मैं कैसे देखूँ?",
+                "a": "ऑनलाइन दायर आरटीआई आवेदन या प्रथम अपील की स्थिति/उत्तर आवेदक \"स्थिति देखें\" पर क्लिक करके देख सकता है।"
+              },
+              {
+                "q": "स्थिति देखें विकल्प में यह ओटीपी सुविधा क्यों जोड़ी गई है?",
+                "a": "आरटीआई आवेदन में आवेदक की व्यक्तिगत जानकारी हो सकती है और यदि किसी तीसरे व्यक्ति को पंजीकरण संख्या और ईमेल आईडी मिल जाए, तो वह यह व्यक्तिगत जानकारी देख सकता है। इसलिए, आवेदक की व्यक्तिगत जानकारी की सुरक्षा हेतु साइबर सुरक्षा मानदंडों के अनुसार यह ओटीपी सत्यापन सुविधा शुरू की गई है। स्थिति देखें विकल्प में ओटीपी एनआईसी ईमेल डोमेन से तुरंत भेजे जाते हैं, फिर भी एनआईसी सर्वर या Gmail अथवा Yahoo जैसी बाहरी ईमेल सेवाओं पर अधिक ट्रैफ़िक के कारण कभी-कभी विलंब हो सकता है। महत्वपूर्ण बात यह है कि ओटीपी उपयोग होने तक समाप्त नहीं होते, अर्थात ओटीपी आते ही उपयोगकर्ता अपने आवेदनों की स्थिति देख सकते हैं।"
+              }
+            ]
+          },
+          "help": {
+            "title": "दस्तावेज़, सहायता और समस्या-निवारण",
+            "items": [
+              {
+                "q": "यदि \"आवेदक से सहायक दस्तावेज़ अपेक्षित\" का अलर्ट आए तो सहायक दस्तावेज़ कैसे अपलोड करें?",
+                "a": "जब कोई लोक प्राधिकरण सहायक दस्तावेज़ माँगता है, तो आवेदक के मोबाइल या ईमेल आईडी पर एक अलर्ट भेजा जाता है। ऐसी स्थिति में आवेदक से अनुरोध है कि वे आरटीआई ऑनलाइन वेबसाइट पर जाकर 'स्थिति देखें' में विवरण दर्ज करें। विवरण दर्ज करते ही आरटीआई आवेदन की वर्तमान स्थिति के साथ सहायक दस्तावेज़ अपलोड करने का विकल्प दिखाई देगा।"
+              },
+              {
+                "q": "हेल्पलाइन ईमेल helprtionline-dopt(at)nic(dot)in पर कौन-से प्रश्न भेजे जा सकते हैं?",
+                "a": "हेल्पलाइन मेल आईडी केवल इस पोर्टल से ऑनलाइन आरटीआई दायर करते समय आने वाले प्रश्नों या समस्याओं के लिए है। कृपया किसी अन्य विषय या अन्य विवरण के लिए इस हेल्पलाइन पर मेल न भेजें। उत्तर केवल केंद्र सरकार के आरटीआई ऑनलाइन पोर्टल तक सीमित है।"
+              },
+              {
+                "q": "आरटीआई ऑनलाइन पोर्टल खोलते समय ब्राउज़र में प्रमाणपत्र त्रुटि दिखे तो मैं क्या करूँ?",
+                "a": "आपको प्रमाणपत्र त्रुटि को अनदेखा कर आगे बढ़ना चाहिए। कृपया चुनें — Mozilla Firefox: I understand the risk, add exception। Google Chrome: Proceed Anyway। Internet Explorer: Continue to this website।"
+              }
+            ]
+          }
+        }
       },
     },
   },

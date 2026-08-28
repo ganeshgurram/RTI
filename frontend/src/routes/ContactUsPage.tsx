@@ -1,4 +1,5 @@
 import { type ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 
 import { mockContactDetails } from "@/data/mock-contact"
 import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
@@ -19,14 +20,15 @@ function ContactRow({ icon, label, children }: { icon: string; label: string; ch
 }
 
 export function ContactUsPage() {
+  const { t } = useTranslation()
   const { openRequestGuidelines } = useRequestGuidelines()
 
   return (
     <div className="mx-auto w-full max-w-container-max px-margin-mobile py-stack-lg md:px-margin-desktop md:py-16">
       <header className="mx-auto mb-10 max-w-2xl text-center md:mb-12">
-        <h1 className="font-headline-lg text-4xl font-bold tracking-tight text-primary md:text-[48px]">Contact Us</h1>
+        <h1 className="font-headline-lg text-4xl font-bold tracking-tight text-primary md:text-[48px]">{t("contact.title")}</h1>
         <p className="mt-4 text-lg leading-7 text-on-surface-variant">
-          We are here to assist you with any queries regarding the RTI Online portal. Please reach out to the appropriate contact for your needs.
+          {t("contact.intro")}
         </p>
       </header>
 
@@ -37,17 +39,17 @@ export function ContactUsPage() {
               <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary-container/10 md:size-16">
                 <MaterialIcon className="text-3xl text-primary-container">support_agent</MaterialIcon>
               </div>
-              <h2 className="font-headline-md text-2xl font-bold text-primary">Technical Support &amp; General Queries</h2>
+              <h2 className="font-headline-md text-2xl font-bold text-primary">{t("contact.supportTitle")}</h2>
             </div>
             <div>
               <p className="mb-6 text-base leading-6 text-on-surface-variant">
-                For technical issues, payment queries, or general assistance with using the RTI Online portal.
+                {t("contact.supportBody")}
               </p>
               <div className="space-y-4">
-                <ContactRow icon="mail" label="Email Address">
+                <ContactRow icon="mail" label={t("contact.emailLabel")}>
                   <a className="text-lg font-semibold text-primary transition-colors hover:text-surface-tint" href={`mailto:${mockContactDetails.supportEmail}`}>{mockContactDetails.supportEmail}</a>
                 </ContactRow>
-                <ContactRow icon="call" label="Helpline Number">
+                <ContactRow icon="call" label={t("contact.helplineLabel")}>
                   <p className="text-lg font-semibold text-primary">{mockContactDetails.helplineNumber}</p>
                   <p className="mt-1 text-xs leading-5 text-on-surface-variant">{mockContactDetails.helplineAvailability}</p>
                 </ContactRow>
@@ -62,9 +64,9 @@ export function ContactUsPage() {
               <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-container/10">
                 <MaterialIcon className="text-primary-container">account_balance</MaterialIcon>
               </div>
-              <h2 className="font-headline-md text-xl font-bold text-primary">Official Contact</h2>
+              <h2 className="font-headline-md text-xl font-bold text-primary">{t("contact.officialTitle")}</h2>
             </div>
-            <p className="text-sm leading-6 text-on-surface-variant">For official correspondence or escalation of unresolved technical issues.</p>
+            <p className="text-sm leading-6 text-on-surface-variant">{t("contact.officialBody")}</p>
           </div>
           <div className="space-y-5">
             <div>
@@ -84,7 +86,7 @@ export function ContactUsPage() {
         </section>
 
         <aside className="flex flex-col items-start self-start rounded-lg border border-surface-variant bg-surface-container-low p-5 text-left text-sm leading-6 text-on-surface-variant md:col-span-12 md:col-start-1 md:p-6">
-          <p><strong className="text-on-surface">Note:</strong> Please do not file RTI applications to the above email addresses. These are strictly for technical support and portal-related assistance. To file an RTI application, please use the <button className="font-medium text-surface-tint underline underline-offset-2 transition-colors hover:text-primary" onClick={() => openRequestGuidelines()} type="button">Submit Request</button> functionality on the portal.</p>
+          <p><strong className="text-on-surface">{t("contact.noteLabel")}</strong> {t("contact.noteBefore")}<button className="font-medium text-surface-tint underline underline-offset-2 transition-colors hover:text-primary" onClick={() => openRequestGuidelines()} type="button">{t("contact.noteLink")}</button>{t("contact.noteAfter")}</p>
         </aside>
       </div>
     </div>
