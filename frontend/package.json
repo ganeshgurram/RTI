@@ -4,8 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/ensure-dependencies.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/ensure-dependencies.mjs",
     "build": "tsc -b && vite build",
+    "prelint": "node scripts/ensure-dependencies.mjs",
     "lint": "oxlint",
     "eval:authorities": "node --experimental-strip-types --no-warnings scripts/eval-authority-recommendations.mjs",
     "eval:privacy": "node --no-warnings scripts/eval-privacy-filter.mjs",

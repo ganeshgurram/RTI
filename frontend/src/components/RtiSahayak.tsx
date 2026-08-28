@@ -2,34 +2,143 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
+import { usePortalLanguage, type PortalLanguage } from "@/i18n"
 import type { AuthoritySuggestion } from "@/services/authority-recommendations"
 import {
   askRtiSahayak,
   containsSensitiveData,
-  type ChatHistoryMessage,
-  type TokenUsage,
+  translateChatMessages,
+  type ChatRole,
+  type LocalizedText,
 } from "@/services/rti-sahayak"
 
-type ChatMessage = ChatHistoryMessage & {
+type ChatMessage = {
   id: string
+  role: ChatRole
+  /**
+   * The message in every language it is known in. Switching the portal language keeps the
+   * conversation and shows the other side of this, translating it first where it is missing.
+   */
+  text: LocalizedText
+  /** What the message was originally written in - the fallback when a translation is missing. */
+  sourceLanguage: PortalLanguage
   authoritySuggestions?: AuthoritySuggestion[]
   source?: "gpt-5.6-luna" | "local"
 }
 
-const welcomeMessage: ChatMessage = {
-  id: "welcome",
-  role: "assistant",
-  content:
-    "Namaste! I am RTI Sahayak. I can answer general questions about filing an RTI, fees, appeals, Public Authorities, and using View Status.",
-  source: "local",
+type ChatCopy = {
+  name: string
+  welcome: string
+  subtitle: string
+  privacyWarning: string
+  privacyNotice: string
+  authorityTitle: string
+  relatedOffices: string
+  confirmAuthority: string
+  preparing: string
+  askLabel: string
+  placeholder: string
+  sendMessage: string
+  browseFaqs: string
+  clearChat: string
+  closeChat: string
+  openChat: string
+  translating: string
+  translationFailed: string
+  suggestions: string[]
 }
 
-const suggestions = [
-  "Which department handles a passport issue?",
-  "What is the RTI fee?",
-  "How do I file a First Appeal?",
-  "How can I check my status?",
-]
+const chatCopy: Record<PortalLanguage, ChatCopy> = {
+  en: {
+    name: "RTI Sahayak",
+    welcome:
+      "Namaste! I am RTI Sahayak. I can answer general questions about filing an RTI, fees, appeals, Public Authorities, and using View Status.",
+    subtitle: "General RTI guidance - no personal data",
+    privacyWarning: "Never share contact details, IDs, application numbers, OTPs, passwords, payment details, or documents.",
+    privacyNotice:
+      "That message was not sent. For your privacy, do not share names, contact details, Aadhaar/PAN, registration numbers, OTPs, passwords, payment details, or documents.",
+    authorityTitle: "Possible filing targets",
+    relatedOffices: "Related offices",
+    confirmAuthority: "Confirm in Public Authorities",
+    preparing: "RTI Sahayak is preparing an answer...",
+    askLabel: "Ask RTI Sahayak",
+    placeholder: "Describe the issue in general terms...",
+    sendMessage: "Send message",
+    browseFaqs: "Browse official FAQs",
+    clearChat: "Clear chat",
+    closeChat: "Close RTI Sahayak",
+    openChat: "Open RTI Sahayak",
+    translating: "Translating this conversation into English...",
+    translationFailed: "Some earlier messages could not be translated, and are shown as they were written.",
+    suggestions: [
+      "Which department handles a passport issue?",
+      "What is the RTI fee?",
+      "How do I file a First Appeal?",
+      "How can I check my status?",
+    ],
+  },
+  hi: {
+    name: "आरटीआई सहायक",
+    welcome:
+      "नमस्ते! मैं आरटीआई सहायक हूँ। मैं आरटीआई आवेदन, शुल्क, अपील, लोक प्राधिकरण और स्थिति देखने से जुड़े सामान्य प्रश्नों में आपकी सहायता कर सकता हूँ।",
+    subtitle: "सामान्य आरटीआई मार्गदर्शन - कोई व्यक्तिगत जानकारी नहीं",
+    privacyWarning: "संपर्क विवरण, पहचान पत्र, आवेदन संख्या, ओटीपी, पासवर्ड, भुगतान विवरण या दस्तावेज़ कभी साझा न करें।",
+    privacyNotice:
+      "वह संदेश भेजा नहीं गया। आपकी गोपनीयता के लिए नाम, संपर्क विवरण, आधार/पैन, पंजीकरण संख्या, ओटीपी, पासवर्ड, भुगतान विवरण या दस्तावेज़ साझा न करें।",
+    authorityTitle: "संभावित दाखिला प्राधिकरण",
+    relatedOffices: "संबंधित कार्यालय",
+    confirmAuthority: "लोक प्राधिकरणों में पुष्टि करें",
+    preparing: "आरटीआई सहायक उत्तर तैयार कर रहा है...",
+    askLabel: "आरटीआई सहायक से पूछें",
+    placeholder: "समस्या को सामान्य शब्दों में लिखें...",
+    sendMessage: "संदेश भेजें",
+    browseFaqs: "आधिकारिक सामान्य प्रश्न देखें",
+    clearChat: "चैट साफ़ करें",
+    closeChat: "आरटीआई सहायक बंद करें",
+    openChat: "आरटीआई सहायक खोलें",
+    translating: "इस बातचीत का हिन्दी में अनुवाद हो रहा है...",
+    translationFailed: "कुछ पुराने संदेशों का अनुवाद नहीं हो सका, वे मूल रूप में दिखाए जा रहे हैं।",
+    suggestions: [
+      "पासपोर्ट संबंधी समस्या के लिए कौन-सा विभाग जिम्मेदार है?",
+      "आरटीआई शुल्क कितना है?",
+      "मैं प्रथम अपील कैसे दर्ज करूँ?",
+      "मैं अपनी स्थिति कैसे देख सकता हूँ?",
+    ],
+  },
+}
+
+function createWelcomeMessage(language: PortalLanguage): ChatMessage {
+  return {
+    id: "welcome",
+    role: "assistant",
+    // Portal copy, so both languages are already written and no translation is ever needed.
+    text: { en: chatCopy.en.welcome, hi: chatCopy.hi.welcome },
+    sourceLanguage: language,
+    source: "local",
+  }
+}
+
+function localize(language: PortalLanguage, text: string): LocalizedText {
+  return language === "hi" ? { hi: text } : { en: text }
+}
+
+function getMessageText(message: ChatMessage, language: PortalLanguage) {
+  return message.text[language] ?? message.text[message.sourceLanguage] ?? ""
+}
+
+function getTranslationKey(message: ChatMessage, language: PortalLanguage) {
+  return message.id + ":" + language
+}
+
+function needsTranslation(
+  message: ChatMessage,
+  language: PortalLanguage,
+  failedTranslations: ReadonlySet<string>
+) {
+  return (
+    message.text[language] === undefined && !failedTranslations.has(getTranslationKey(message, language))
+  )
+}
 
 function createMessageId() {
   return crypto.randomUUID()
@@ -129,14 +238,14 @@ function FormattedMessage({ content }: { content: string }) {
   return <div className="space-y-2">{blocks}</div>
 }
 
-function AuthorityMatches({ suggestions }: { suggestions: AuthoritySuggestion[] }) {
+function AuthorityMatches({ suggestions, copy }: { suggestions: AuthoritySuggestion[]; copy: ChatCopy }) {
   if (!suggestions.length) {
     return null
   }
 
   return (
     <section className="mt-3 border-t border-border pt-3">
-      <p className="mb-2 text-xs font-semibold text-foreground">Possible filing targets</p>
+      <p className="mb-2 text-xs font-semibold text-foreground">{copy.authorityTitle}</p>
       <div className="space-y-2">
         {suggestions.map((suggestion) => (
           <div className="rounded-lg border border-border bg-muted/40 p-2.5" key={suggestion.authorityId}>
@@ -146,14 +255,14 @@ function AuthorityMatches({ suggestions }: { suggestions: AuthoritySuggestion[] 
             )}
             {suggestion.relatedOffices.length > 0 && (
               <p className="mt-1.5 text-xs leading-4 text-muted-foreground">
-                Related offices: {suggestion.relatedOffices.join("; ")}
+                {copy.relatedOffices}: {suggestion.relatedOffices.join("; ")}
               </p>
             )}
           </div>
         ))}
       </div>
       <Link className="mt-2 inline-flex text-xs font-semibold text-primary hover:underline" to="/public-authorities">
-        Confirm in Public Authorities
+        {copy.confirmAuthority}
         <span aria-hidden="true" className="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
       </Link>
     </section>
@@ -161,17 +270,82 @@ function AuthorityMatches({ suggestions }: { suggestions: AuthoritySuggestion[] 
 }
 
 export function RtiSahayak() {
+  const { language } = usePortalLanguage()
+  const copy = chatCopy[language]
   const [isOpen, setIsOpen] = useState(false)
   const [hasScrolledDown, setHasScrolledDown] = useState(false)
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage])
-  const [privacyNotice, setPrivacyNotice] = useState("")
-  const [tokenUsage, setTokenUsage] = useState<TokenUsage | null>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage(language)])
+  const [hasPrivacyNotice, setHasPrivacyNotice] = useState(false)
+  /** Messages whose translation was already tried and failed - retrying would loop forever. */
+  const [failedTranslations, setFailedTranslations] = useState<ReadonlySet<string>>(() => new Set())
   const safetyIdentifier = useRef(createSafetyIdentifier())
+  const activeConversation = useRef(0)
+  const isTranslatingRef = useRef(false)
   const launcherRef = useRef<HTMLDivElement>(null)
   const messageListRef = useRef<HTMLDivElement>(null)
   const draftRef = useRef<HTMLTextAreaElement>(null)
+
+  // Both derived rather than stored, so they clear themselves the moment a message is carried
+  // across, and the indicator appears the instant the language flips rather than one pass later.
+  const isTranslating = messages.some((message) => needsTranslation(message, language, failedTranslations))
+  const translationFailed = messages.some(
+    (message) =>
+      message.text[language] === undefined && failedTranslations.has(getTranslationKey(message, language))
+  )
+
+  // Switching the portal language keeps the conversation rather than clearing it, so a message
+  // the model wrote in the other language has to be carried across. This also covers a reply
+  // that lands after the switch, which was generated in the language it was asked in.
+  useEffect(() => {
+    if (isTranslatingRef.current) {
+      return
+    }
+
+    const pending = messages.filter((message) => needsTranslation(message, language, failedTranslations))
+
+    if (!pending.length) {
+      return
+    }
+
+    // The target is captured rather than read later: a switch back mid-flight must still file
+    // the answer under the language it was requested in, not under whatever is selected now.
+    const targetLanguage = language
+    isTranslatingRef.current = true
+
+    void (async () => {
+      const result = await translateChatMessages({
+        texts: pending.map((message) => getMessageText(message, targetLanguage)),
+        language: targetLanguage,
+        safetyIdentifier: safetyIdentifier.current,
+      })
+
+      // Released before the state updates below, so the pass they trigger can start the next
+      // batch. Every branch here changes state, so a pass always follows.
+      isTranslatingRef.current = false
+
+      if (result) {
+        // A batch is capped by size, so the rest is picked up when this state change re-runs.
+        const translated = new Map(
+          result.translations.map((text, index) => [pending[index].id, text] as const)
+        )
+
+        setMessages((currentMessages) =>
+          currentMessages.map((message) => {
+            const text = translated.get(message.id)
+            return text ? { ...message, text: { ...message.text, [targetLanguage]: text } } : message
+          })
+        )
+      } else {
+        setFailedTranslations((current) => {
+          const next = new Set(current)
+          pending.forEach((message) => next.add(getTranslationKey(message, targetLanguage)))
+          return next
+        })
+      }
+    })()
+  }, [language, messages, failedTranslations])
 
   // Grow the box to fit what has been typed instead of making the user scroll inside it.
   // Height is cleared first so the box also shrinks back when text is deleted.
@@ -191,7 +365,7 @@ export function RtiSahayak() {
     if (list) {
       list.scrollTop = list.scrollHeight
     }
-  }, [messages, isSending, isOpen])
+  }, [messages, isSending, isTranslating, isOpen])
 
   // Keep the launcher clear of the site footer as it enters the viewport, and reveal the
   // back-to-top button once the page has moved about a screenful.
@@ -232,60 +406,66 @@ export function RtiSahayak() {
     setDraft("")
 
     if (containsSensitiveData(message)) {
-      setPrivacyNotice(
-        "That message was not sent. For your privacy, do not share names, contact details, Aadhaar/PAN, registration numbers, OTPs, passwords, payment details, or documents."
-      )
+      setHasPrivacyNotice(true)
       return
     }
 
-    setPrivacyNotice("")
+    setHasPrivacyNotice(false)
     const userMessage: ChatMessage = {
       id: createMessageId(),
       role: "user",
-      content: message,
+      text: localize(language, message),
+      sourceLanguage: language,
     }
     const nextMessages = [...messages, userMessage]
+    const conversationId = activeConversation.current
     setMessages(nextMessages)
     setIsSending(true)
 
     const history = nextMessages
       .filter((item) => item.id !== "welcome")
       .slice(-4)
-      .map(({ role, content }) => ({ role, content }))
+      .map((item) => ({ role: item.role, content: getMessageText(item, language) }))
 
-    const response = await askRtiSahayak({
-      message,
-      history,
-      safetyIdentifier: safetyIdentifier.current,
-    })
+    try {
+      const response = await askRtiSahayak({
+        message,
+        history,
+        language,
+        safetyIdentifier: safetyIdentifier.current,
+      })
 
-    const usage = response.usage
-    if (usage) {
-      setTokenUsage((currentUsage) => ({
-        inputTokens: (currentUsage?.inputTokens ?? 0) + usage.inputTokens,
-        outputTokens: (currentUsage?.outputTokens ?? 0) + usage.outputTokens,
-        totalTokens: (currentUsage?.totalTokens ?? 0) + usage.totalTokens,
-      }))
+      // Ignore a reply that belonged to a conversation the user has since cleared.
+      if (conversationId !== activeConversation.current) {
+        return
+      }
+
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: createMessageId(),
+          role: "assistant",
+          text: response.reply,
+          // The language the answer was asked in, which may no longer be the selected one.
+          sourceLanguage: language,
+          authoritySuggestions: response.authoritySuggestions,
+          source: response.source,
+        },
+      ])
+    } finally {
+      if (conversationId === activeConversation.current) {
+        setIsSending(false)
+      }
     }
-
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: createMessageId(),
-        role: "assistant",
-        content: response.reply,
-        authoritySuggestions: response.authoritySuggestions,
-        source: response.source,
-      },
-    ])
-    setIsSending(false)
   }
 
   const clearConversation = () => {
-    setMessages([welcomeMessage])
+    activeConversation.current += 1
+    setFailedTranslations(new Set())
+    setMessages([createWelcomeMessage(language)])
     setDraft("")
-    setPrivacyNotice("")
-    setTokenUsage(null)
+    setHasPrivacyNotice(false)
+    setIsSending(false)
     safetyIdentifier.current = createSafetyIdentifier()
   }
 
@@ -295,7 +475,7 @@ export function RtiSahayak() {
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end" ref={launcherRef}>
       {isOpen && (
         <section
-          aria-label="RTI Sahayak chat"
+          aria-label={copy.name + " chat"}
           className="mb-3 flex h-[min(38rem,calc(100svh/var(--app-scale)-7.5rem))] w-[calc(100vw-2.5rem)] max-w-[25rem] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:w-[25rem]"
         >
           <header className="flex items-start gap-3 bg-primary px-4 py-3 text-primary-foreground">
@@ -303,11 +483,11 @@ export function RtiSahayak() {
               <span aria-hidden="true" className="material-symbols-outlined text-xl">support_agent</span>
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="font-headline-md text-base font-semibold">RTI Sahayak</h2>
-              <p className="text-xs text-primary-foreground/75">General RTI guidance - no personal data</p>
+              <h2 className="font-headline-md text-base font-semibold">{copy.name}</h2>
+              <p className="text-xs text-primary-foreground/75">{copy.subtitle}</p>
             </div>
             <Button
-              aria-label="Close RTI Sahayak"
+              aria-label={copy.closeChat}
               className="shrink-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
               onClick={() => setIsOpen(false)}
               size="icon-sm"
@@ -319,7 +499,7 @@ export function RtiSahayak() {
 
           <div className="border-b border-border bg-muted/50 px-4 py-2 text-xs leading-5 text-muted-foreground">
             <span aria-hidden="true" className="material-symbols-outlined mr-1 align-[-3px] text-sm">shield</span>
-            Never share contact details, IDs, application numbers, OTPs, passwords, payment details, or documents.
+            {copy.privacyWarning}
           </div>
 
           <div aria-live="polite" className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-4" ref={messageListRef}>
@@ -329,17 +509,23 @@ export function RtiSahayak() {
                 key={message.id}
               >
                 {message.role === "assistant"
-                  ? <FormattedMessage content={message.content} />
-                  : message.content}
+                  ? <FormattedMessage content={getMessageText(message, language)} />
+                  : getMessageText(message, language)}
                 {message.role === "assistant" && message.authoritySuggestions && (
-                  <AuthorityMatches suggestions={message.authoritySuggestions} />
+                  <AuthorityMatches copy={copy} suggestions={message.authoritySuggestions} />
                 )}
               </div>
             ))}
+            {isTranslating && (
+              <div className="flex w-fit items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground shadow-sm">
+                <span aria-hidden="true" className="material-symbols-outlined animate-spin text-base">progress_activity</span>
+                {copy.translating}
+              </div>
+            )}
             {isSending && (
               <div className="mr-5 flex w-fit items-center gap-2 rounded-2xl rounded-bl-sm border border-border bg-background px-3 py-2 text-sm text-muted-foreground shadow-sm">
                 <span aria-hidden="true" className="material-symbols-outlined animate-pulse text-base">more_horiz</span>
-                RTI Sahayak is preparing an answer...
+                {copy.preparing}
               </div>
             )}
           </div>
@@ -347,7 +533,7 @@ export function RtiSahayak() {
           <div className="border-t border-border bg-background p-3">
             {messages.length === 1 && (
               <div className="mb-3 flex flex-wrap gap-2">
-                {suggestions.map((suggestion) => (
+                {copy.suggestions.map((suggestion) => (
                   <button
                     className="rounded-full border border-border bg-background px-3 py-1.5 text-left text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isSending}
@@ -361,9 +547,15 @@ export function RtiSahayak() {
               </div>
             )}
 
-            {privacyNotice && (
+            {hasPrivacyNotice && (
               <p className="mb-2 rounded-md bg-destructive/10 px-2.5 py-2 text-xs leading-4 text-destructive" role="alert">
-                {privacyNotice}
+                {copy.privacyNotice}
+              </p>
+            )}
+
+            {translationFailed && !isTranslating && (
+              <p className="mb-2 rounded-md bg-muted px-2.5 py-2 text-xs leading-4 text-muted-foreground">
+                {copy.translationFailed}
               </p>
             )}
 
@@ -374,7 +566,7 @@ export function RtiSahayak() {
                 void sendMessage(draft)
               }}
             >
-              <label className="sr-only" htmlFor="rti-sahayak-message">Ask RTI Sahayak</label>
+              <label className="sr-only" htmlFor="rti-sahayak-message">{copy.askLabel}</label>
               <textarea
                 className="max-h-32 min-h-10 flex-1 resize-none overflow-y-auto rounded-lg border border-input bg-background px-3 py-2 text-sm leading-5 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
                 disabled={isSending}
@@ -391,28 +583,20 @@ export function RtiSahayak() {
                   event.preventDefault()
                   void sendMessage(draft)
                 }}
-                placeholder="Describe the issue in general terms..."
+                placeholder={copy.placeholder}
                 ref={draftRef}
                 rows={1}
                 value={draft}
               />
-              <Button aria-label="Send message" disabled={!draft.trim() || isSending} size="icon" type="submit">
+              <Button aria-label={copy.sendMessage} disabled={!draft.trim() || isSending} size="icon" type="submit">
                 <span aria-hidden="true" className="material-symbols-outlined">send</span>
               </Button>
             </form>
 
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-              <Link className="font-medium text-foreground hover:underline" to="/faq">Browse official FAQs</Link>
-              <button className="hover:text-foreground hover:underline" onClick={clearConversation} type="button">Clear chat</button>
+              <Link className="font-medium text-foreground hover:underline" to="/faq">{copy.browseFaqs}</Link>
+              <button className="hover:text-foreground hover:underline" onClick={clearConversation} type="button">{copy.clearChat}</button>
             </div>
-
-            <p className="mt-2 border-t border-border pt-2 text-[11px] leading-4 text-muted-foreground">
-              {tokenUsage
-                ? "Luna session tokens - in: " + tokenUsage.inputTokens + " | out: " + tokenUsage.outputTokens + " | total: " + tokenUsage.totalTokens
-                : "Luna usage appears here after a live AI response."}
-              <br />
-              Response cap: 1,200 tokens per Luna request.
-            </p>
           </div>
         </section>
       )}
@@ -430,7 +614,7 @@ export function RtiSahayak() {
 
       <Button
         aria-expanded={isOpen}
-        aria-label={isOpen ? "Close RTI Sahayak" : "Open RTI Sahayak"}
+        aria-label={isOpen ? copy.closeChat : copy.openChat}
         className={isOpen
           ? "h-12 rounded-full bg-primary px-4 text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary"
           : "h-12 rounded-full border-primary-foreground/25 bg-primary/55 px-4 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:supports-backdrop-filter:backdrop-blur-sm"}
@@ -438,7 +622,7 @@ export function RtiSahayak() {
         size="lg"
       >
         <span aria-hidden="true" className="material-symbols-outlined">support_agent</span>
-        <span>RTI Sahayak</span>
+        <span>{copy.name}</span>
       </Button>
     </div>
   )

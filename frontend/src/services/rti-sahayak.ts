@@ -4,24 +4,40 @@ import {
 } from "@/services/authority-recommendations"
 
 export type ChatRole = "assistant" | "user"
+export type RtiSahayakLanguage = "en" | "hi"
 
 export type ChatHistoryMessage = {
   role: ChatRole
   content: string
 }
 
-export type TokenUsage = {
-  inputTokens: number
-  outputTokens: number
-  totalTokens: number
-}
+/**
+ * One message held in every language it is known in. Text the portal itself writes is filled in
+ * for both at once; text the model wrote exists in one language until it is translated.
+ */
+export type LocalizedText = Partial<Record<RtiSahayakLanguage, string>>
 
 export type RtiSahayakReply = {
-  reply: string
+  reply: LocalizedText
   source: "gpt-5.6-luna" | "local"
   authoritySuggestions: AuthoritySuggestion[]
-  usage?: TokenUsage
 }
+
+export type TranslationResult = {
+  /**
+   * Translations for the first N of the texts given, in order. A batch that would be too large
+   * is cut short here rather than sent whole; the caller translates the remainder on a later pass.
+   */
+  translations: string[]
+}
+
+/**
+ * Kept in step with the same limits in api/rti-sahayak.js, which rejects an oversized batch.
+ * The character budget is what one response window can hold once translated, not a preference:
+ * a batch that needs a larger window than the account can pay for is refused outright.
+ */
+const MAX_TRANSLATION_SEGMENTS = 12
+const MAX_TRANSLATION_BATCH_CHARS = 1600
 
 /**
  * A message is refused when one of these matches. Every value pattern requires a digit, because
@@ -49,7 +65,52 @@ export function containsSensitiveData(text: string) {
   return sensitivePatterns.some((pattern) => pattern.test(text))
 }
 
-function getLocalReply(message: string, suggestions: AuthoritySuggestion[]): string {
+function getHindiLocalReply(message: string, suggestions: AuthoritySuggestion[]): string {
+  const query = message.toLowerCase()
+
+  if (suggestions.length) {
+    const subject = suggestions[0].matchReason
+
+    return (subject ? "आपका प्रश्न " + subject + " विषय से सबसे अधिक मेल खाता है। " : "") +
+      "नीचे दिए गए केंद्रीय लोक प्राधिकरण इस विषय को संभालते हैं। आवेदन करने से पहले लोक प्राधिकरण निर्देशिका में पुष्टि करें कि सूचना किस कार्यालय के पास है। ये केवल सुझाव हैं, अंतिम कानूनी निर्णय नहीं।"
+  }
+
+  if (/(first appeal|1st appeal|प्रथम अपील|पहली अपील)/u.test(query)) {
+    return "प्रथम अपील दर्ज करने के लिए ‘प्रथम अपील दर्ज करें’ चुनें और मूल ऑनलाइन आरटीआई आवेदन में उपयोग की गई पंजीकरण संख्या तथा ईमेल आईडी सुरक्षित अपील फॉर्म में भरें। प्रथम अपील के लिए कोई शुल्क नहीं है। ये विवरण यहाँ साझा न करें।"
+  }
+
+  if (/(second appeal|2nd appeal|द्वितीय अपील|दूसरी अपील)/u.test(query)) {
+    return "द्वितीय अपील उन मामलों के लिए है जिनमें आप प्रथम अपीलीय प्राधिकारी के निर्णय से संतुष्ट नहीं हैं। आरटीआई सहायक प्रक्रिया समझा सकता है; अपने मामले के विवरण के लिए आधिकारिक अपील फॉर्म का उपयोग करें।"
+  }
+
+  if (/(fee|payment|upi|debit|credit|bpl|money|deducted|शुल्क|भुगतान|कटा)/u.test(query)) {
+    return "गैर-बीपीएल आवेदक आवेदन फॉर्म पूरा करने के बाद निर्धारित आरटीआई शुल्क देते हैं। पोर्टल एसबीआई इंटरनेट बैंकिंग, एसबीआई डेबिट कार्ड, मास्टर/वीज़ा कार्ड और यूपीआई का समर्थन करता है। बीपीएल आवेदक शुल्क नहीं देते, लेकिन आधिकारिक फॉर्म में आवश्यक बीपीएल प्रमाणपत्र संलग्न करते हैं। भुगतान कटने पर भी पंजीकरण संख्या न बने तो भुगतान मिलान का उपयोग करें और सहायता लेने से पहले 24-48 कार्य घंटे प्रतीक्षा करें।"
+  }
+
+  if (/(status|track|reply|registration|स्थिति|ट्रैक|पंजीकरण)/u.test(query)) {
+    return "ऑनलाइन आरटीआई आवेदन या प्रथम अपील की स्थिति अथवा उत्तर ‘स्थिति देखें’ से देखा जा सकता है। गोपनीयता के लिए पंजीकरण संख्या, ईमेल या ओटीपी चैट में भेजने के बजाय सुरक्षित स्थिति प्रक्रिया का उपयोग करें।"
+  }
+
+  if (/(state|central|public authority|ministry|department|राज्य|केंद्रीय|लोक प्राधिकरण|मंत्रालय|विभाग)/u.test(query)) {
+    return "यह आरटीआई ऑनलाइन पोर्टल केवल केंद्र सरकार के मंत्रालयों, विभागों और सूचीबद्ध केंद्रीय लोक प्राधिकरणों के लिए है। दिल्ली के राष्ट्रीय राजधानी क्षेत्र सहित राज्य लोक प्राधिकरणों के आवेदन इस पोर्टल पर दर्ज नहीं किए जाने चाहिए।"
+  }
+
+  if (/(file|submit|request|apply|दर्ज|आवेदन|अनुरोध)/u.test(query)) {
+    return "आरटीआई अनुरोध ‘अनुरोध दर्ज करें’ से सीधे दायर किया जा सकता है; खाता बनाना अनिवार्य नहीं है। फॉर्म में अनुरोध का पाठ 3,000 वर्णों तक भरा जा सकता है। लंबा अनुरोध हो तो आधिकारिक फॉर्म के सहायक दस्तावेज़ क्षेत्र से पीडीएफ संलग्न करें।"
+  }
+
+  if (/(document|upload|attachment|supporting|दस्तावेज|अपलोड|संलग्न)/u.test(query)) {
+    return "यदि किसी लोक प्राधिकरण ने सहायक दस्तावेज़ मांगा है, तो सुरक्षित पोर्टल में ‘स्थिति देखें’ खोलें। आवेदन की स्थिति में दस्तावेज़ अपलोड करने का विकल्प दिखेगा। दस्तावेज़ चैट में न भेजें और न चिपकाएँ।"
+  }
+
+  return "मैं आरटीआई आवेदन, शुल्क, प्रथम या द्वितीय अपील, केंद्रीय लोक प्राधिकरण चुनने और ‘स्थिति देखें’ के बारे में सहायता कर सकता हूँ। समस्या को सामान्य शब्दों में लिखें, मैं संभावित विभागों का सुझाव दूँगा। व्यक्तिगत विवरण, पंजीकरण संख्या, ओटीपी, भुगतान विवरण या दस्तावेज़ साझा न करें।"
+}
+
+function getLocalReply(message: string, suggestions: AuthoritySuggestion[], language: RtiSahayakLanguage): string {
+  if (language === "hi") {
+    return getHindiLocalReply(message, suggestions)
+  }
+
   const query = message.toLowerCase()
 
   if (suggestions.length) {
@@ -90,40 +151,24 @@ function getLocalReply(message: string, suggestions: AuthoritySuggestion[]): str
   return "I can help with RTI filing, fees, First or Second Appeals, selecting a Central Public Authority, and using View Status. Describe the issue in general terms and I will suggest possible departments. Do not share personal details, registration numbers, OTPs, payment details, or documents."
 }
 
-function toTokenUsage(value: unknown): TokenUsage | undefined {
-  if (!value || typeof value !== "object") {
-    return undefined
-  }
-
-  const usage = value as Record<string, unknown>
-  const inputTokens = usage.inputTokens
-  const outputTokens = usage.outputTokens
-  const totalTokens = usage.totalTokens
-
-  if (
-    typeof inputTokens !== "number" ||
-    typeof outputTokens !== "number" ||
-    typeof totalTokens !== "number"
-  ) {
-    return undefined
-  }
-
-  return { inputTokens, outputTokens, totalTokens }
-}
-
 export async function askRtiSahayak({
   message,
   history,
+  language,
   safetyIdentifier,
 }: {
   message: string
   history: ChatHistoryMessage[]
+  language: RtiSahayakLanguage
   safetyIdentifier: string
 }): Promise<RtiSahayakReply> {
   if (containsSensitiveData(message)) {
     return {
-      reply:
-        "For your privacy, I have not sent that message. Please do not share personal details, registration numbers, OTPs, payment details, passwords, or documents here. Use the secure portal journey for account- or application-specific help.",
+      // Written by the portal, so both languages are known without asking the model.
+      reply: {
+        en: "For your privacy, I have not sent that message. Please do not share personal details, registration numbers, OTPs, payment details, passwords, or documents here. Use the secure portal journey for account- or application-specific help.",
+        hi: "आपकी गोपनीयता के लिए वह संदेश भेजा नहीं गया। व्यक्तिगत विवरण, पंजीकरण संख्या, ओटीपी, भुगतान विवरण, पासवर्ड या दस्तावेज़ यहाँ साझा न करें। खाते या आवेदन से जुड़ी सहायता के लिए सुरक्षित पोर्टल प्रक्रिया का उपयोग करें।",
+      },
       source: "local",
       authoritySuggestions: [],
     }
@@ -138,6 +183,7 @@ export async function askRtiSahayak({
       body: JSON.stringify({
         message,
         history,
+        language,
         safetyIdentifier,
         authoritySuggestions,
       }),
@@ -147,25 +193,85 @@ export async function askRtiSahayak({
       throw new Error("RTI Sahayak service is unavailable")
     }
 
-    const data = (await response.json()) as {
-      reply?: unknown
-      usage?: unknown
-    }
+    const data = (await response.json()) as { reply?: unknown }
     if (typeof data.reply !== "string" || !data.reply.trim()) {
       throw new Error("RTI Sahayak returned an empty response")
     }
 
     return {
-      reply: data.reply.trim(),
+      reply: { [language]: data.reply.trim() },
       source: "gpt-5.6-luna",
       authoritySuggestions,
-      usage: toTokenUsage(data.usage),
     }
   } catch {
     return {
-      reply: getLocalReply(message, authoritySuggestions),
+      // The local reply is written from a fixed script, so both languages cost nothing here and
+      // the fallback answer survives a language switch even while the service is unreachable.
+      reply: {
+        en: getLocalReply(message, authoritySuggestions, "en"),
+        hi: getLocalReply(message, authoritySuggestions, "hi"),
+      },
       source: "local",
       authoritySuggestions,
     }
+  }
+}
+
+/**
+ * Translates messages already on screen into the newly selected portal language. Returns null
+ * when the translation cannot be trusted - the caller then keeps showing the original text,
+ * which reads in the wrong language but is never the wrong words.
+ */
+export async function translateChatMessages({
+  texts,
+  language,
+  safetyIdentifier,
+}: {
+  texts: string[]
+  language: RtiSahayakLanguage
+  safetyIdentifier: string
+}): Promise<TranslationResult | null> {
+  const batch: string[] = []
+  let remainingChars = MAX_TRANSLATION_BATCH_CHARS
+
+  for (const text of texts) {
+    // A single message longer than the whole budget still goes, alone, rather than never.
+    if (batch.length && (batch.length >= MAX_TRANSLATION_SEGMENTS || text.length > remainingChars)) {
+      break
+    }
+
+    batch.push(text)
+    remainingChars -= text.length
+  }
+
+  if (!batch.length) {
+    return null
+  }
+
+  try {
+    const response = await fetch("/api/rti-sahayak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: "translate", texts: batch, language, safetyIdentifier }),
+    })
+
+    if (!response.ok) {
+      throw new Error("RTI Sahayak could not translate the conversation")
+    }
+
+    const data = (await response.json()) as { translations?: unknown }
+    const translations = data.translations
+
+    if (
+      !Array.isArray(translations) ||
+      translations.length !== batch.length ||
+      translations.some((item) => typeof item !== "string" || !item.trim())
+    ) {
+      throw new Error("RTI Sahayak returned a mismatched translation")
+    }
+
+    return { translations: (translations as string[]).map((item) => item.trim()) }
+  } catch {
+    return null
   }
 }
