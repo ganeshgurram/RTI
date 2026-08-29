@@ -1,7 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 
 import { useAuth } from "@/auth/AuthContext"
-import { mockProfile, mockRequests } from "@/data/mock-profile"
+import {
+  digiLockerMockProfile,
+  digiLockerMockRequests,
+  mockProfile,
+  mockRequests,
+  type ApplicantProfile,
+} from "@/data/mock-profile"
 
 export type RtiRequest = (typeof mockRequests)[number] & {
   applicantEmail: string
@@ -29,15 +35,27 @@ type RequestContextValue = {
   requests: RtiRequest[]
 }
 
-const requestStorageKey = "rti-demo-requests"
+/** Bumped when the seed data changed - a stale store holds only the password account's history. */
+const requestStorageKey = "rti-demo-requests-v2"
 const RequestContext = createContext<RequestContextValue | undefined>(undefined)
 
-const initialRequests: RtiRequest[] = mockRequests.map((request) => ({
-  ...request,
-  applicantEmail: mockProfile.email,
-  applicantName: mockProfile.fullName,
-  applicantPhone: mockProfile.mobile,
-}))
+/**
+ * Each seeded request is stamped with its own applicant, because useAccountRequests() below
+ * filters on the signed-in email. Both demo accounts need their own history or whichever one is
+ * not the owner signs in to an empty Request History.
+ */
+const seedFor = (requests: typeof mockRequests, profile: ApplicantProfile): RtiRequest[] =>
+  requests.map((request) => ({
+    ...request,
+    applicantEmail: profile.email,
+    applicantName: profile.fullName,
+    applicantPhone: profile.mobile,
+  }))
+
+const initialRequests: RtiRequest[] = [
+  ...seedFor(mockRequests, mockProfile),
+  ...seedFor(digiLockerMockRequests, digiLockerMockProfile),
+]
 
 function getStoredRequests() {
   try {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 
+import { useAuth } from "@/auth/AuthContext"
 import { mockNotifications, type MockNotification } from "@/data/mock-notifications"
 
 type NotificationContextValue = {
@@ -9,7 +10,8 @@ type NotificationContextValue = {
   markAllAsRead: () => void
 }
 
-const notificationStorageKey = "rti-demo-notifications"
+/** Bumped when the seed data changed shape - a stale inbox has no applicantEmail to filter on. */
+const notificationStorageKey = "rti-demo-notifications-v2"
 const NotificationContext = createContext<NotificationContextValue | undefined>(undefined)
 
 function getStoredNotifications() {
@@ -31,23 +33,39 @@ function getStoredNotifications() {
  */
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<MockNotification[]>(getStoredNotifications)
+  const { user } = useAuth()
 
   useEffect(() => {
     localStorage.setItem(notificationStorageKey, JSON.stringify(notifications))
   }, [notifications])
 
+  /**
+   * Both demo accounts keep their inbox in the same store, so only the signed-in one is shown.
+   * Otherwise the DigiLocker applicant sees alerts about requests that are not hers.
+   */
+  const visible = useMemo(() => {
+    if (!user) return []
+
+    const accountEmail = user.email.trim().toLowerCase()
+    return notifications.filter((notification) => notification.applicantEmail.trim().toLowerCase() === accountEmail)
+  }, [notifications, user])
+
   const value = useMemo<NotificationContextValue>(() => ({
-    notifications,
-    unreadCount: notifications.filter((notification) => !notification.isRead).length,
+    notifications: visible,
+    unreadCount: visible.filter((notification) => !notification.isRead).length,
     markAsRead: (notificationId) => {
       setNotifications((current) => current.map((notification) => (
         notification.id === notificationId ? { ...notification, isRead: true } : notification
       )))
     },
     markAllAsRead: () => {
-      setNotifications((current) => current.map((notification) => ({ ...notification, isRead: true })))
+      // Only this account's, or signing in as one user would silently clear the other's badge.
+      const ownIds = new Set(visible.map((notification) => notification.id))
+      setNotifications((current) => current.map((notification) => (
+        ownIds.has(notification.id) ? { ...notification, isRead: true } : notification
+      )))
     },
-  }), [notifications])
+  }), [visible])
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
 }

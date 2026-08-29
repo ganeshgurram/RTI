@@ -77,4 +77,21 @@ The project includes a serverless handler at frontend/api/rti-sahayak.js configu
 2. Add your OpenRouter OPENROUTER_API_KEY. Do not use a VITE_ prefix.
 3. Run npm run dev from the repository root.
 
-The Vite development server invokes the same secure API handler as the deployed serverless route. Token usage is recorded in the terminal only, as numeric input, output, and total counts per call; the chat widget shows the applicant nothing about tokens or model limits. The response cap is 1,200 tokens per request.
+The Vite development server invokes the same secure API handler as the deployed serverless route. Token usage is recorded in the terminal only, as numeric input, output, and total counts per call; the chat widget shows the applicant nothing about tokens or model limits. The response cap is 900 tokens per request.
+
+### Deploying to Vercel
+
+The site and the chat endpoint deploy together: Vercel serves the built assets and runs `frontend/api/rti-sahayak.js` as a serverless function at `/api/rti-sahayak`. Because that is the same origin the page is served from, there is no CORS involved and no endpoint URL to configure.
+
+| Setting | Value |
+|---|---|
+| Root Directory | `frontend` |
+| Framework Preset | Vite (build `npm run build`, output `dist`) |
+| Environment Variable | `OPENROUTER_API_KEY` — no `VITE_` prefix, all environments |
+
+Two things the project already carries so this works:
+
+- `frontend/vercel.json` rewrites unmatched paths to `/index.html`, because `App.tsx` uses `createBrowserRouter` and a hard reload of `/faq` would otherwise 404. The `(?!api/)` lookahead in the rewrite keeps `/api/rti-sahayak` routed to the function rather than being swallowed by the SPA shell — without it the chatbot silently falls back to local replies.
+- `engines.node` in `frontend/package.json`, since the repo-root `.nvmrc` is outside the configured Root Directory and Vercel will not read it.
+
+Set a spend cap on the OpenRouter key before the deployment is public. The function is unauthenticated, so anyone who finds the URL can spend credits against it.

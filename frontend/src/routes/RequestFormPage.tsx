@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { indianStates, indianUnionTerritories } from "@/data/indian-states"
 import type { PaymentRequestDraft } from "@/data/mock-transactions"
 import type { RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
 import { useRequests } from "@/requests/RequestContext"
@@ -189,7 +190,9 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
   const captchaCodes = ["915267", "418903", "672154"]
   const captchaCode = captchaCodes[captchaIndex]
   const applicantProfile = user?.profile ?? null
-  const profileMobile = applicantProfile?.mobile.replace(/\D/g, "")
+  // Keep only the last ten digits: the profile stores "+91 98765 43210" and the +91 is already
+  // rendered as a fixed prefix beside this input, so the country code must not be repeated in it.
+  const profileMobile = applicantProfile?.mobile.replace(/\D/g, "").slice(-10)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -349,7 +352,7 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
           </div>
           <div className="space-y-1">
             <label className={labelClassName} htmlFor="request-state">{t("requestForm.state")}<Required /></label>
-            <select className={selectClassName} defaultValue={applicantProfile?.address.state ?? ""} id="request-state" name="state" required><option disabled value="">{t("requestForm.selectState")}</option><option>Delhi</option><option>Kerala</option><option>Maharashtra</option><option>Tamil Nadu</option></select>
+            <select className={selectClassName} defaultValue={applicantProfile?.address.state ?? ""} id="request-state" name="state" required><option disabled value="">{t("requestForm.selectState")}</option><optgroup label={t("requestForm.statesGroup")}>{indianStates.map((option) => <option key={option}>{option}</option>)}</optgroup><optgroup label={t("requestForm.unionTerritoriesGroup")}>{indianUnionTerritories.map((option) => <option key={option}>{option}</option>)}</optgroup></select>
           </div>
           <fieldset className="space-y-1">
             <legend className={labelClassName}>{t("requestForm.areaType")}</legend>

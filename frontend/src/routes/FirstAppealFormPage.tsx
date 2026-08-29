@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { indianStates, indianUnionTerritories } from "@/data/indian-states"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -12,7 +13,6 @@ const labelClassName = "text-label-lg font-semibold text-on-surface"
 // the refresh as an outline icon button on the right.
 const captchaCodeClassName = "flex h-10 min-w-24 shrink-0 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary"
 const captchaRefreshClassName = "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-on-surface outline-none transition-all hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px"
-const stateOptions = ["Delhi", "Kerala", "Maharashtra", "Tamil Nadu"]
 
 function AppealRow({ children, label, hint, required = false }: { children: ReactNode; label: string; hint?: string; required?: boolean }) {
   return (
@@ -122,7 +122,7 @@ export function FirstAppealFormPage() {
           </AppealRow>
           <AppealRow label={t("requestForm.pinCode")}><div className="flex items-center gap-2"><input className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.pincode ?? ""} inputMode="numeric" type="text" /><HelpIcon title={t("requestForm.pinCode")} /></div></AppealRow>
           <AppealRow label={t("requestForm.country")}><div className="flex gap-4">{['India', 'Other'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.country ?? "India") === option} name="appeal-country" type="radio" value={option} />{t(`requestForm.${option === "India" ? "india" : "other"}`)}</label>)}</div></AppealRow>
-          <AppealRow label={t("requestForm.state")}><select className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.state ?? ""}><option disabled value="">{t("requestForm.selectState")}</option>{stateOptions.map((option) => <option key={option}>{option}</option>)}</select></AppealRow>
+          <AppealRow label={t("requestForm.state")}><select className={`${fieldClassName} md:w-1/3`} defaultValue={appellantProfile?.address.state ?? ""}><option disabled value="">{t("requestForm.selectState")}</option><optgroup label={t("requestForm.statesGroup")}>{indianStates.map((option) => <option key={option}>{option}</option>)}</optgroup><optgroup label={t("requestForm.unionTerritoriesGroup")}>{indianUnionTerritories.map((option) => <option key={option}>{option}</option>)}</optgroup></select></AppealRow>
           <AppealRow label={t("requestForm.areaType")}><div className="flex gap-4">{['Rural', 'Urban'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.areaType ?? "Urban") === option} name="appeal-area" type="radio" value={option} />{t(`requestForm.${option === "Rural" ? "rural" : "urban"}`)}</label>)}</div></AppealRow>
           <AppealRow label={t("requestForm.educationalStatus")}><div className="flex gap-4">{['Literate', 'Illiterate'].map((option) => <label className="flex items-center gap-2 text-body-md" key={option}><input defaultChecked={(appellantProfile?.educationalStatus ?? "Literate") === option} name="appeal-education" type="radio" value={option} />{t(`requestForm.${option === "Literate" ? "literate" : "illiterate"}`)}</label>)}</div></AppealRow>
           <AppealRow hint={t("firstAppeal.smsHint")} label={t("requestForm.mobile")}><div className="flex items-center gap-2"><div className="flex w-full md:w-2/3"><input className="w-16 rounded-l border border-r-0 border-outline-variant bg-surface-container-lowest px-3 py-2 text-center text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue="+91" type="text" /><input className="flex-grow rounded-r border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary" defaultValue={appellantMobile} name="mobile" type="tel" /></div><HelpIcon title={t("requestForm.mobile")} /></div></AppealRow>
