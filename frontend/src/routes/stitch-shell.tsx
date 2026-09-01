@@ -331,7 +331,8 @@ function StitchTopNav() {
                 className="rounded bg-secondary px-6 py-2 font-label-lg text-label-lg text-on-secondary shadow-sm transition-colors hover:bg-secondary/90"
                 to={location.pathname === "/login" ? "/signup" : "/login"}
               >
-                {location.pathname === "/login" ? t("nav.signUp") : location.pathname === "/signup" ? t("nav.signIn") : t("nav.signInOrSignUp")}
+                {/* On the auth pages this offers the other one; everywhere else it is just Sign in. */}
+                {location.pathname === "/login" ? t("nav.signUp") : t("nav.signIn")}
               </Link>
             )}
           </div>
