@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { IconTooltip } from "@/components/IconTooltip"
 import { usePortalLanguage } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import { useNotifications } from "@/notifications/NotificationContext"
@@ -159,9 +160,9 @@ function StitchTopNav() {
       <div className="relative z-50 w-full bg-primary text-on-primary/70">
         <div className="mx-auto flex h-9 w-full max-w-container-max items-center justify-end gap-1 px-3 text-label-sm md:px-margin-desktop">
           <span className="mr-1 hidden sm:inline">{t("nav.textSize")}</span>
-          <button aria-label={t("nav.increaseText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale >= maxTextScale} onClick={() => setTextScale((current) => clampTextScale(current + textScaleStep))} type="button">A+</button>
-          <button aria-label={t("nav.resetText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale === 1} onClick={() => setTextScale(1)} type="button">A</button>
-          <button aria-label={t("nav.decreaseText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale <= minTextScale} onClick={() => setTextScale((current) => clampTextScale(current - textScaleStep))} type="button">A-</button>
+          <IconTooltip label={t("nav.increaseText")} render={<button aria-label={t("nav.increaseText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale >= maxTextScale} onClick={() => setTextScale((current) => clampTextScale(current + textScaleStep))} type="button" />} side="bottom">A+</IconTooltip>
+          <IconTooltip label={t("nav.resetText")} render={<button aria-label={t("nav.resetText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale === 1} onClick={() => setTextScale(1)} type="button" />} side="bottom">A</IconTooltip>
+          <IconTooltip label={t("nav.decreaseText")} render={<button aria-label={t("nav.decreaseText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale <= minTextScale} onClick={() => setTextScale((current) => clampTextScale(current - textScaleStep))} type="button" />} side="bottom">A-</IconTooltip>
           <span aria-hidden="true" className="mx-2 h-4 border-l border-on-primary/30" />
           <button aria-label={t("language.switchToEnglish")} aria-pressed={language === "en"} className={`rounded px-2 py-0.5 transition-colors ${language === "en" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("en")} type="button">{t("language.english")}</button>
           <span aria-hidden="true" className="opacity-50">|</span>
@@ -185,7 +186,7 @@ function StitchTopNav() {
                 <MaterialIcon>menu</MaterialIcon>
               </SheetTrigger>
               <SheetContent
-                className="border-white/20 bg-background/65 bg-[linear-gradient(135deg,hsl(var(--background)/0.92),hsl(var(--muted)/0.72)_48%,hsl(var(--background)/0.58))] shadow-[0_24px_80px_hsl(var(--foreground)/0.28)] ring-1 ring-white/25 supports-backdrop-filter:backdrop-blur-2xl supports-backdrop-filter:backdrop-saturate-200 data-[side=left]:bottom-3 data-[side=left]:left-3 data-[side=left]:top-3 data-[side=left]:h-auto data-[side=left]:w-[min(20rem,calc(100vw-1.5rem))] data-[side=left]:rounded-2xl data-[side=left]:border"
+                className="border-white/20 bg-background/65 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--background)_92%,transparent),color-mix(in_oklab,var(--muted)_72%,transparent)_48%,color-mix(in_oklab,var(--background)_58%,transparent))] shadow-[0_24px_80px_color-mix(in_oklab,var(--foreground)_28%,transparent)] ring-1 ring-white/25 supports-backdrop-filter:backdrop-blur-2xl supports-backdrop-filter:backdrop-saturate-200 data-[side=left]:bottom-3 data-[side=left]:left-3 data-[side=left]:top-3 data-[side=left]:h-auto data-[side=left]:w-[min(20rem,calc(100vw-1.5rem))] data-[side=left]:rounded-2xl data-[side=left]:border"
                 side="left"
               >
                 <SheetHeader>
@@ -276,10 +277,14 @@ function StitchTopNav() {
             {user ? (
               <>
                 <div className="group relative" ref={notificationMenuRef}>
-                  <Button aria-expanded={isNotificationMenuOpen} aria-label={`${t("nav.notifications")}${unreadCount ? ` (${unreadCount})` : ""}`} className="relative overflow-visible rounded-full text-on-primary hover:bg-on-primary/10 hover:text-on-primary" onClick={() => setIsNotificationMenuOpen((isOpen) => !isOpen)} size="icon-lg" type="button" variant="ghost">
+                  <IconTooltip
+                    label={`${t("nav.notifications")}${unreadCount ? ` (${unreadCount})` : ""}`}
+                    render={<Button aria-expanded={isNotificationMenuOpen} aria-label={`${t("nav.notifications")}${unreadCount ? ` (${unreadCount})` : ""}`} className="relative overflow-visible rounded-full text-on-primary hover:bg-on-primary/10 hover:text-on-primary" onClick={() => setIsNotificationMenuOpen((isOpen) => !isOpen)} size="icon-lg" type="button" variant="ghost" />}
+                    side="bottom"
+                  >
                     <MaterialIcon>notifications</MaterialIcon>
                     {unreadCount ? <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] leading-4 font-bold text-black">{unreadCount}</span> : null}
-                  </Button>
+                  </IconTooltip>
                   <div className={`fixed left-3 right-3 top-[4.5rem] z-50 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72 ${isNotificationMenuOpen ? "block" : "hidden"}`}>
                     <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low p-4">
                       <h3 className="text-[14px] font-bold uppercase tracking-wider text-primary-container">{t("nav.recentNotifications")}</h3>
@@ -343,10 +348,8 @@ function StitchTopNav() {
   )
 }
 
-function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
-  const location = useLocation()
+function StitchFooter() {
   const { t } = useTranslation()
-  const isFaqActive = activeFaq || location.pathname === "/faq"
 
   return (
     <footer className="mt-auto rounded-t-xl bg-on-surface text-surface-container-lowest" data-site-footer>
@@ -354,24 +357,17 @@ function StitchFooter({ activeFaq = false }: { activeFaq?: boolean }) {
         <div className="text-center font-headline-md text-headline-md md:text-left">
           © {new Date().getFullYear()} RTI Online. {t("nav.allRightsReserved")}
         </div>
-        <div className="flex flex-wrap justify-center gap-6">
-          <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/public-authorities">
+        <div className="flex flex-wrap justify-center gap-2">
+          <Link className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" to="/public-authorities">
             {t("nav.publicAuthorities")}
           </Link>
-          <Link
-            className={
-              isFaqActive
-                ? "text-secondary-fixed underline transition-opacity hover:opacity-80"
-                : "text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80"
-            }
-            to="/faq"
-          >
+          <Link className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" to="/faq">
             {t("nav.faqs")}
           </Link>
-          <a className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" download href="/rti-online-user-manual.pdf">
+          <a className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" download href="/rti-online-user-manual.pdf">
             {t("nav.userManual")}
           </a>
-          <Link className="text-surface-variant transition-opacity hover:text-surface-container-lowest hover:opacity-80" to="/contact-us">
+          <Link className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" to="/contact-us">
             {t("nav.contactUs")}
           </Link>
         </div>

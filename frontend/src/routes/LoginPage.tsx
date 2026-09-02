@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { IconTooltip } from "@/components/IconTooltip"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field"
@@ -95,7 +96,7 @@ export function LoginPage() {
                   </div>
                   <div className="relative">
                     <Input autoComplete="current-password" className={password ? "pr-10" : undefined} id="password" onChange={(event) => { setPassword(event.target.value); setError("") }} placeholder={t("login.enterPassword")} required type={isPasswordVisible ? "text" : "password"} value={password} />
-                    {password ? <button aria-label={isPasswordVisible ? t("login.hidePassword") : t("login.showPassword")} className="absolute inset-y-0 right-0 flex items-center px-3 text-outline transition-colors hover:text-on-surface" onClick={() => setIsPasswordVisible((visible) => !visible)} type="button"><MaterialIcon className="text-[18px]">{isPasswordVisible ? "visibility_off" : "visibility"}</MaterialIcon></button> : null}
+                    {password ? <IconTooltip label={isPasswordVisible ? t("login.hidePassword") : t("login.showPassword")} render={<button aria-label={isPasswordVisible ? t("login.hidePassword") : t("login.showPassword")} className="absolute inset-y-0 right-0 flex items-center px-3 text-outline transition-colors hover:text-on-surface" onClick={() => setIsPasswordVisible((visible) => !visible)} type="button" />} side="left"><MaterialIcon className="text-[18px]">{isPasswordVisible ? "visibility_off" : "visibility"}</MaterialIcon></IconTooltip> : null}
                   </div>
                 </Field>
 
@@ -107,7 +108,7 @@ export function LoginPage() {
                       <img alt="" className="h-full w-full object-cover opacity-60 mix-blend-multiply" src={captchaUrl} />
                       <span className="absolute inset-0 flex items-center justify-center font-mono text-sm font-bold tracking-widest text-primary mix-blend-difference">{activeCaptcha.split("").join(" ")}</span>
                     </div>
-                    <Button aria-label={t("login.refreshSecurity")} onClick={refreshCaptcha} size="icon-lg" type="button" variant="ghost"><MaterialIcon>refresh</MaterialIcon></Button>
+                    <IconTooltip label={t("login.refreshSecurity")} render={<Button aria-label={t("login.refreshSecurity")} onClick={refreshCaptcha} size="icon-lg" type="button" variant="ghost" />}><MaterialIcon>refresh</MaterialIcon></IconTooltip>
                   </div>
                 </Field>
 

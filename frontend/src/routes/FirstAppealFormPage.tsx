@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { IconTooltip } from "@/components/IconTooltip"
 import { indianStates, indianUnionTerritories } from "@/data/indian-states"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
@@ -36,7 +37,13 @@ function AppealSection({ children, title }: { children: ReactNode; title: string
 }
 
 function HelpIcon({ title }: { title: string }) {
-  return <span title={title}><MaterialIcon className="cursor-help text-outline">help</MaterialIcon></span>
+  // A button rather than the bare span it used to be: the hint was unreachable by keyboard while
+  // it lived in a title attribute, and a tooltip only opens on a trigger that can take focus.
+  return (
+    <IconTooltip label={title} render={<button aria-label={title} className="cursor-help text-outline" type="button" />}>
+      <MaterialIcon>help</MaterialIcon>
+    </IconTooltip>
+  )
 }
 
 export function FirstAppealFormPage() {
@@ -143,9 +150,12 @@ export function FirstAppealFormPage() {
             <div className="flex max-w-md items-center gap-2">
               <input className={`${fieldClassName} h-10 flex-1`} placeholder={t("requestForm.enterCode")} type="text" />
               <span aria-label={t("firstAppeal.securityCode")} className={captchaCodeClassName}>{captchaCodes[captchaIndex]}</span>
-              <button aria-label={t("firstAppeal.refresh")} className={captchaRefreshClassName} onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title={t("firstAppeal.refresh")} type="button">
+              <IconTooltip
+                label={t("firstAppeal.refresh")}
+                render={<button aria-label={t("firstAppeal.refresh")} className={captchaRefreshClassName} onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} type="button" />}
+              >
                 <MaterialIcon className="text-lg">refresh</MaterialIcon>
-              </button>
+              </IconTooltip>
             </div>
           </AppealRow>
         </AppealSection>

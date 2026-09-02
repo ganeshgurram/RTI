@@ -1,3 +1,8 @@
+// Relative, with the extension, rather than the "@/" alias the rest of the app uses: this
+// module is imported directly by scripts/eval-authority-recommendations.mjs through Node's
+// type stripping, which resolves neither tsconfig paths nor extensionless imports.
+import { ministryNames } from "../data/ministry-names.ts"
+
 export type AuthoritySuggestion = {
   authorityId: string
   authorityName: string
@@ -15,25 +20,6 @@ type Authority = {
 
 type DirectoryData = {
   authorities: Authority[]
-}
-
-/**
- * Ministries that own departments in this directory but have no row of their own. Naming them
- * keeps sibling departments in one group, matching the Public Authorities page.
- */
-const ministryNames: Record<string, string> = {
-  "9": "Ministry of Agriculture & Farmers Welfare",
-  "16": "Ministry of Chemicals & Fertilizers",
-  "22": "Ministry of Commerce & Industry",
-  "26": "Ministry of Communications",
-  "30": "Ministry of Consumer Affairs, Food & Public Distribution",
-  "33": "Ministry of Defence",
-  "41": "Ministry of Finance",
-  "46": "Ministry of Health & Family Welfare",
-  "50": "Ministry of Heavy Industries & Public Enterprises",
-  "65": "Ministry of Law & Justice",
-  "74": "Ministry of Personnel, Public Grievances & Pensions",
-  "87": "Ministry of Science & Technology",
 }
 
 /**

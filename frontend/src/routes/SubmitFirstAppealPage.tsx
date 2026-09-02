@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
+import { IconTooltip } from "@/components/IconTooltip"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -85,7 +86,7 @@ export function SubmitFirstAppealPage() {
               <div className="flex-grow">
                 <div className="flex items-center gap-2">
                   <input aria-invalid={Boolean(errors.registrationNumber)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-registration-number" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined })) }} placeholder="RTI-2026-11842" type="text" value={registrationNumber} />
-                  <button aria-label={t("firstAppeal.helpRegistration")} className="text-surface-tint transition-colors hover:text-primary" title={t("firstAppeal.helpRegistration")} type="button"><MaterialIcon className="text-[20px]">help</MaterialIcon></button>
+                  <IconTooltip label={t("firstAppeal.helpRegistration")} render={<button aria-label={t("firstAppeal.helpRegistration")} className="text-surface-tint transition-colors hover:text-primary" type="button" />}><MaterialIcon className="text-[20px]">help</MaterialIcon></IconTooltip>
                 </div>
                 {errors.registrationNumber ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.registrationNumber}</p> : null}
               </div>
@@ -103,7 +104,7 @@ export function SubmitFirstAppealPage() {
                 <div className="flex max-w-md items-center gap-2">
                   <input aria-invalid={Boolean(errors.captcha)} className="h-10 flex-1 rounded-md border border-outline-variant bg-surface px-3 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-captcha" onChange={(event) => { setCaptcha(event.target.value); setErrors((current) => ({ ...current, captcha: undefined })) }} placeholder={t("requestForm.enterCode")} type="text" value={captcha} />
                   <span aria-label={t("firstAppeal.securityCode")} className={captchaCodeClassName}>{activeCaptcha}</span>
-                  <button aria-label={t("firstAppeal.refresh")} className={captchaRefreshClassName} onClick={refreshCaptcha} title={t("firstAppeal.refresh")} type="button"><MaterialIcon className="text-lg">refresh</MaterialIcon></button>
+                  <IconTooltip label={t("firstAppeal.refresh")} render={<button aria-label={t("firstAppeal.refresh")} className={captchaRefreshClassName} onClick={refreshCaptcha} type="button" />}><MaterialIcon className="text-lg">refresh</MaterialIcon></IconTooltip>
                 </div>
                 {errors.captcha ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.captcha}</p> : null}
               </div>

@@ -136,8 +136,8 @@ export function HomePage() {
         <section className="relative -mt-25 overflow-hidden bg-primary-container pb-24 pt-41 text-on-primary md:pb-32 md:pt-49">
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(var(--primary-foreground)_1px,transparent_1px)] [background-size:24px_24px]" />
           <div className="relative z-10 mx-auto flex max-w-container-max flex-col items-center px-margin-mobile text-center md:px-margin-desktop">
-            <h1 className="mb-4 max-w-4xl font-display-lg text-headline-lg-mobile font-bold tracking-tight text-shadow md:text-display-lg">{t("home.title")}</h1>
-            <p className="mx-auto mb-10 max-w-2xl font-body-lg text-body-lg text-on-primary-container opacity-90 md:text-xl">
+            <h1 className="mb-4 max-w-4xl font-display-lg text-headline-lg-mobile font-bold tracking-tight md:text-display-lg">{t("home.title")}</h1>
+            <p className="mx-auto mb-10 max-w-2xl font-body-lg text-body-lg opacity-90 md:text-xl">
               {t("home.subtitle")}
             </p>
             <div className="mx-auto flex w-full max-w-md flex-col justify-center gap-4 sm:flex-row">

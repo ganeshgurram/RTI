@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { IconTooltip } from "@/components/IconTooltip"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
@@ -274,7 +275,7 @@ export function SignupPage() {
                       <FieldLabel htmlFor="signup-password">{t("signup.password")}</FieldLabel>
                       <div className="relative">
                         <Input aria-invalid={Boolean(errors.password)} autoComplete="new-password" className={form.password ? "pr-10" : undefined} id="signup-password" onChange={(event) => updateField("password", event.target.value)} placeholder={t("signup.passwordPlaceholder")} type={isPasswordVisible ? "text" : "password"} value={form.password} />
-                        {form.password ? <button aria-label={isPasswordVisible ? t("login.hidePassword") : t("login.showPassword")} className="absolute inset-y-0 right-0 flex items-center px-3 text-outline transition-colors hover:text-on-surface" onClick={() => setIsPasswordVisible((visible) => !visible)} type="button"><MaterialIcon className="text-[18px]">{isPasswordVisible ? "visibility_off" : "visibility"}</MaterialIcon></button> : null}
+                        {form.password ? <IconTooltip label={isPasswordVisible ? t("login.hidePassword") : t("login.showPassword")} render={<button aria-label={isPasswordVisible ? t("login.hidePassword") : t("login.showPassword")} className="absolute inset-y-0 right-0 flex items-center px-3 text-outline transition-colors hover:text-on-surface" onClick={() => setIsPasswordVisible((visible) => !visible)} type="button" />} side="left"><MaterialIcon className="text-[18px]">{isPasswordVisible ? "visibility_off" : "visibility"}</MaterialIcon></IconTooltip> : null}
                       </div>
                       {form.password ? (
                         <div className="mt-2 flex items-center gap-2">
@@ -301,7 +302,7 @@ export function SignupPage() {
                     <div className="flex items-center gap-2">
                       <Input aria-invalid={Boolean(errors.captcha)} className="h-10" id="signup-captcha" onChange={(event) => updateField("captcha", event.target.value)} placeholder={t("login.enterCaptcha")} value={form.captcha} />
                       <span aria-label={t("login.securityCheck")} className="flex h-10 min-w-24 shrink-0 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary">{activeCaptcha}</span>
-                      <Button aria-label={t("login.refreshSecurity")} onClick={refreshCaptcha} size="icon-lg" type="button" variant="ghost"><MaterialIcon>refresh</MaterialIcon></Button>
+                      <IconTooltip label={t("login.refreshSecurity")} render={<Button aria-label={t("login.refreshSecurity")} onClick={refreshCaptcha} size="icon-lg" type="button" variant="ghost" />}><MaterialIcon>refresh</MaterialIcon></IconTooltip>
                     </div>
                     <FieldError message={errors.captcha} />
                   </Field>

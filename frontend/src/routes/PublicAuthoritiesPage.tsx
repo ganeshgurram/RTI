@@ -3,9 +3,11 @@ import type { ReactNode } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
+import { IconTooltip } from "@/components/IconTooltip"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ministryNames } from "@/data/ministry-names"
 import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -39,25 +41,6 @@ type Match = {
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
 const groupPageSize = 12
 const matchPageSize = 20
-
-// The portal list (allpa.php) contains only authorities an RTI can actually be filed
-// against, so the ministries these departments belong to never appear as rows - they are
-// referenced by parentId and nothing else. Naming them here keeps sibling departments
-// together instead of scattering them through the D's. A ministry is not a filing target.
-const ministryNames: Record<string, string> = {
-  "9": "Ministry of Agriculture & Farmers Welfare",
-  "16": "Ministry of Chemicals & Fertilizers",
-  "22": "Ministry of Commerce & Industry",
-  "26": "Ministry of Communications",
-  "30": "Ministry of Consumer Affairs, Food & Public Distribution",
-  "33": "Ministry of Defence",
-  "41": "Ministry of Finance",
-  "46": "Ministry of Health & Family Welfare",
-  "50": "Ministry of Heavy Industries & Public Enterprises",
-  "65": "Ministry of Law & Justice",
-  "74": "Ministry of Personnel, Public Grievances & Pensions",
-  "87": "Ministry of Science & Technology",
-}
 
 /** "Ministry of Railways" -> "Railways", so A-Z buckets on the word people actually look for. */
 function significantName(name: string) {
@@ -474,7 +457,7 @@ export function PublicAuthoritiesPage() {
               type="search"
               value={search}
             />
-            {search ? <Button aria-label={t("authorities.clearSearch")} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface" onClick={() => { setSearch(""); resetPage() }} size="icon-sm" type="button" variant="ghost"><MaterialIcon className="text-lg!">close</MaterialIcon></Button> : null}
+            {search ? <IconTooltip label={t("authorities.clearSearch")} render={<Button aria-label={t("authorities.clearSearch")} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface" onClick={() => { setSearch(""); resetPage() }} size="icon-sm" type="button" variant="ghost" />} side="left"><MaterialIcon className="text-lg!">close</MaterialIcon></IconTooltip> : null}
           </div>
           <div className="flex h-12 shrink-0 items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 shadow-sm">
             <MaterialIcon className="text-lg! text-primary">sort_by_alpha</MaterialIcon>
@@ -641,11 +624,11 @@ export function PublicAuthoritiesPage() {
       {resultTotal > pageSize ? (
         <nav aria-label={t("authorities.pagination")} className="mt-7 flex justify-center">
           <div className="flex max-w-full items-center gap-2 overflow-x-auto px-1 pb-1">
-            <Button aria-label={t("authorities.previousPage")} disabled={currentPage === 1} onClick={() => setPage((value) => value - 1)} size="icon" type="button" variant="outline"><MaterialIcon className="text-lg!">chevron_left</MaterialIcon></Button>
+            <IconTooltip label={t("authorities.previousPage")} render={<Button aria-label={t("authorities.previousPage")} disabled={currentPage === 1} onClick={() => setPage((value) => value - 1)} size="icon" type="button" variant="outline" />}><MaterialIcon className="text-lg!">chevron_left</MaterialIcon></IconTooltip>
             {paginationItems.map((item, index) => typeof item === "number" ? (
               <Button aria-current={item === currentPage ? "page" : undefined} className="size-8 p-0" key={item} onClick={() => setPage(item)} size="icon" type="button" variant={item === currentPage ? "default" : "outline"}>{item}</Button>
             ) : <span className="flex size-8 items-center justify-center text-sm text-on-surface-variant" key={`${item}-${index}`}>…</span>)}
-            <Button aria-label={t("authorities.nextPage")} disabled={currentPage === totalPages} onClick={() => setPage((value) => value + 1)} size="icon" type="button" variant="outline"><MaterialIcon className="text-lg!">chevron_right</MaterialIcon></Button>
+            <IconTooltip label={t("authorities.nextPage")} render={<Button aria-label={t("authorities.nextPage")} disabled={currentPage === totalPages} onClick={() => setPage((value) => value + 1)} size="icon" type="button" variant="outline" />}><MaterialIcon className="text-lg!">chevron_right</MaterialIcon></IconTooltip>
           </div>
         </nav>
       ) : null}

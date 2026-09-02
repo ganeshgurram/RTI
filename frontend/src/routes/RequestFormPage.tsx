@@ -3,7 +3,9 @@ import { Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { IconTooltip } from "@/components/IconTooltip"
 import { indianStates, indianUnionTerritories } from "@/data/indian-states"
+import { ministryNames } from "@/data/ministry-names"
 import type { PaymentRequestDraft } from "@/data/mock-transactions"
 import type { RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
 import { useRequests } from "@/requests/RequestContext"
@@ -58,28 +60,11 @@ type DirectoryOption = {
   ministryName?: string
 }
 
-// These parent IDs are present in the official directory's hierarchy but do not have a row of
-// their own. Keeping their displayed name here lets the request form group all their offices.
-const directoryMinistryNames: Record<string, string> = {
-  "9": "Ministry of Agriculture & Farmers Welfare",
-  "16": "Ministry of Chemicals & Fertilizers",
-  "22": "Ministry of Commerce & Industry",
-  "26": "Ministry of Communications",
-  "30": "Ministry of Consumer Affairs, Food & Public Distribution",
-  "33": "Ministry of Defence",
-  "41": "Ministry of Finance",
-  "46": "Ministry of Health & Family Welfare",
-  "50": "Ministry of Heavy Industries & Public Enterprises",
-  "65": "Ministry of Law & Justice",
-  "74": "Ministry of Personnel, Public Grievances & Pensions",
-  "87": "Ministry of Science & Technology",
-}
-
 function ministryFor(authority: DirectoryAuthority, authoritiesById: Map<string, DirectoryAuthority>) {
   let current = authority
 
   while (current.parentId) {
-    if (directoryMinistryNames[current.parentId]) return directoryMinistryNames[current.parentId]
+    if (ministryNames[current.parentId]) return ministryNames[current.parentId]
 
     const parent = authoritiesById.get(current.parentId)
     if (!parent) break
@@ -415,9 +400,12 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
           <div className="flex items-center gap-2">
             <input className={`${inputClassName} flex-1`} id="request-captcha" name="captcha" placeholder={t("requestForm.enterCode")} required type="text" />
             <span aria-label={t("requestForm.securityCode")} className={captchaCodeClassName}>{captchaCode}</span>
-            <button aria-label={t("requestForm.refreshSecurity")} className={captchaRefreshClassName} onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} title={t("requestForm.refreshSecurity")} type="button">
+            <IconTooltip
+              label={t("requestForm.refreshSecurity")}
+              render={<button aria-label={t("requestForm.refreshSecurity")} className={captchaRefreshClassName} onClick={() => setCaptchaIndex((current) => (current + 1) % captchaCodes.length)} type="button" />}
+            >
               <MaterialIcon className="text-lg">refresh</MaterialIcon>
-            </button>
+            </IconTooltip>
           </div>
         </div>
         {paymentMessage ? <p className="rounded-md border border-primary-fixed-dim bg-primary-fixed/30 p-3 text-sm font-medium text-primary" role="status">{paymentMessage}</p> : null}

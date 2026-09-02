@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react"
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
+import { IconTooltip } from "@/components/IconTooltip"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -115,7 +116,7 @@ export function PaymentReconciliationPage() {
                 <div className="flex max-w-md gap-2">
                   <Input aria-invalid={Boolean(errors.captcha)} id="reconciliation-captcha" onChange={(event) => { setCaptcha(event.target.value); clearErrors() }} placeholder={t("status.enterCaptcha")} value={captcha} />
                   <span aria-label="Captcha code" className="flex h-8 min-w-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary">{activeCaptcha}</span>
-                  <Button aria-label={t("status.refreshCaptcha")} onClick={refreshCaptcha} size="icon" type="button" variant="outline"><MaterialIcon>refresh</MaterialIcon></Button>
+                  <IconTooltip label={t("status.refreshCaptcha")} render={<Button aria-label={t("status.refreshCaptcha")} onClick={refreshCaptcha} size="icon" type="button" variant="outline" />}><MaterialIcon>refresh</MaterialIcon></IconTooltip>
                 </div>
                 <p className="mt-1.5 text-xs text-on-surface-variant">{t("payment.allCaseInsensitive")}</p>
                 {errors.captcha ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.captcha}</p> : null}

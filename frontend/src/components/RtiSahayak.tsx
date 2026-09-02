@@ -1,8 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react"
 import { Link } from "react-router-dom"
 
+import { IconTooltip } from "@/components/IconTooltip"
 import { Button } from "@/components/ui/button"
 import { usePortalLanguage, type PortalLanguage } from "@/i18n"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
 import type { AuthoritySuggestion } from "@/services/authority-recommendations"
 import {
   askRtiSahayak,
@@ -33,8 +35,10 @@ type ChatCopy = {
   privacyWarning: string
   privacyNotice: string
   authorityTitle: string
+  backToTop: string
   relatedOffices: string
   confirmAuthority: string
+  fileRti: string
   preparing: string
   askLabel: string
   placeholder: string
@@ -58,8 +62,10 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
     privacyNotice:
       "That message was not sent. For your privacy, do not share names, contact details, Aadhaar/PAN, registration numbers, OTPs, passwords, payment details, or documents.",
     authorityTitle: "Possible filing targets",
+    backToTop: "Back to top",
     relatedOffices: "Related offices",
     confirmAuthority: "Confirm in Public Authorities",
+    fileRti: "File RTI",
     preparing: "RTI Sahayak is preparing an answer...",
     askLabel: "Ask RTI Sahayak",
     placeholder: "Describe the issue in general terms...",
@@ -86,8 +92,10 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
     privacyNotice:
       "वह संदेश भेजा नहीं गया। आपकी गोपनीयता के लिए नाम, संपर्क विवरण, आधार/पैन, पंजीकरण संख्या, ओटीपी, पासवर्ड, भुगतान विवरण या दस्तावेज़ साझा न करें।",
     authorityTitle: "संभावित दाखिला प्राधिकरण",
+    backToTop: "ऊपर जाएँ",
     relatedOffices: "संबंधित कार्यालय",
     confirmAuthority: "लोक प्राधिकरणों में पुष्टि करें",
+    fileRti: "आरटीआई दायर करें",
     preparing: "आरटीआई सहायक उत्तर तैयार कर रहा है...",
     askLabel: "आरटीआई सहायक से पूछें",
     placeholder: "समस्या को सामान्य शब्दों में लिखें...",
@@ -138,6 +146,25 @@ function needsTranslation(
   return (
     message.text[language] === undefined && !failedTranslations.has(getTranslationKey(message, language))
   )
+}
+
+/**
+ * Tailwind's sm breakpoint. Below it the panel already takes the full screen width, so the
+ * launcher drops its label for a circle rather than a pill wide enough to hold "आरटीआई सहायक".
+ */
+const COMPACT_LAUNCHER_QUERY = "(max-width: 639.98px)"
+
+// Subscribed to rather than stored in state: the width can change between the first render and
+// an effect running, and a media query is exactly the external source useSyncExternalStore is for.
+function subscribeToCompactLauncher(onChange: () => void) {
+  const query = window.matchMedia(COMPACT_LAUNCHER_QUERY)
+  query.addEventListener("change", onChange)
+
+  return () => query.removeEventListener("change", onChange)
+}
+
+function getIsCompactLauncher() {
+  return window.matchMedia(COMPACT_LAUNCHER_QUERY).matches
 }
 
 function createMessageId() {
@@ -238,7 +265,15 @@ function FormattedMessage({ content }: { content: string }) {
   return <div className="space-y-2">{blocks}</div>
 }
 
-function AuthorityMatches({ suggestions, copy }: { suggestions: AuthoritySuggestion[]; copy: ChatCopy }) {
+function AuthorityMatches({
+  copy,
+  onFileRti,
+  suggestions,
+}: {
+  copy: ChatCopy
+  onFileRti: (suggestion: AuthoritySuggestion) => void
+  suggestions: AuthoritySuggestion[]
+}) {
   if (!suggestions.length) {
     return null
   }
@@ -258,6 +293,15 @@ function AuthorityMatches({ suggestions, copy }: { suggestions: AuthoritySuggest
                 {copy.relatedOffices}: {suggestion.relatedOffices.join("; ")}
               </p>
             )}
+            <button
+              aria-label={copy.fileRti + ": " + suggestion.authorityName}
+              className="mt-2 inline-flex h-7 items-center gap-1 rounded-md bg-primary px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+              onClick={() => onFileRti(suggestion)}
+              type="button"
+            >
+              <span aria-hidden="true" className="material-symbols-outlined text-sm">edit_document</span>
+              {copy.fileRti}
+            </button>
           </div>
         ))}
       </div>
@@ -271,9 +315,11 @@ function AuthorityMatches({ suggestions, copy }: { suggestions: AuthoritySuggest
 
 export function RtiSahayak() {
   const { language } = usePortalLanguage()
+  const { openRequestGuidelines } = useRequestGuidelines()
   const copy = chatCopy[language]
   const [isOpen, setIsOpen] = useState(false)
   const [hasScrolledDown, setHasScrolledDown] = useState(false)
+  const isCompact = useSyncExternalStore(subscribeToCompactLauncher, getIsCompactLauncher)
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage(language)])
@@ -392,6 +438,20 @@ export function RtiSahayak() {
     }
   }, [])
 
+  // The request form only accepts a ministry and authority pair it can find in its own option
+  // list, and it derives the ministry by the same walk up the directory that groups a suggestion
+  // here. A suggestion with no ministry is a top-level authority, which the form files under its
+  // own name rather than under a parent.
+  const startRequestFor = (suggestion: AuthoritySuggestion) => {
+    setIsOpen(false)
+    openRequestGuidelines({
+      authority: {
+        name: suggestion.authorityName,
+        ministryName: suggestion.ministryName ?? suggestion.authorityName,
+      },
+    })
+  }
+
   const scrollToTop = () => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" })
@@ -469,6 +529,13 @@ export function RtiSahayak() {
     safetyIdentifier.current = createSafetyIdentifier()
   }
 
+  const toggleChat = () => setIsOpen((open) => !open)
+  const launcherLabel = isOpen ? copy.closeChat : copy.openChat
+  const launcherIcon = <span aria-hidden="true" className="material-symbols-outlined">support_agent</span>
+  const launcherClassName = isOpen
+    ? "rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary"
+    : "rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:supports-backdrop-filter:backdrop-blur-sm"
+
   return (
     // items-end keeps the launcher pinned to the right edge; without it the button drifts
     // left to the start of the container once the much wider panel opens above it.
@@ -486,15 +553,21 @@ export function RtiSahayak() {
               <h2 className="font-headline-md text-base font-semibold">{copy.name}</h2>
               <p className="text-xs text-primary-foreground/75">{copy.subtitle}</p>
             </div>
-            <Button
-              aria-label={copy.closeChat}
-              className="shrink-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
-              onClick={() => setIsOpen(false)}
-              size="icon-sm"
-              variant="ghost"
+            <IconTooltip
+              label={copy.closeChat}
+              render={
+                <Button
+                  aria-label={copy.closeChat}
+                  className="shrink-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                  onClick={() => setIsOpen(false)}
+                  size="icon-sm"
+                  variant="ghost"
+                />
+              }
+              side="left"
             >
               <span aria-hidden="true" className="material-symbols-outlined">close</span>
-            </Button>
+            </IconTooltip>
           </header>
 
           <div className="border-b border-border bg-muted/50 px-4 py-2 text-xs leading-5 text-muted-foreground">
@@ -512,7 +585,7 @@ export function RtiSahayak() {
                   ? <FormattedMessage content={getMessageText(message, language)} />
                   : getMessageText(message, language)}
                 {message.role === "assistant" && message.authoritySuggestions && (
-                  <AuthorityMatches copy={copy} suggestions={message.authoritySuggestions} />
+                  <AuthorityMatches copy={copy} onFileRti={startRequestFor} suggestions={message.authoritySuggestions} />
                 )}
               </div>
             ))}
@@ -588,9 +661,9 @@ export function RtiSahayak() {
                 rows={1}
                 value={draft}
               />
-              <Button aria-label={copy.sendMessage} disabled={!draft.trim() || isSending} size="icon" type="submit">
+              <IconTooltip label={copy.sendMessage} render={<Button aria-label={copy.sendMessage} disabled={!draft.trim() || isSending} size="icon" type="submit" />}>
                 <span aria-hidden="true" className="material-symbols-outlined">send</span>
-              </Button>
+              </IconTooltip>
             </form>
 
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
@@ -602,28 +675,38 @@ export function RtiSahayak() {
       )}
 
       {!isOpen && hasScrolledDown ? (
-        <Button
-          aria-label="Back to top"
-          className="mb-3 size-12 rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
-          onClick={scrollToTop}
-          size="icon-lg"
+        <IconTooltip
+          label={copy.backToTop}
+          render={
+            <Button
+              aria-label={copy.backToTop}
+              className="mb-3 size-12 rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+              onClick={scrollToTop}
+              size="icon-lg"
+            />
+          }
+          side="left"
         >
           <span aria-hidden="true" className="material-symbols-outlined">arrow_upward</span>
-        </Button>
+        </IconTooltip>
       ) : null}
 
-      <Button
-        aria-expanded={isOpen}
-        aria-label={isOpen ? copy.closeChat : copy.openChat}
-        className={isOpen
-          ? "h-12 rounded-full bg-primary px-4 text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary"
-          : "h-12 rounded-full border-primary-foreground/25 bg-primary/55 px-4 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:supports-backdrop-filter:backdrop-blur-sm"}
-        onClick={() => setIsOpen((open) => !open)}
-        size="lg"
-      >
-        <span aria-hidden="true" className="material-symbols-outlined">support_agent</span>
-        <span>{copy.name}</span>
-      </Button>
+      {isCompact ? (
+        // size-12 rather than the pill's height alone, so the collapsed launcher and the
+        // back-to-top button stacked above it are the same circle.
+        <IconTooltip
+          label={launcherLabel}
+          render={<Button aria-expanded={isOpen} aria-label={launcherLabel} className={`size-12 ${launcherClassName}`} onClick={toggleChat} size="icon-lg" />}
+          side="left"
+        >
+          {launcherIcon}
+        </IconTooltip>
+      ) : (
+        <Button aria-expanded={isOpen} aria-label={launcherLabel} className={`h-12 px-4 ${launcherClassName}`} onClick={toggleChat} size="lg">
+          {launcherIcon}
+          <span>{copy.name}</span>
+        </Button>
+      )}
     </div>
   )
 }

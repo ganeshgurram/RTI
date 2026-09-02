@@ -152,7 +152,7 @@ function App() {
         <RequestProvider>
           <PaymentProvider>
             <NotificationProvider>
-              <TooltipProvider>
+              <TooltipProvider delay={0}>
                 <RouterProvider router={router} />
               </TooltipProvider>
             </NotificationProvider>

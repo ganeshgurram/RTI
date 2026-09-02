@@ -75,7 +75,7 @@ export function SecondAppealPage() {
         </section>
 
         <div className="mt-7 text-center">
-          <Link className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline" to="/"><MaterialIcon className="text-base">arrow_back</MaterialIcon>{t("common.backToHome")}</Link>
+          <Link className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 active:scale-95" to="/"><MaterialIcon className="text-base">arrow_back</MaterialIcon>{t("common.backToHome")}</Link>
         </div>
       </div>
     </main>
