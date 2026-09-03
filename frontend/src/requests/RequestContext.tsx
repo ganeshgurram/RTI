@@ -14,6 +14,10 @@ export type RtiRequest = (typeof mockRequests)[number] & {
   applicantEmail: string
   applicantName: string
   applicantPhone: string
+  /** True for a BPL application, whose filing fee was exempted rather than paid. */
+  isBplApplicant?: boolean
+  /** The filename is sufficient for this frontend prototype; no document is uploaded to a server. */
+  supportingDocumentName?: string
   /**
    * What the applicant actually asked for. Optional because the seeded history predates it, and
    * because the portal used to keep only the first 120 characters of a request - as its subject -
@@ -29,6 +33,8 @@ type CreateRequestInput = {
   authority: string
   requestText: string
   subject: string
+  isBplApplicant?: boolean
+  supportingDocumentName?: string
 }
 
 type CreateFirstAppealInput = {
@@ -162,7 +168,9 @@ export function RequestProvider({ children }: { children: ReactNode }) {
         applicantEmail: input.applicantEmail,
         applicantName: input.applicantName,
         applicantPhone: input.applicantPhone,
+        isBplApplicant: input.isBplApplicant,
         requestText: input.requestText,
+        supportingDocumentName: input.supportingDocumentName,
       }
 
       setCreatedRequests((current) => [request, ...current])

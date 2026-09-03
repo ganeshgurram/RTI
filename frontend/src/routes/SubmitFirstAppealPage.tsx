@@ -1,9 +1,11 @@
-import { useState, type FormEvent } from "react"
+import { useRef, useState, type FormEvent } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { DeadlineNotice } from "@/components/DeadlineTracker"
 import { IconTooltip } from "@/components/IconTooltip"
+import { Button } from "@/components/ui/button"
+import { useFormDraft } from "@/hooks/useFormDraft"
 import type { FirstAppealPrefill } from "@/request-guidelines/RequestGuidelinesContext"
 import { useRequests } from "@/requests/RequestContext"
 import { canFileFirstAppeal, getRequestDeadline, type RequestDeadline } from "@/services/statutory-deadlines"
@@ -32,12 +34,15 @@ export function SubmitFirstAppealPage() {
   // Filled in when the appellant arrived from a specific request rather than from the top nav.
   // The security code is still theirs to enter: it is the check, and prefilling it would remove it.
   const prefill = (location.state as { appeal?: FirstAppealPrefill } | null)?.appeal
+  const lookupDraft = useFormDraft("rti-demo-first-appeal-lookup-draft-v1", { exclude: ["appealCaptcha"] })
   const [captchaIndex, setCaptchaIndex] = useState(0)
-  const [registrationNumber, setRegistrationNumber] = useState(prefill?.registrationNumber ?? "")
-  const [email, setEmail] = useState(prefill?.email ?? "")
+  const [registrationNumber, setRegistrationNumber] = useState(prefill?.registrationNumber ?? lookupDraft.value("registrationNumber", ""))
+  const [email, setEmail] = useState(prefill?.email ?? lookupDraft.value("email", ""))
   const [captcha, setCaptcha] = useState("")
   const [errors, setErrors] = useState<LookupErrors>({})
   const [blockedDeadline, setBlockedDeadline] = useState<RequestDeadline | null>(null)
+  const [formResetKey, setFormResetKey] = useState(0)
+  const formRef = useRef<HTMLFormElement>(null)
   const { t } = useTranslation()
 
   const activeCaptcha = codes[captchaIndex]
@@ -89,15 +94,18 @@ export function SubmitFirstAppealPage() {
     setBlockedDeadline(deadline)
 
     if (!Object.keys(nextErrors).length && matchingRequest) {
+      lookupDraft.clear()
       navigate("/first-appeal-form", { state: { requestId: matchingRequest.id } })
     }
   }
 
   const resetLookup = () => {
+    lookupDraft.clear()
     setRegistrationNumber("")
     setEmail("")
     setCaptcha("")
     setErrors({})
+    setFormResetKey((current) => current + 1)
   }
 
   const refreshCaptcha = () => {
@@ -105,6 +113,8 @@ export function SubmitFirstAppealPage() {
     setCaptcha("")
     setErrors((current) => ({ ...current, captcha: undefined }))
   }
+
+  const saveDraft = () => window.requestAnimationFrame(() => lookupDraft.save(formRef.current))
 
   return (
     <div className="mx-auto flex w-full max-w-container-max flex-1 flex-col items-center px-margin-mobile py-stack-lg md:px-margin-desktop md:py-12">
@@ -117,24 +127,27 @@ export function SubmitFirstAppealPage() {
             </div>
           </div>
           <p className="text-body-md text-on-surface-variant">{t("firstAppeal.lookupDescription")}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-on-surface-variant">
+            {lookupDraft.wasRestored ? <span className="flex items-center gap-1.5"><MaterialIcon className="text-base text-state-success">restore</MaterialIcon>{t("formDraft.restored")}</span> : null}
+            {lookupDraft.saveState === "saving" ? <span>{t("formDraft.saving")}</span> : null}
+            {lookupDraft.saveState === "saved" ? <span className="flex items-center gap-1.5"><MaterialIcon className="text-base text-state-success">save</MaterialIcon>{t("formDraft.saved")}</span> : null}
+            {lookupDraft.hasDraft ? <Button className="h-auto px-1.5 py-0.5 text-sm" onClick={resetLookup} type="button" variant="ghost">{t("formDraft.discard")}</Button> : null}
+          </div>
         </header>
 
         <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-stack-lg">
-          <form className="flex flex-col gap-stack-md" noValidate onReset={resetLookup} onSubmit={beginAppeal}>
+          <form className="flex flex-col gap-stack-md" key={formResetKey} noValidate onChange={saveDraft} onReset={resetLookup} onSubmit={beginAppeal} ref={formRef}>
             <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-registration-number"><span className="text-error">*</span> {t("firstAppeal.registrationNumber")}</label>
               <div className="flex-grow">
-                <div className="flex items-center gap-2">
-                  <input aria-invalid={Boolean(errors.registrationNumber)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-registration-number" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined, timing: undefined })) }} placeholder="RTI-2026-11842" type="text" value={registrationNumber} />
-                  <IconTooltip label={t("firstAppeal.helpRegistration")} render={<button aria-label={t("firstAppeal.helpRegistration")} className="text-surface-tint transition-colors hover:text-primary" type="button" />}><MaterialIcon className="text-[20px]">help</MaterialIcon></IconTooltip>
-                </div>
+                <input aria-invalid={Boolean(errors.registrationNumber)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-registration-number" name="registrationNumber" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined, timing: undefined })) }} placeholder="RTI-2026-11842" type="text" value={registrationNumber} />
                 {errors.registrationNumber ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.registrationNumber}</p> : null}
               </div>
             </div>
             <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-email"><span className="text-error">*</span> {t("firstAppeal.emailPrompt")}</label>
               <div className="flex-grow">
-                <input aria-invalid={Boolean(errors.email)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-email" onChange={(event) => { setEmail(event.target.value); setErrors((current) => ({ ...current, email: undefined, lookup: undefined, timing: undefined })) }} placeholder={t("status.emailAddress")} type="email" value={email} />
+                <input aria-invalid={Boolean(errors.email)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-email" name="email" onChange={(event) => { setEmail(event.target.value); setErrors((current) => ({ ...current, email: undefined, lookup: undefined, timing: undefined })) }} placeholder={t("status.emailAddress")} type="email" value={email} />
                 {errors.email ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.email}</p> : null}
               </div>
             </div>
@@ -142,7 +155,7 @@ export function SubmitFirstAppealPage() {
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-captcha"><span className="text-error">*</span> {t("firstAppeal.securityCode")}</label>
               <div className="flex flex-grow flex-col gap-stack-sm">
                 <div className="flex max-w-md items-center gap-2">
-                  <input aria-invalid={Boolean(errors.captcha)} className="h-10 flex-1 rounded-md border border-outline-variant bg-surface px-3 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-captcha" onChange={(event) => { setCaptcha(event.target.value); setErrors((current) => ({ ...current, captcha: undefined })) }} placeholder={t("requestForm.enterCode")} type="text" value={captcha} />
+                  <input aria-invalid={Boolean(errors.captcha)} className="h-10 flex-1 rounded-md border border-outline-variant bg-surface px-3 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-captcha" name="appealCaptcha" onChange={(event) => { setCaptcha(event.target.value); setErrors((current) => ({ ...current, captcha: undefined })) }} placeholder={t("requestForm.enterCode")} type="text" value={captcha} />
                   <span aria-label={t("firstAppeal.securityCode")} className={captchaCodeClassName}>{activeCaptcha}</span>
                   <IconTooltip label={t("firstAppeal.refresh")} render={<button aria-label={t("firstAppeal.refresh")} className={captchaRefreshClassName} onClick={refreshCaptcha} type="button" />}><MaterialIcon className="text-lg">refresh</MaterialIcon></IconTooltip>
                 </div>

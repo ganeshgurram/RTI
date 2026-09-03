@@ -8,6 +8,8 @@ import { usePortalLanguage } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import { useNotifications } from "@/notifications/NotificationContext"
 import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
+import { useRequests } from "@/requests/RequestContext"
+import { canFileFirstAppeal } from "@/services/statutory-deadlines"
 import {
   Sheet,
   SheetClose,
@@ -50,7 +52,8 @@ function StitchTopNav() {
   const navigate = useNavigate()
   const { logout, user } = useAuth()
   const { openRequestGuidelines } = useRequestGuidelines()
-  const { markAllAsRead, notifications, unreadCount } = useNotifications()
+  const { markAllAsRead, markAsRead, notifications, unreadCount } = useNotifications()
+  const { requests } = useRequests()
   const { language, setLanguage } = usePortalLanguage()
   const { t } = useTranslation()
   const [isScrolled, setIsScrolled] = useState(false)
@@ -133,7 +136,7 @@ function StitchTopNav() {
     }
 
     if (path === "/submit-request") {
-      return ["/submit-request", "/request-submission-success"].includes(location.pathname)
+      return ["/submit-request", "/request-review", "/mock-payment", "/request-submission-success"].includes(location.pathname)
     }
 
     if (path === "/payment-reconciliation") {
@@ -153,6 +156,39 @@ function StitchTopNav() {
   const handleLogout = () => {
     logout()
     navigate("/", { replace: true })
+  }
+
+  const recentNotifications = [...notifications]
+    .sort((left, right) => {
+      const actionOrder = Number(right.action === "fileFirstAppeal") - Number(left.action === "fileFirstAppeal")
+      if (actionOrder) return actionOrder
+      return Number(!right.isRead) - Number(!left.isRead)
+    })
+    .slice(0, 3)
+
+  const handleNotificationAction = (notification: (typeof notifications)[number]) => {
+    markAsRead(notification.id)
+    setIsNotificationMenuOpen(false)
+
+    if (notification.action === "fileFirstAppeal") {
+      const request = requests.find((item) => item.id === notification.requestId)
+      if (request && canFileFirstAppeal({ request, requestId: request.id, today: new Date() }).allowed) {
+        openRequestGuidelines({
+          appeal: { email: request.applicantEmail, registrationNumber: request.id, requestId: request.id },
+          cancelTo: location.pathname,
+          journey: "firstAppeal",
+        })
+        return
+      }
+    }
+
+    navigate(`/request-history/${notification.requestId}`)
+  }
+
+  const notificationActionLabel = (notification: (typeof notifications)[number]) => {
+    if (notification.action === "fileFirstAppeal") return t("notifications.fileFirstAppeal")
+    if (notification.action === "viewResponse") return t("notifications.viewResponse")
+    return t("notifications.viewRequest")
   }
 
   return (
@@ -239,8 +275,8 @@ function StitchTopNav() {
             </Sheet>
             <Link className="flex items-center gap-2.5" to="/">
               <img alt="Indian Emblem" className="h-9 w-auto shrink-0 opacity-90" src={emblemUrl} />
-              <span className="h-9 w-px shrink-0 bg-on-primary/30" aria-hidden="true" />
-              <span className="whitespace-nowrap font-headline-md text-headline-md font-bold leading-none text-on-primary">
+              <span className="h-9 w-px shrink-0 bg-brand-gold/45" aria-hidden="true" />
+              <span className="whitespace-nowrap font-headline-md text-headline-md font-bold leading-none text-brand-gold">
                 RTI Online
               </span>
             </Link>
@@ -291,17 +327,17 @@ function StitchTopNav() {
                       <Button className={unreadCount ? "" : "invisible"} onClick={markAllAsRead} size="sm" type="button">{t("nav.markAllRead")}</Button>
                     </div>
                     <div className="divide-y divide-outline-variant/50">
-                      {notifications.slice(0, 3).map((notification) => (
-                        <div className={`flex gap-2.5 p-4 transition-colors hover:bg-surface-container-low ${notification.isRead ? "" : "bg-primary-fixed/25"}`} key={notification.id}>
+                      {recentNotifications.map((notification) => (
+                        <button aria-label={`${notification.title}: ${notificationActionLabel(notification)}`} className={`flex w-full cursor-pointer gap-2.5 p-4 text-left transition-colors hover:bg-surface-container-low focus-visible:bg-surface-container-low focus-visible:outline-none ${notification.isRead ? "" : "bg-primary-fixed/25"}`} key={notification.id} onClick={() => handleNotificationAction(notification)} type="button">
                           <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${notification.isRead ? "bg-transparent" : "bg-primary"}`} />
                           <div className="min-w-0">
                             <p className={`text-[14px] ${notification.isRead ? "font-medium text-on-surface" : "font-semibold text-primary"}`}>{notification.title}</p>
                             <p className="mt-1 text-[12px] text-on-surface-variant">{notification.requestId} · {notification.time}</p>
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
-                    <div className="border-t border-outline-variant p-3 text-center"><button className="text-[12px] font-semibold text-surface-tint hover:underline" onClick={() => { setIsNotificationMenuOpen(false); navigate("/notifications") }} type="button">{t("nav.viewAllNotifications")}</button></div>
+                    <div className="border-t border-outline-variant p-3 text-center"><button className="cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-semibold text-surface-tint transition-colors hover:bg-primary/10 hover:text-primary" onClick={() => { setIsNotificationMenuOpen(false); navigate("/notifications") }} type="button">{t("nav.viewAllNotifications")}</button></div>
                   </div>
                 </div>
                 <details className="group relative" onToggle={(event) => setIsProfileMenuOpen(event.currentTarget.open)} open={isProfileMenuOpen} ref={profileMenuRef}>
@@ -352,22 +388,22 @@ function StitchFooter() {
   const { t } = useTranslation()
 
   return (
-    <footer className="mt-auto rounded-t-xl bg-on-surface text-surface-container-lowest" data-site-footer>
+    <footer className="mt-auto rounded-t-xl bg-primary text-on-primary" data-site-footer>
       <div className="mx-auto flex w-full max-w-container-max flex-col items-center justify-between gap-6 px-margin-mobile py-stack-lg md:flex-row md:px-margin-desktop">
-        <div className="text-center font-headline-md text-headline-md md:text-left">
+        <div className="text-center font-headline-md text-headline-md text-brand-gold md:text-left">
           © {new Date().getFullYear()} RTI Online. {t("nav.allRightsReserved")}
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          <Link className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" to="/public-authorities">
+          <Link className="rounded-md px-3 py-1.5 text-on-primary/80 transition-colors hover:bg-on-primary/10 hover:text-brand-gold" to="/public-authorities">
             {t("nav.publicAuthorities")}
           </Link>
-          <Link className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" to="/faq">
+          <Link className="rounded-md px-3 py-1.5 text-on-primary/80 transition-colors hover:bg-on-primary/10 hover:text-brand-gold" to="/faq">
             {t("nav.faqs")}
           </Link>
-          <a className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" download href="/rti-online-user-manual.pdf">
+          <a className="rounded-md px-3 py-1.5 text-on-primary/80 transition-colors hover:bg-on-primary/10 hover:text-brand-gold" download href="/rti-online-user-manual.pdf">
             {t("nav.userManual")}
           </a>
-          <Link className="rounded-md px-3 py-1.5 text-surface-variant transition-colors hover:bg-surface-container-lowest/10 hover:text-surface-container-lowest" to="/contact-us">
+          <Link className="rounded-md px-3 py-1.5 text-on-primary/80 transition-colors hover:bg-on-primary/10 hover:text-brand-gold" to="/contact-us">
             {t("nav.contactUs")}
           </Link>
         </div>

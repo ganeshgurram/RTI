@@ -1,18 +1,26 @@
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { type NotificationFilter } from "@/data/mock-notifications"
 import { useNotifications } from "@/notifications/NotificationContext"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
+import { useRequests } from "@/requests/RequestContext"
+import { canFileFirstAppeal } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const filters: NotificationFilter[] = ["all", "unread", "read"]
 
 export function NotificationsPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [filter, setFilter] = useState<NotificationFilter>("all")
   const { markAllAsRead, markAsRead, notifications: notificationItems, unreadCount } = useNotifications()
+  const { openRequestGuidelines } = useRequestGuidelines()
+  const { requests } = useRequests()
+  const today = useMemo(() => new Date(), [])
   const notifications = useMemo(
     () => notificationItems.filter((notification) => filter === "all" || (filter === "unread" ? !notification.isRead : notification.isRead)),
     [filter, notificationItems],
@@ -23,6 +31,32 @@ export function NotificationsPage() {
     : value === "unread"
       ? unreadCount
       : notificationItems.length - unreadCount
+
+  const handleAction = (notification: (typeof notificationItems)[number]) => {
+    markAsRead(notification.id)
+    const request = requests.find((item) => item.id === notification.requestId)
+
+    if (notification.action === "fileFirstAppeal" && request) {
+      const eligibility = canFileFirstAppeal({ request, requestId: request.id, today })
+
+      if (eligibility.allowed) {
+        openRequestGuidelines({
+          appeal: { email: request.applicantEmail, registrationNumber: request.id, requestId: request.id },
+          cancelTo: "/notifications",
+          journey: "firstAppeal",
+        })
+        return
+      }
+    }
+
+    navigate(`/request-history/${notification.requestId}`)
+  }
+
+  const actionLabel = (notification: (typeof notificationItems)[number]) => {
+    if (notification.action === "fileFirstAppeal") return t("notifications.fileFirstAppeal")
+    if (notification.action === "viewResponse") return t("notifications.viewResponse")
+    return t("notifications.viewRequest")
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-margin-mobile py-8 md:px-margin-desktop md:py-10">
@@ -62,6 +96,7 @@ export function NotificationsPage() {
               className={`relative flex gap-4 rounded-xl border p-4 transition-colors sm:p-5 ${notification.isRead ? "border-outline-variant bg-surface-container-lowest" : "border-primary/30 bg-primary-fixed/35"}`}
               key={notification.id}
             >
+              <button aria-label={`${notification.title}: ${actionLabel(notification)}`} className="flex min-w-0 flex-1 cursor-pointer gap-4 text-left outline-none focus-visible:rounded-lg focus-visible:ring-3 focus-visible:ring-primary/30" onClick={() => handleAction(notification)} type="button">
               <div className={`mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full ${notification.isRead ? "bg-surface-container-high text-on-surface-variant" : "bg-primary text-on-primary"}`}>
                 <MaterialIcon className="text-xl">{notification.icon}</MaterialIcon>
               </div>
@@ -77,6 +112,7 @@ export function NotificationsPage() {
                   <time>{notification.time}</time>
                 </div>
               </div>
+              </button>
               {!notification.isRead ? (
                 <div className="flex shrink-0 items-start gap-2">
                   <span aria-label={t("notifications.unreadDot")} className="mt-2 size-2 rounded-full bg-primary" />

@@ -120,6 +120,8 @@
     --color-tertiary-container: var(--tertiary-container);
     --color-surface-tint: var(--surface-tint);
     --color-surface-dim: var(--surface-dim);
+    --color-brand-gold: var(--brand-gold);
+    --color-brand-gold-soft: var(--brand-gold-soft);
     --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
     --color-tertiary: var(--tertiary);
     --color-surface-container-low: var(--surface-container-low);
@@ -166,47 +168,50 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+    /* Official portal palette: reference navy #0A1F33 and emblem gold #D4AF37. */
+    --brand-gold: #d4af37;
+    --brand-gold-soft: #f7edcf;
+    --background: #ffffff;
+    --foreground: #17212b;
+    --card: #ffffff;
+    --card-foreground: #0a1f33;
+    --popover: #ffffff;
+    --popover-foreground: #0a1f33;
+    --primary: #0a1f33;
+    --primary-foreground: #ffffff;
+    --secondary: #f4f6f8;
+    --secondary-foreground: #0a1f33;
+    --muted: #f6f7f9;
+    --muted-foreground: #5e6872;
+    --accent: #f7edcf;
+    --accent-foreground: #0a1f33;
+    --destructive: #b42318;
+    --border: #dde2e7;
+    --input: #cbd4db;
+    --ring: #d4af37;
+    --chart-1: #0a1f33;
+    --chart-2: #d4af37;
+    --chart-3: #50708a;
+    --chart-4: #8a6510;
+    --chart-5: #68747f;
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar: #ffffff;
+    --sidebar-foreground: #0a1f33;
+    --sidebar-primary: #0a1f33;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f7edcf;
+    --sidebar-accent-foreground: #0a1f33;
+    --sidebar-border: #dde2e7;
+    --sidebar-ring: #d4af37;
     --on-surface: var(--foreground);
     --surface-variant: var(--border);
-    --primary-fixed: var(--muted);
-    --secondary-fixed-dim: var(--border);
+    --primary-fixed: #e7edf2;
+    --secondary-fixed-dim: #ead798;
     --outline-variant: var(--border);
-    --secondary-container: var(--secondary);
+    --secondary-container: #f7edcf;
     --on-primary-fixed-variant: var(--foreground);
     --state-error: var(--destructive);
-    --surface-container-high: var(--muted);
+    --surface-container-high: #eef1f4;
     --inverse-surface: var(--foreground);
     --inverse-on-surface: var(--background);
     --surface-container-lowest: var(--background);
@@ -215,9 +220,9 @@
     --on-error: var(--primary-foreground);
     --on-secondary: var(--secondary-foreground);
     --on-secondary-fixed: var(--secondary-foreground);
-    --surface-container: var(--muted);
-    --secondary-fixed: var(--secondary);
-    --primary-fixed-dim: var(--muted);
+    --surface-container: #f4f6f8;
+    --secondary-fixed: #f7edcf;
+    --primary-fixed-dim: #cbd7e0;
     --inverse-primary: var(--primary-foreground);
     --error-container: var(--destructive);
     --outline: var(--muted-foreground);
@@ -226,12 +231,12 @@
     --on-surface-variant: var(--muted-foreground);
     --error: var(--destructive);
     --on-tertiary-container: var(--foreground);
-    --surface-container-highest: var(--muted);
+    --surface-container-highest: #e7ebef;
     --on-primary-fixed: var(--foreground);
     --on-tertiary: var(--primary-foreground);
     --on-secondary-fixed-variant: var(--secondary-foreground);
-    --state-success: oklch(0.53 0.13 150);
-    --state-warning: oklch(0.56 0.12 70);
+    --state-success: #157347;
+    --state-warning: #8a6510;
     /* The spark that travels the lifecycle flowchart. Deliberately its own token rather than a
        reused status colour: it means motion, not a warning. Held a little darker than true gold so
        it still reads against the near-white surface the process map sits on. */
@@ -240,10 +245,10 @@
     --primary-container: var(--primary);
     --tertiary-container: var(--primary);
     --surface-tint: var(--primary);
-    --surface-dim: var(--muted);
-    --tertiary-fixed-dim: var(--muted);
+    --surface-dim: #eef1f4;
+    --tertiary-fixed-dim: #ead798;
     --tertiary: var(--primary);
-    --surface-container-low: var(--muted);
+    --surface-container-low: #fafbfc;
     --on-secondary-container: var(--secondary-foreground);
     --tertiary-fixed: var(--muted);
 }

@@ -702,9 +702,17 @@ export function RtiSahayak() {
           {launcherIcon}
         </IconTooltip>
       ) : (
-        <Button aria-expanded={isOpen} aria-label={launcherLabel} className={`h-12 px-4 ${launcherClassName}`} onClick={toggleChat} size="lg">
-          {launcherIcon}
-          <span>{copy.name}</span>
+        <Button
+          aria-expanded={isOpen}
+          aria-label={launcherLabel}
+          className={`group/sahayak h-12 w-12 justify-start gap-0 overflow-hidden rounded-full px-0 transition-[width] duration-200 ease-out hover:w-[9.25rem] focus-visible:w-[9.25rem] motion-reduce:transition-none ${launcherClassName}`}
+          onClick={toggleChat}
+          size="lg"
+        >
+          <span className="flex size-12 shrink-0 items-center justify-center">{launcherIcon}</span>
+          <span className="max-w-0 overflow-hidden whitespace-nowrap pr-0 opacity-0 transition-[max-width,opacity,padding] duration-200 ease-out group-hover/sahayak:max-w-28 group-hover/sahayak:pr-3 group-hover/sahayak:opacity-100 group-focus-visible/sahayak:max-w-28 group-focus-visible/sahayak:pr-3 group-focus-visible/sahayak:opacity-100 motion-reduce:transition-none">
+            {copy.name}
+          </span>
         </Button>
       )}
     </div>

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
 import { DeadlineNotice } from "@/components/DeadlineTracker"
+import { RequestTimeline } from "@/components/RequestTimeline"
 import { IconTooltip } from "@/components/IconTooltip"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -154,6 +155,9 @@ export function StatusPage() {
                   <Detail label={t("status.currentStatus")} value={request.status} />
                   <Detail label={t("status.nextAction")} value={request.nextAction} />
                 </dl>
+                <div className="mb-4 border-t border-outline-variant/50 pt-5">
+                  <RequestTimeline request={request} />
+                </div>
                 {deadline ? (
                   <div className="mb-4">
                     <DeadlineNotice appealFor={{ email: request.applicantEmail, registrationNumber: request.id }} deadline={deadline} />

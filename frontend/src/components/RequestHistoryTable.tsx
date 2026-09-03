@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 
 import { DeadlineChip } from "@/components/DeadlineTracker"
-import { RequestDetailDialog } from "@/components/RequestDetailDialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,7 @@ export function RequestHistoryTable({ requests: scopedRequests }: { requests?: R
   const [requestSearch, setRequestSearch] = useState("")
   const [requestStatus, setRequestStatus] = useState("all")
   const [requestPage, setRequestPage] = useState(1)
-  const [openRequest, setOpenRequest] = useState<RtiRequest | null>(null)
+  const navigate = useNavigate()
   const { t } = useTranslation()
   const requestPageSize = 10
   // One "today" for the whole table, so every row in a render is measured against the same day.
@@ -84,12 +84,12 @@ export function RequestHistoryTable({ requests: scopedRequests }: { requests?: R
           </thead>
           <tbody className="divide-y divide-outline-variant/50 text-sm text-on-surface">
             {visibleRequests.map((request) => (
-              <tr className="cursor-pointer transition-colors hover:bg-surface-container/30" key={request.id} onClick={() => setOpenRequest(request)}>
+              <tr className="cursor-pointer transition-colors hover:bg-surface-container/30" key={request.id} onClick={() => navigate(`/request-history/${request.id}`)}>
                 <td className="px-5 py-4">
                   <button
                     aria-label={t("requestDetail.viewDetails", { id: request.id })}
                     className="rounded font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                    onClick={(event) => { event.stopPropagation(); setOpenRequest(request) }}
+                    onClick={(event) => { event.stopPropagation(); navigate(`/request-history/${request.id}`) }}
                     type="button"
                   >
                     {request.id}
@@ -97,7 +97,7 @@ export function RequestHistoryTable({ requests: scopedRequests }: { requests?: R
                 </td>
                 <td className="max-w-[300px] px-5 py-4"><p className="font-medium">{request.subject}</p><p className="mt-1 text-xs text-on-surface-variant">{request.authority}</p></td>
                 <td className="px-5 py-4 text-on-surface-variant"><p>{request.submittedOn}</p><p className="mt-1 text-xs">{t("history.updated", { date: request.lastUpdated })}</p></td>
-                <td className="px-5 py-4"><span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${request.statusClass}`}>{request.status}</span></td>
+                <td className="px-5 py-4"><span className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-center text-xs font-medium ${request.statusClass}`}>{request.status}</span></td>
                 <td className="px-5 py-4 text-on-surface-variant">{renderNextAction(request)}</td>
               </tr>
             ))}
@@ -115,7 +115,6 @@ export function RequestHistoryTable({ requests: scopedRequests }: { requests?: R
           </div>
         </div>
       </div>
-      <RequestDetailDialog onClose={() => setOpenRequest(null)} request={openRequest} />
     </Card>
   )
 }

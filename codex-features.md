@@ -1,156 +1,125 @@
-# RTI Online — Feature & Refinement Plan
+# RTI Online — Product & Interface Feature Roadmap
 
-This backlog is for turning the current hackathon prototype into a polished, trustworthy demo. Work is ordered by user value and presentation impact rather than by implementation effort.
+This roadmap prioritizes what a citizen, mentor, or judge can immediately understand and experience. The goal is a portal that makes filing and tracking an RTI feel clear, guided, and trustworthy — not merely a collection of forms.
 
-## Guiding principles
+## Current product story
 
-- Keep all applicant data mock-only until a secure backend exists.
-- Make every new journey work in English and Hindi, on mobile and desktop.
-- Prefer clear guidance and progressive disclosure over adding visual complexity.
-- Never portray the prototype as an official government service.
+RTI Online already demonstrates a complete prototype journey:
 
-## Priority 1 — Reliability, performance, and accessibility
+1. Discover the right public authority.
+2. Read and acknowledge filing guidelines.
+3. File an RTI request with profile-prefilled details, BPL handling, mock payment, and AI writing assistance.
+4. Receive a registration number and track the request from the dashboard or public status lookup.
+5. Understand statutory deadlines and move into a First Appeal when appropriate.
+6. Use Hindi, DigiLocker simulation, notifications, and RTI Sahayak for support.
 
-### 1. Route-level loading and smaller first load
+## Priority 1 — Make filing feel safe and complete ✅ Complete
 
-**Why:** The current production JavaScript bundle is about 898 kB before compression. Secondary journeys should not slow down a visitor who only needs the home page or status lookup.
+### 1. Review before submission ✅
 
-**Scope:**
+**Experience:** Before payment or submission, show a clean review screen with the selected authority, applicant contact details, BPL / fee decision, attachments, and request text.
 
-- Load secondary routes on demand: profile, request history, public authorities, FAQs, payments, appeals, and success pages.
-- Defer the RTI Sahayak panel until the visitor opens it.
-- Add a consistent inline loading state for deferred pages.
+**Why it matters:** Users gain confidence that the right details are being sent and can correct one section without starting again.
 
-**Done when:** The initial bundle is materially smaller and every direct URL still loads correctly on Vercel.
+**Done when:** A user can inspect the whole application and jump back to any field before a registration number is generated.
 
-### 2. Route error and recovery states
+### 2. Save and resume drafts ✅
 
-**Why:** A failed dynamic import, malformed mock storage value, or unavailable directory should never leave a blank page.
+**Experience:** Automatically preserve a partially written RTI request or First Appeal on the current device. Show a modest “Saved just now” message and a clear discard option.
 
-**Scope:**
+**Why it matters:** A long request should never be lost because a user reloads the page or needs to pause.
 
-- Add a friendly application-level error boundary with Reload and Back to Home actions.
-- Keep the existing Public Authorities load error, but add retry behavior.
-- Fix the two React effect-dependency warnings around the request-guidelines gate.
+**Done when:** Each form restores its own draft after a reload without mixing RTI and appeal data.
 
-**Done when:** A controlled failure produces a readable recovery screen rather than an empty viewport.
+### 3. Smarter form guidance ✅
 
-### 3. Accessibility completion pass
+**Experience:** Add short, plain-language guidance beside difficult fields: choosing an authority, writing a focused information request, BPL proof, and appeal grounds.
 
-**Scope:**
+**Why it matters:** It reduces hesitation without turning the form into a dense instruction manual.
 
-- Update the document `lang` attribute when the portal language changes.
-- Add a keyboard-visible skip-to-content link.
-- Review focus movement in dialogs, dropdowns, notifications, and the mobile drawer.
-- Respect `prefers-reduced-motion` for animations.
-- Perform a manual mobile, keyboard, and screen-reader smoke test before demo day.
+**Done when:** Help appears only where needed, works on mobile, and never blocks form completion.
 
-**Done when:** Primary journeys can be completed without a mouse and language-aware assistive technology receives the correct document language.
+## Priority 2 — Make request tracking understandable ✅ Complete
 
-## Priority 2 — Better application journeys
+### 4. Actionable notifications ✅
 
-### 4. Save and resume drafts
+**Experience:** Expand notifications beyond read/unread state: each item should say what changed and offer one relevant action, such as “View response,” “Pay fee,” or “File First Appeal.”
 
-**Why:** RTI and appeal forms can be long. Losing a partially written request is a major trust failure.
+**Why it matters:** The dashboard becomes a useful guide instead of a passive list of updates.
 
-**Scope:**
+**Done when:** A user can act on an important update directly from the notification centre.
 
-- Save a local draft automatically while the applicant types.
-- Resume a draft after reload, with a clear “Discard draft” option.
-- Keep RTI request and First Appeal drafts separate.
-- Show the last-saved time and clearly state that drafts stay only on the current device in this prototype.
+### 5. Request detail hub ✅
 
-**Done when:** A visitor can leave a partially completed form, return, and continue without re-entering information.
+**Experience:** Let a request open into a focused detail view containing its current status, submitted text, authority, documents, payment state, and next steps.
 
-### 5. Review before submit
+**Why it matters:** Users should not need to hunt across history, status, and appeal pages to understand one application.
 
-**Scope:**
+**Done when:** One request detail view answers “what did I submit, where is it, and what should I do next?”
 
-- Add a final review screen before mock payment or submission.
-- Summarize authority, applicant contact details, BPL/fee status, subject, and request text.
-- Let the applicant jump back to the exact section needing correction.
-- Preserve the current guidelines acknowledgement and payment behavior.
+## Priority 3 — Help people choose the right path before filing
 
-**Done when:** The applicant can confirm the complete submission before generating a registration number.
+### 6. RTI Readiness Check
 
-### 6. Request timeline and clearer status language
+**Experience:** Ask four or five plain-language questions before a user begins: whether the matter concerns a Central Public Authority, whether they seek existing information, whether they know the authority, and whether a prior request exists.
 
-**Scope:**
+**Result:** Direct the user to “Ready to file,” “Find an authority,” “File a First Appeal,” “Use CIC / SIC,” or “This may be a grievance rather than an RTI.”
 
-- Show a visual timeline in request details/history: submitted, payment verified, assigned, CPIO response, appeal eligibility.
-- Explain what each mock status means and what the applicant can do next.
-- Keep statuses visibly distinct without relying only on colour.
+**Why it matters:** It prevents users from spending time in the wrong journey and demonstrates thoughtful product design.
 
-**Done when:** A first-time visitor understands the next step for every status at a glance.
+**Done when:** The decision takes under two minutes, collects no personal data, and works in English and Hindi.
 
-## Priority 3 — High-impact new features
+### 7. Guided authority finder
 
-### 7. RTI Readiness Check (recommended next new feature)
+**Experience:** Build on the Public Authorities Directory with a conversational topic search: “passport delay,” “railway refund,” or “pension records” should explain why an authority is suggested and offer a direct File RTI action.
 
-**Goal:** Help people decide whether and how to file before they begin a lengthy form.
+**Why it matters:** Knowing the right authority is often the hardest part of filing.
 
-**Experience:**
+**Done when:** Results explain their match in plain language and always allow the user to verify or change the authority.
 
-1. Ask 4–5 plain-language questions: Is it about a Central Government public authority? Are they seeking existing information or asking for action? Do they know the authority? Is there a prior request/appeal?
-2. Return a clear result: ready to file, choose an authority first, use First Appeal, or this portal may not be the right channel.
-3. Suggest matching public authorities using the existing recommendation service.
-4. Offer the right next action without collecting personal data.
+### 8. Better First Appeal preparation
 
-**Guardrails:**
+**Experience:** When an appeal becomes eligible, prefill the original request context, explain the relevant ground, and provide a short checklist of documents before the form begins.
 
-- Present guidance, not legal advice or a legal eligibility decision.
-- Clearly direct State Government matters and grievances to the appropriate channel.
-- Support English and Hindi from the first release.
+**Why it matters:** Appeals are high-stakes and should feel guided, not like a separate unfamiliar form.
 
-**Done when:** A visitor can reach the right portal journey in under two minutes without exposing personal data.
+**Done when:** An applicant can move from an eligible request to a prepared First Appeal without re-entering known information.
 
-### 8. News and updates area (deferred)
+## Priority 4 — Build trust through the interface
 
-**Goal:** Give every visitor one important, current update at first glance.
+### 9. Plain-language privacy and prototype notices
 
-**Preferred design:**
+**Experience:** Clearly explain what is mock data, what stays on the device, what DigiLocker simulation means, and what information should never be entered into RTI Sahayak.
 
-- Use a site-wide announcement strip beneath the navigation instead of an auto-scrolling marquee.
-- Display a “New” label, one short update, date, and optional link.
-- Keep it readable on mobile and available to screen readers.
-- Allow a future CMS/API to supply updates; use clearly marked mock updates until then.
+**Why it matters:** Trust is part of the product, especially for a portal handling personal contact information.
 
-**Avoid:** Continuous moving text that cannot be paused, or an alert banner that overwhelms the main content.
+### 10. First-visit guidance
 
-### 9. Demo mode and reset journey
+**Experience:** Offer a dismissible, three-step orientation: find an authority, submit a request, track progress.
 
-**Scope:**
+**Why it matters:** It helps first-time applicants understand the portal without adding clutter for returning users.
 
-- Add a small, clearly labelled demo helper for judges.
-- Explain the available mock accounts, DigiLocker simulation, mock payment outcomes, and public status lookup.
-- Offer a reset action that clears local prototype state after confirmation.
+### 11. News and service updates
 
-**Done when:** A judge can experience the end-to-end story reliably from a fresh browser session.
+**Experience:** Add one accessible announcement area beneath the navigation for important RTI updates, maintenance notices, or guidance changes.
 
-## Priority 4 — Confidence and presentation
+**Design rule:** Use a static, readable announcement strip — not an auto-scrolling marquee.
 
-### 10. Guided first-visit onboarding
+## Presentation priorities
 
-- Offer a dismissible three-step introduction: find authority, submit request, track progress.
-- Show it only on the first visit and never block core actions.
+For a two-minute walkthrough, show these visible features in order:
 
-### 11. Sharper evidence in the authority directory
+1. Home page and the problem being solved.
+2. Guidelines → authority search → compact RTI form.
+3. AI rewrite assistance and BPL / payment decision.
+4. Submission success → request history → deadlines and First Appeal path.
 
-- Show why a result was suggested (matched term, ministry, or related office).
-- Add small, plain-language examples for common topics.
-- Track zero-result search terms locally during demos to improve the vocabulary map.
+## Supporting quality work — after the feature pass
 
-### 12. Presentation-ready quality gate
+These remain important, but should support the product story rather than lead it:
 
-- Add a concise manual QA checklist for desktop, mobile, English, Hindi, logged-out, logged-in, BPL, non-BPL, payment failure, First Appeal, and status lookup.
-- Run build, lint, authority-recommendation evaluation, and privacy-filter evaluation before every demo or release.
-- Add lightweight end-to-end tests for the two most important paths once a browser test environment is available.
-
-## Suggested implementation order
-
-1. Route-level loading and route recovery.
-2. Save and resume drafts.
-3. Review before submit and request timeline.
-4. RTI Readiness Check.
-5. Accessibility pass and demo mode.
-6. News and updates area once there is real content to publish.
+- Route-level code splitting and smaller initial load.
+- Error recovery states and robust directory loading.
+- Keyboard, screen-reader, contrast, and language accessibility checks.
+- Demo reset mode and a full end-to-end QA checklist.
+- Lightweight automated tests for request, payment, status, and appeal journeys.

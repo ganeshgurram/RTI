@@ -10,8 +10,11 @@ type NotificationContextValue = {
   markAllAsRead: () => void
 }
 
-/** Bumped when the seed data changed shape - a stale inbox has no applicantEmail to filter on. */
-const notificationStorageKey = "rti-demo-notifications-v2"
+/**
+ * A fresh seed can introduce a new actionable alert. Keep a user's read state, but always merge
+ * the current mock records so a previously stored inbox cannot hide a newly added demo update.
+ */
+const notificationStorageKey = "rti-demo-notifications-v4"
 const NotificationContext = createContext<NotificationContextValue | undefined>(undefined)
 
 function getStoredNotifications() {
@@ -20,7 +23,13 @@ function getStoredNotifications() {
     if (!stored) return mockNotifications
 
     const parsed = JSON.parse(stored) as MockNotification[]
-    return Array.isArray(parsed) ? parsed : mockNotifications
+    if (!Array.isArray(parsed)) return mockNotifications
+
+    const storedById = new Map(parsed.map((notification) => [notification.id, notification]))
+    return mockNotifications.map((notification) => {
+      const storedNotification = storedById.get(notification.id)
+      return storedNotification ? { ...notification, isRead: storedNotification.isRead } : notification
+    })
   } catch {
     return mockNotifications
   }

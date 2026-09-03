@@ -1,6 +1,7 @@
 export type NotificationFilter = "all" | "unread" | "read"
 
 export type MockNotification = {
+  action?: "fileFirstAppeal" | "viewRequest" | "viewResponse"
   id: string
   icon: string
   title: string
@@ -19,6 +20,7 @@ export const mockNotifications: MockNotification[] = [
     title: "Request is being processed",
     description: "Your application for road maintenance records has been assigned to the concerned CPIO.",
     requestId: "RTI-2026-11842",
+    action: "viewRequest",
     applicantEmail: "rajesh.kumar@example.in",
     time: "2 hours ago",
     isRead: false,
@@ -29,6 +31,7 @@ export const mockNotifications: MockNotification[] = [
     title: "A response is available",
     description: "The Public Works Division has uploaded a reply to your RTI request.",
     requestId: "RTI-2026-08604",
+    action: "viewResponse",
     applicantEmail: "rajesh.kumar@example.in",
     time: "Yesterday",
     isRead: false,
@@ -39,6 +42,7 @@ export const mockNotifications: MockNotification[] = [
     title: "First appeal action required",
     description: "Please review the appeal acknowledgement and keep the registration number for reference.",
     requestId: "RTI-2026-09751",
+    action: "viewRequest",
     applicantEmail: "rajesh.kumar@example.in",
     time: "3 days ago",
     isRead: false,
@@ -59,6 +63,7 @@ export const mockNotifications: MockNotification[] = [
     title: "Request closed",
     description: "Your scholarship disbursement request has been marked as satisfied and closed.",
     requestId: "RTI-2026-10319",
+    action: "viewRequest",
     applicantEmail: "rajesh.kumar@example.in",
     time: "12 days ago",
     isRead: true,
@@ -69,6 +74,7 @@ export const mockNotifications: MockNotification[] = [
     title: "Application acknowledgement generated",
     description: "Your RTI application has been registered successfully. You can download its acknowledgement anytime.",
     requestId: "RTI-2026-06642",
+    action: "viewRequest",
     applicantEmail: "rajesh.kumar@example.in",
     time: "18 days ago",
     isRead: true,
@@ -169,6 +175,7 @@ export const mockNotifications: MockNotification[] = [
     title: "Supporting document requested",
     description: "The Ministry of Ports has asked for a supporting document. Upload it from View Status.",
     requestId: "RTI-2026-08877",
+    action: "viewRequest",
     applicantEmail: "ananya.nair@example.in",
     time: "2 weeks ago",
     isRead: true,
@@ -179,8 +186,31 @@ export const mockNotifications: MockNotification[] = [
     title: "Fee payment confirmed",
     description: "Your RTI fee of Rs 10 was received and the registration number was generated.",
     requestId: "RTI-2026-09612",
+    action: "viewRequest",
     applicantEmail: "ananya.nair@example.in",
     time: "3 weeks ago",
     isRead: true,
+  },
+  {
+    id: "notification-dl-8",
+    icon: "gavel",
+    title: "First appeal can now be filed",
+    description: "No reply has been recorded within the statutory response period for your police verification request.",
+    requestId: "RTI-2026-11840",
+    action: "fileFirstAppeal",
+    applicantEmail: "ananya.nair@example.in",
+    time: "Today",
+    isRead: false,
+  },
+  {
+    id: "notification-11",
+    icon: "gavel",
+    title: "First appeal can now be filed",
+    description: "No reply has been recorded within the statutory response period for your municipal works request.",
+    requestId: "RTI-2026-11203",
+    action: "fileFirstAppeal",
+    applicantEmail: "rajesh.kumar@example.in",
+    time: "Today",
+    isRead: false,
   },
 ]

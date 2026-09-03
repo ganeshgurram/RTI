@@ -18,6 +18,8 @@ import { ProfilePage } from "@/routes/ProfilePage"
 import { PublicAuthoritiesPage } from "@/routes/PublicAuthoritiesPage"
 import { FirstAppealFormPage } from "@/routes/FirstAppealFormPage"
 import { RequestFormPage } from "@/routes/RequestFormPage"
+import { RequestReviewPage } from "@/routes/RequestReviewPage"
+import { RequestDetailPage } from "@/routes/RequestDetailPage"
 import { SubmitFirstAppealPage } from "@/routes/SubmitFirstAppealPage"
 import { SecondAppealPage } from "@/routes/SecondAppealPage"
 import { SignupPage } from "@/routes/SignupPage"
@@ -28,6 +30,7 @@ import { NotificationProvider } from "@/notifications/NotificationContext"
 import { PaymentProvider } from "@/payments/PaymentContext"
 import { type RequestAuthority, useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
 import { RequestProvider } from "@/requests/RequestContext"
+import type { RequestFormFocusSection, RequestReviewDraft } from "@/data/request-review"
 
 const router = createBrowserRouter([
   {
@@ -42,6 +45,7 @@ const router = createBrowserRouter([
       { path: "contact-us", element: <ContactUsPage /> },
       { path: "public-authorities", element: <PublicAuthoritiesPage /> },
       { path: "submit-request", element: <RequestFormRoute /> },
+      { path: "request-review", element: <RequestReviewPage /> },
       { path: "payment-reconciliation", element: <PaymentReconciliationPage /> },
       { path: "mock-payment", element: <MockPaymentPage /> },
       { path: "transaction-status", element: <TransactionStatusPage /> },
@@ -52,6 +56,7 @@ const router = createBrowserRouter([
       { path: "second-appeal", element: <SecondAppealPage /> },
       { path: "profile", element: <ProtectedProfile /> },
       { path: "request-history", element: <ProtectedRequestHistory /> },
+      { path: "request-history/:requestId", element: <ProtectedRequestDetail /> },
       { path: "notifications", element: <ProtectedNotifications /> },
       { path: "status", element: <StatusPage /> },
       { path: "*", element: <NotFoundPage /> },
@@ -62,7 +67,12 @@ const router = createBrowserRouter([
 function RequestFormRoute() {
   const location = useLocation()
   const { openRequestGuidelines } = useRequestGuidelines()
-  const routeState = location.state as { guidelinesAccepted?: boolean; authority?: RequestAuthority } | null
+  const routeState = location.state as {
+    authority?: RequestAuthority
+    focusSection?: RequestFormFocusSection
+    guidelinesAccepted?: boolean
+    reviewDraft?: RequestReviewDraft
+  } | null
   const hasAcceptedGuidelines = Boolean(routeState?.guidelinesAccepted)
 
   useEffect(() => {
@@ -72,7 +82,7 @@ function RequestFormRoute() {
   }, [hasAcceptedGuidelines])
 
   if (hasAcceptedGuidelines) {
-    return <RequestFormPage authority={routeState?.authority} />
+    return <RequestFormPage authority={routeState?.authority} draft={routeState?.reviewDraft} focusSection={routeState?.focusSection} />
   }
 
   return (
@@ -132,6 +142,17 @@ function ProtectedRequestHistory() {
   }
 
   return <RequestHistoryPage />
+}
+
+function ProtectedRequestDetail() {
+  const { isAuthenticated } = useAuth()
+  const location = useLocation()
+
+  if (!isAuthenticated) {
+    return <Navigate replace state={{ from: location.pathname }} to="/login" />
+  }
+
+  return <RequestDetailPage />
 }
 
 function ProtectedNotifications() {

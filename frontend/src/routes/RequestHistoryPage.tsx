@@ -36,8 +36,8 @@ export function RequestHistoryPage() {
       </header>
 
       <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        {metrics.map((metric) => (
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm" key={metric.label}>
+        {metrics.map((metric, index) => (
+          <div className={`rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm ${metrics.length % 2 === 1 && index === metrics.length - 1 ? "max-sm:col-span-2" : ""}`} key={metric.label}>
             <div className="flex items-center justify-between"><span className="text-sm text-on-surface-variant">{metric.label}</span><MaterialIcon className="text-primary">{metric.icon}</MaterialIcon></div>
             <p className="mt-3 text-3xl font-bold text-primary">{metric.value}</p>
           </div>
