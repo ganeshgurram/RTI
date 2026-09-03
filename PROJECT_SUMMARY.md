@@ -1,0 +1,9 @@
+# RTI Online Redesign Summary
+
+RTI Online Redesign is a frontend-first prototype that reimagines India's Right to Information journey as a clear, guided citizen experience. People can understand the paths: find a public authority, submit a request, view status, reconcile a payment, or begin a First or Second Appeal. The product uses labelled mock data and never claims access to real government accounts, applications, payments, or records.
+
+Citizens can sign up, sign in, or begin with DigiLocker. A profile can prefill relevant form details, reducing repetitive entry. In the Public Authorities directory, users search by topic, review matches, then choose an authority to go directly to the RTI form with that selection carried forward. The guided form clarifies request text, supporting-document options, payment methods, and payment-reconciliation steps.
+
+RTI Sahayak is available throughout the journey. It provides general portal guidance and suggests relevant departments from local authority data, but never asks for personal information, registration numbers, OTPs, Aadhaar, passwords, payment details, or documents. Likely sensitive data is blocked in the browser and checked again on the server route. The assistant never claims case access or provides legal advice; if AI is unavailable, local guidance remains available.
+
+The responsive Vite, React, TypeScript, React Router, Tailwind CSS, and reusable-component prototype supports English and Hindi. Switching language updates the portal and translates earlier chatbot messages as well as future replies, preserving the conversation. Clear navigation, profile-assisted completion, privacy protection, bilingual continuity, status and appeal routes, and transparent mock behavior make the experience calmer, safer, and more actionable for citizens.

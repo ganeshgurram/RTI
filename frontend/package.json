@@ -16,6 +16,7 @@
     "eval:authorities": "node --experimental-strip-types --no-warnings scripts/eval-authority-recommendations.mjs",
     "eval:privacy": "node --no-warnings scripts/eval-privacy-filter.mjs",
     "eval:deadlines": "node --experimental-strip-types --no-warnings scripts/eval-deadlines.mjs",
+    "check:i18n": "node --no-warnings scripts/check-translations.mjs",
     "preview": "vite preview",
     "build:manual": "node scripts/build-user-manual.mjs"
   },
@@ -25,6 +26,7 @@
     "@fontsource-variable/noto-sans-devanagari": "^5.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "frontend": "file:",
     "i18next": "^26.4.0",
     "lucide-react": "^1.34.0",
     "next-themes": "^0.4.6",

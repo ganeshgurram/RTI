@@ -38,6 +38,9 @@ jobs:
       - name: Evaluate statutory deadlines
         working-directory: frontend
         run: npm run eval:deadlines
+      - name: Check translations
+        working-directory: frontend
+        run: npm run check:i18n
 
       - name: Build
         working-directory: frontend

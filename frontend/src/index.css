@@ -90,6 +90,7 @@
     --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
     --color-state-error: var(--state-error);
     --color-state-warning: var(--state-warning);
+    --color-flow-light: var(--flow-light);
     --color-surface-container-high: var(--surface-container-high);
     --color-inverse-surface: var(--inverse-surface);
     --color-inverse-on-surface: var(--inverse-on-surface);
@@ -231,6 +232,10 @@
     --on-secondary-fixed-variant: var(--secondary-foreground);
     --state-success: oklch(0.53 0.13 150);
     --state-warning: oklch(0.56 0.12 70);
+    /* The spark that travels the lifecycle flowchart. Deliberately its own token rather than a
+       reused status colour: it means motion, not a warning. Held a little darker than true gold so
+       it still reads against the near-white surface the process map sits on. */
+    --flow-light: oklch(0.76 0.15 88);
     --on-primary: var(--primary-foreground);
     --primary-container: var(--primary);
     --tertiary-container: var(--primary);
@@ -277,6 +282,8 @@
     --destructive: oklch(0.704 0.191 22.216);
     --state-success: oklch(0.75 0.16 152);
     --state-warning: oklch(0.78 0.15 78);
+    /* Brighter on the dark surface, where a glowing gold has room to actually glow. */
+    --flow-light: oklch(0.87 0.16 92);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
@@ -320,6 +327,42 @@
   to {
     left: calc(100% - 0.5rem);
     opacity: 0.4;
+  }
+}
+
+/* A single bright dash swept along one route of the RTI lifecycle flowchart.
+ *
+ * One connector per element, never a single path holding them all: SVG restarts the dash pattern at
+ * the beginning of every subpath, so a combined path does not carry one dash along the whole route
+ * - it blinks the same dash onto all of them at once, and shows nothing for the rest of the cycle.
+ *
+ * Instead each connector runs the same animation over a pattern whose period is the WHOLE route, so
+ * only one connector can hold the dash at any moment. Which one is decided by --rti-flow-start, the
+ * distance from the route's beginning to that connector: the dash lands on it exactly when the
+ * sweep has travelled that far. No per-element animation-delay is involved, so the connectors can
+ * never drift out of step, and the dash is split across the node boxes it passes behind. */
+@keyframes rti-flow-light {
+  from {
+    stroke-dashoffset: var(--rti-flow-start);
+  }
+
+  to {
+    stroke-dashoffset: calc(var(--rti-flow-start) - var(--rti-flow-length));
+  }
+}
+
+.rti-flow-light {
+  animation-iteration-count: infinite;
+  animation-name: rti-flow-light;
+  animation-timing-function: linear;
+  filter: drop-shadow(0 0 5px currentColor);
+  stroke-dasharray: var(--rti-flow-dash) calc(var(--rti-flow-length) - var(--rti-flow-dash));
+  stroke-dashoffset: var(--rti-flow-start);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rti-flow-light {
+    animation: none;
   }
 }
 
