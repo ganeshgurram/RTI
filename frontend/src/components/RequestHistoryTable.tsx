@@ -1,11 +1,14 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { DeadlineChip } from "@/components/DeadlineTracker"
+import { RequestDetailDialog } from "@/components/RequestDetailDialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRequests, type RtiRequest } from "@/requests/RequestContext"
+import { getRequestDeadline } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 /** Defaults to every request; account views pass their own scoped list. */
@@ -15,17 +18,38 @@ export function RequestHistoryTable({ requests: scopedRequests }: { requests?: R
   const [requestSearch, setRequestSearch] = useState("")
   const [requestStatus, setRequestStatus] = useState("all")
   const [requestPage, setRequestPage] = useState(1)
+  const [openRequest, setOpenRequest] = useState<RtiRequest | null>(null)
   const { t } = useTranslation()
   const requestPageSize = 10
+  // One "today" for the whole table, so every row in a render is measured against the same day.
+  const today = useMemo(() => new Date(), [])
   const requestQuery = requestSearch.trim().toLowerCase()
   const requestStatuses = [...new Set(requests.map((request) => request.status))]
   const filteredRequests = requests.filter((request) => {
-    const matchesSearch = !requestQuery || [request.id, request.subject, request.authority].some((value) => value.toLowerCase().includes(requestQuery))
+    // The request body is searched too, now that it is kept: what someone remembers about a filing
+    // is usually a phrase from what they asked for, not its registration number.
+    const matchesSearch = !requestQuery || [request.id, request.subject, request.authority, request.requestText ?? ""].some((value) => value.toLowerCase().includes(requestQuery))
     return matchesSearch && (requestStatus === "all" || request.status === requestStatus)
   })
   const requestPageCount = Math.max(1, Math.ceil(filteredRequests.length / requestPageSize))
   const activeRequestPage = Math.min(requestPage, requestPageCount)
   const visibleRequests = filteredRequests.slice((activeRequestPage - 1) * requestPageSize, activeRequestPage * requestPageSize)
+
+  /**
+   * The computed clock sits above the seeded prose rather than replacing it: the prose carries
+   * things no date can say ("Filed with CIC", "Hearing notice awaited"), and stacking keeps the
+   * table at its current five columns.
+   */
+  const renderNextAction = (request: RtiRequest) => {
+    const deadline = getRequestDeadline({ request, today })
+
+    return (
+      <>
+        {deadline ? <DeadlineChip className="mb-1.5 flex" deadline={deadline} /> : null}
+        <span className="block">{request.nextAction}</span>
+      </>
+    )
+  }
   const firstVisibleRequest = filteredRequests.length ? (activeRequestPage - 1) * requestPageSize + 1 : 0
   const lastVisibleRequest = Math.min(activeRequestPage * requestPageSize, filteredRequests.length)
 
@@ -60,12 +84,21 @@ export function RequestHistoryTable({ requests: scopedRequests }: { requests?: R
           </thead>
           <tbody className="divide-y divide-outline-variant/50 text-sm text-on-surface">
             {visibleRequests.map((request) => (
-              <tr className="transition-colors hover:bg-surface-container/30" key={request.id}>
-                <td className="px-5 py-4 font-semibold text-primary">{request.id}</td>
+              <tr className="cursor-pointer transition-colors hover:bg-surface-container/30" key={request.id} onClick={() => setOpenRequest(request)}>
+                <td className="px-5 py-4">
+                  <button
+                    aria-label={t("requestDetail.viewDetails", { id: request.id })}
+                    className="rounded font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    onClick={(event) => { event.stopPropagation(); setOpenRequest(request) }}
+                    type="button"
+                  >
+                    {request.id}
+                  </button>
+                </td>
                 <td className="max-w-[300px] px-5 py-4"><p className="font-medium">{request.subject}</p><p className="mt-1 text-xs text-on-surface-variant">{request.authority}</p></td>
                 <td className="px-5 py-4 text-on-surface-variant"><p>{request.submittedOn}</p><p className="mt-1 text-xs">{t("history.updated", { date: request.lastUpdated })}</p></td>
                 <td className="px-5 py-4"><span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${request.statusClass}`}>{request.status}</span></td>
-                <td className="px-5 py-4 text-on-surface-variant">{request.nextAction}</td>
+                <td className="px-5 py-4 text-on-surface-variant">{renderNextAction(request)}</td>
               </tr>
             ))}
             {!visibleRequests.length ? <tr><td className="px-5 py-10 text-center text-sm text-on-surface-variant" colSpan={5}>{t("history.noMatches")}</td></tr> : null}
@@ -82,6 +115,7 @@ export function RequestHistoryTable({ requests: scopedRequests }: { requests?: R
           </div>
         </div>
       </div>
+      <RequestDetailDialog onClose={() => setOpenRequest(null)} request={openRequest} />
     </Card>
   )
 }

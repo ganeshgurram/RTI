@@ -1,3 +1,5 @@
+import { addDays, formatRequestDate } from "../services/statutory-deadlines.ts"
+
 export const demoCredentials = {
   username: "rajesh.kumar",
   password: "rti@2026",
@@ -80,15 +82,52 @@ export const mockProfileMetrics = [
   { label: "Appeals", value: "2", icon: "gavel" },
 ]
 
+/**
+ * The newest rows carry dates relative to today, so the statutory deadline tracker always has a
+ * running clock, one about to expire and one already lapsed to show, whatever day the portal is
+ * opened. Everything below them keeps fixed dates and reads as history.
+ *
+ * Relative, with the extension, rather than the "@/" alias the rest of the app uses: this module
+ * is imported directly by scripts/eval-deadlines.mjs through Node's type stripping, which resolves
+ * neither tsconfig paths nor extensionless imports.
+ */
+const daysAgo = (days: number) => formatRequestDate(addDays({ date: new Date(), days: -days }))
+
 export const mockRequests = [
   {
     id: "RTI-2026-11842",
     subject: "Road maintenance records for Ward 14",
+    requestText:
+      "Please provide the following information regarding road maintenance in Ward 14 for the financial year 2025-26:\n\n1. A copy of the maintenance schedule for all roads in Ward 14.\n2. The total expenditure incurred on road repair in Ward 14, head-wise.\n3. Copies of work completion certificates issued for these works.\n4. The names of the contractors to whom the works were awarded, and the date of award in each case.",
     authority: "Municipal Public Works Division",
-    submittedOn: "12 Aug 2026",
-    lastUpdated: "18 Aug 2026",
+    submittedOn: daysAgo(12),
+    lastUpdated: daysAgo(6),
     status: "Processing",
-    nextAction: "Reply due 11 Sep 2026",
+    nextAction: "Awaiting reply from the CPIO",
+    statusClass: "bg-primary-fixed text-primary border-primary/20",
+  },
+  {
+    id: "RTI-2026-11510",
+    subject: "Ward 14 streetlight repair backlog and contractor penalties",
+    requestText:
+      "Please provide the following information regarding streetlight maintenance in Ward 14:\n\n1. The number of streetlight repair complaints received for Ward 14 between 1 April 2025 and the date of this application.\n2. The number of those complaints closed, along with the date of closure in each case.\n3. A copy of the maintenance contract currently in force, including the response time it specifies.\n4. Details of any penalty imposed on the contractor for delayed repairs, with copies of the penalty orders.",
+    authority: "Municipal Public Works Division",
+    submittedOn: daysAgo(27),
+    lastUpdated: daysAgo(21),
+    status: "Processing",
+    nextAction: "Awaiting reply from the CPIO",
+    statusClass: "bg-primary-fixed text-primary border-primary/20",
+  },
+  {
+    id: "RTI-2026-11203",
+    subject: "Stormwater drain desilting schedule before the monsoon",
+    requestText:
+      "Please provide the following information regarding stormwater drain desilting:\n\n1. A copy of the pre-monsoon desilting schedule for the current year for Ward 14.\n2. The date on which desilting was actually carried out in each location covered by that schedule.\n3. The quantity of silt removed, as recorded in the measurement book.\n4. Copies of any inspection reports prepared after the desilting work.",
+    authority: "Municipal Public Works Division",
+    submittedOn: daysAgo(34),
+    lastUpdated: daysAgo(30),
+    status: "Processing",
+    nextAction: "No reply received",
     statusClass: "bg-primary-fixed text-primary border-primary/20",
   },
   {
@@ -208,7 +247,7 @@ export const mockRequests = [
     submittedOn: "16 Aug 2025",
     lastUpdated: "19 Sep 2025",
     status: "Processing",
-    nextAction: "Reply due 15 Oct 2025",
+    nextAction: "Reply due 15 Sep 2025",
     statusClass: "bg-primary-fixed text-primary border-primary/20",
   },
   {
@@ -228,7 +267,7 @@ export const mockRequests = [
     submittedOn: "14 Jun 2025",
     lastUpdated: "22 Jul 2025",
     status: "First Appeal",
-    nextAction: "Action needed by 20 Aug 2025",
+    nextAction: "Action needed by 21 Aug 2025",
     statusClass: "bg-secondary text-secondary-foreground border-secondary/40",
   },
 ]
@@ -243,11 +282,13 @@ export const digiLockerMockRequests = [
   {
     id: "RTI-2026-12094",
     subject: "Passport re-issue processing timeline at Kochi PSK",
+    requestText:
+      "Please provide the following information regarding passport re-issue applications at the Passport Seva Kendra, Kochi:\n\n1. The average processing time for re-issue applications at this Kendra for each month from January 2026 to the date of this application.\n2. The number of re-issue applications pending beyond thirty days as on the date of this application.\n3. A copy of the service-level standard prescribed for re-issue applications.\n4. The number of applications returned for deficiency during this period.",
     authority: "Ministry of External Affairs",
-    submittedOn: "21 Aug 2026",
-    lastUpdated: "26 Aug 2026",
+    submittedOn: daysAgo(12),
+    lastUpdated: daysAgo(7),
     status: "Processing",
-    nextAction: "Reply due 20 Sep 2026",
+    nextAction: "Awaiting reply from the CPIO",
     statusClass: "bg-primary-fixed text-primary border-primary/20",
   },
   {
@@ -261,13 +302,37 @@ export const digiLockerMockRequests = [
     statusClass: "bg-tertiary-fixed text-on-tertiary-fixed-variant border-tertiary/20",
   },
   {
+    id: "RTI-2026-11930",
+    subject: "Tatkaal appointment quota released at Kochi PSK each week",
+    requestText:
+      "Please provide the following information regarding Tatkaal appointments at the Passport Seva Kendra, Kochi:\n\n1. The number of Tatkaal appointment slots released each week between 1 June 2026 and the date of this application.\n2. The time of day at which these slots are released.\n3. A copy of the instructions or circular governing the release of Tatkaal slots.\n4. The number of Tatkaal slots that remained unbooked in each of those weeks.",
+    authority: "Ministry of External Affairs",
+    submittedOn: daysAgo(27),
+    lastUpdated: daysAgo(20),
+    status: "Processing",
+    nextAction: "Awaiting reply from the CPIO",
+    statusClass: "bg-primary-fixed text-primary border-primary/20",
+  },
+  {
+    id: "RTI-2026-11840",
+    subject: "Police verification turnaround times for Ernakulam district",
+    requestText:
+      "Please provide the following information regarding police verification for passport applications in Ernakulam district:\n\n1. The average time taken to complete police verification in Ernakulam district for each quarter of 2025-26.\n2. The number of verification reports pending beyond twenty-one days as on the date of this application.\n3. A copy of the standing instructions prescribing the time limit for submitting a verification report.\n4. The number of applications marked adverse or incomplete during this period.",
+    authority: "Ministry of External Affairs",
+    submittedOn: daysAgo(34),
+    lastUpdated: daysAgo(31),
+    status: "Processing",
+    nextAction: "No reply received",
+    statusClass: "bg-primary-fixed text-primary border-primary/20",
+  },
+  {
     id: "RTI-2026-10988",
     subject: "Southern Railway platform accessibility works, Ernakulam Junction",
     authority: "Ministry of Railways",
     submittedOn: "27 Jul 2026",
     lastUpdated: "18 Aug 2026",
     status: "First Appeal",
-    nextAction: "Action needed by 16 Sep 2026",
+    nextAction: "Action needed by 17 Sep 2026",
     statusClass: "bg-secondary text-secondary-foreground border-secondary/40",
   },
   {
@@ -357,7 +422,7 @@ export const digiLockerMockRequests = [
     submittedOn: "26 Feb 2026",
     lastUpdated: "19 Mar 2026",
     status: "Processing",
-    nextAction: "Reply due 27 Mar 2026",
+    nextAction: "Reply due 28 Mar 2026",
     statusClass: "bg-primary-fixed text-primary border-primary/20",
   },
   {

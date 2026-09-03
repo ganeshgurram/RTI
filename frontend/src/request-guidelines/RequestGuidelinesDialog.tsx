@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { usePortalLanguage } from "@/i18n"
-import { RequestGuidelinesContext, type RequestAuthority } from "@/request-guidelines/RequestGuidelinesContext"
+import { RequestGuidelinesContext, type FirstAppealPrefill, type RequestAuthority } from "@/request-guidelines/RequestGuidelinesContext"
 import {
   Dialog,
   DialogContent,
@@ -77,6 +77,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
   const [cancelTo, setCancelTo] = useState<number | string | null>(null)
   const [authority, setAuthority] = useState<RequestAuthority | null>(null)
   const [journey, setJourney] = useState<"request" | "firstAppeal">("request")
+  const [appeal, setAppeal] = useState<FirstAppealPrefill | null>(null)
   const guidelinesScrollRef = useRef<HTMLDivElement>(null)
 
   const updateScrollProgress = () => {
@@ -109,6 +110,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
     // Cleared with the rest, so a later visit from the home page or top nav does not
     // silently reuse the office picked in the directory earlier.
     setAuthority(null)
+    setAppeal(null)
     setJourney("request")
 
     if (shouldReturn && destination !== null) {
@@ -132,13 +134,22 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
   }
 
   const handleSubmit = () => {
-    const destination = journey === "firstAppeal" ? "/submit-first-appeal" : "/submit-request"
-    const state = journey === "firstAppeal"
-      ? { guidelinesAccepted: true }
-      : { guidelinesAccepted: true, authority }
+    // An appellant who came from their own request skips the lookup, but never the guidelines:
+    // this dialog is the acknowledgement, so it is the only way either appeal route can start.
+    if (journey === "firstAppeal") {
+      const skipsLookup = Boolean(appeal?.requestId)
+      const destination = skipsLookup ? "/first-appeal-form" : "/submit-first-appeal"
+      const state = skipsLookup
+        ? { guidelinesAccepted: true, requestId: appeal?.requestId }
+        : { appeal, guidelinesAccepted: true }
+
+      closeDialog()
+      navigate(destination, { state })
+      return
+    }
 
     closeDialog()
-    navigate(destination, { state })
+    navigate("/submit-request", { state: { guidelinesAccepted: true, authority } })
   }
 
   const isFirstAppeal = journey === "firstAppeal"
@@ -156,6 +167,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
           setHasReachedEnd(false)
           setCancelTo(options?.cancelTo ?? null)
           setAuthority(options?.authority ?? null)
+          setAppeal(options?.appeal ?? null)
           setJourney(options?.journey ?? "request")
           setIsOpen(true)
         },

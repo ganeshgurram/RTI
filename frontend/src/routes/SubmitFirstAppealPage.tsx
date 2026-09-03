@@ -1,9 +1,12 @@
 import { useState, type FormEvent } from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
+import { DeadlineNotice } from "@/components/DeadlineTracker"
 import { IconTooltip } from "@/components/IconTooltip"
+import type { FirstAppealPrefill } from "@/request-guidelines/RequestGuidelinesContext"
 import { useRequests } from "@/requests/RequestContext"
+import { canFileFirstAppeal, getRequestDeadline, type RequestDeadline } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const codes = ["726958", "318402", "604791"]
@@ -18,16 +21,23 @@ type LookupErrors = {
   email?: string
   captcha?: string
   lookup?: string
+  /** Kept apart from `lookup`: being early is not a mistake, and is not shown as one. */
+  timing?: string
 }
 
 export function SubmitFirstAppealPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { requests } = useRequests()
+  // Filled in when the appellant arrived from a specific request rather than from the top nav.
+  // The security code is still theirs to enter: it is the check, and prefilling it would remove it.
+  const prefill = (location.state as { appeal?: FirstAppealPrefill } | null)?.appeal
   const [captchaIndex, setCaptchaIndex] = useState(0)
-  const [registrationNumber, setRegistrationNumber] = useState("")
-  const [email, setEmail] = useState("")
+  const [registrationNumber, setRegistrationNumber] = useState(prefill?.registrationNumber ?? "")
+  const [email, setEmail] = useState(prefill?.email ?? "")
   const [captcha, setCaptcha] = useState("")
   const [errors, setErrors] = useState<LookupErrors>({})
+  const [blockedDeadline, setBlockedDeadline] = useState<RequestDeadline | null>(null)
   const { t } = useTranslation()
 
   const activeCaptcha = codes[captchaIndex]
@@ -51,7 +61,32 @@ export function SubmitFirstAppealPage() {
       }
     }
 
+    const today = new Date()
+    let deadline: RequestDeadline | null = null
+
+    /**
+     * s.19(1) gives an appeal to someone who received no decision in time, or who is aggrieved by
+     * one. Those are independent, so a reply that has arrived can be appealed at once and only
+     * silence has to wait out the thirty days.
+     */
+    if (!Object.keys(nextErrors).length && matchingRequest) {
+      const eligibility = canFileFirstAppeal({ request: matchingRequest, requestId: matchingRequest.id, today })
+
+      if (!eligibility.allowed) {
+        deadline = getRequestDeadline({ request: matchingRequest, today })
+
+        if (eligibility.reason === "waiting") {
+          nextErrors.timing = eligibility.daysRemaining === 0
+            ? t("deadline.gateWaitingToday", { date: deadline?.dueOn, unlocksOn: eligibility.unlocksOn })
+            : t("deadline.gateWaiting", { count: eligibility.daysRemaining ?? 0, date: deadline?.dueOn, unlocksOn: eligibility.unlocksOn })
+        } else {
+          nextErrors.timing = t(eligibility.reason === "appealRow" ? "deadline.gateAppealRow" : "deadline.gateAlreadyAppealed")
+        }
+      }
+    }
+
     setErrors(nextErrors)
+    setBlockedDeadline(deadline)
 
     if (!Object.keys(nextErrors).length && matchingRequest) {
       navigate("/first-appeal-form", { state: { requestId: matchingRequest.id } })
@@ -90,7 +125,7 @@ export function SubmitFirstAppealPage() {
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-registration-number"><span className="text-error">*</span> {t("firstAppeal.registrationNumber")}</label>
               <div className="flex-grow">
                 <div className="flex items-center gap-2">
-                  <input aria-invalid={Boolean(errors.registrationNumber)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-registration-number" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined })) }} placeholder="RTI-2026-11842" type="text" value={registrationNumber} />
+                  <input aria-invalid={Boolean(errors.registrationNumber)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-registration-number" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined, timing: undefined })) }} placeholder="RTI-2026-11842" type="text" value={registrationNumber} />
                   <IconTooltip label={t("firstAppeal.helpRegistration")} render={<button aria-label={t("firstAppeal.helpRegistration")} className="text-surface-tint transition-colors hover:text-primary" type="button" />}><MaterialIcon className="text-[20px]">help</MaterialIcon></IconTooltip>
                 </div>
                 {errors.registrationNumber ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.registrationNumber}</p> : null}
@@ -99,7 +134,7 @@ export function SubmitFirstAppealPage() {
             <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-email"><span className="text-error">*</span> {t("firstAppeal.emailPrompt")}</label>
               <div className="flex-grow">
-                <input aria-invalid={Boolean(errors.email)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-email" onChange={(event) => { setEmail(event.target.value); setErrors((current) => ({ ...current, email: undefined, lookup: undefined })) }} placeholder={t("status.emailAddress")} type="email" value={email} />
+                <input aria-invalid={Boolean(errors.email)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-email" onChange={(event) => { setEmail(event.target.value); setErrors((current) => ({ ...current, email: undefined, lookup: undefined, timing: undefined })) }} placeholder={t("status.emailAddress")} type="email" value={email} />
                 {errors.email ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.email}</p> : null}
               </div>
             </div>
@@ -115,6 +150,12 @@ export function SubmitFirstAppealPage() {
               </div>
             </div>
             {errors.lookup ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{errors.lookup}</p> : null}
+            {errors.timing ? (
+              <div className="flex flex-col gap-3">
+                <p className="rounded-md border border-state-warning/30 bg-state-warning/12 p-3 text-sm font-medium text-state-warning" role="alert">{errors.timing}</p>
+                {blockedDeadline ? <DeadlineNotice deadline={blockedDeadline} showAppealAction={false} /> : null}
+              </div>
+            ) : null}
             <div className="mt-stack-md flex justify-center gap-stack-md border-t border-surface-container-high pt-stack-lg md:justify-start md:pl-[33%]">
               <button className="min-w-30 rounded-lg bg-primary px-6 py-2 font-label-lg text-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit">{t("firstAppeal.submit")}</button>
               <button className="min-w-30 rounded-lg border border-outline-variant bg-surface-container px-6 py-2 font-label-lg text-label-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface" type="reset">{t("firstAppeal.reset")}</button>

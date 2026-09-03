@@ -28,6 +28,8 @@ export type PaymentRequestDraft = {
   applicantName: string
   applicantPhone: string
   authority: string
+  /** The full request, kept apart from the one-line subject derived from it. */
+  requestText: string
   subject: string
 }
 

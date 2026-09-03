@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import { Navigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { DeadlineNotice } from "@/components/DeadlineTracker"
 import { IconTooltip } from "@/components/IconTooltip"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { useRequests } from "@/requests/RequestContext"
+import { getRequestDeadline } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const captchaCodes = ["7KQ2P", "M4N8R", "T6B3X"]
@@ -40,9 +42,12 @@ export function StatusPage() {
   const [requestId, setRequestId] = useState<string | null>(null)
   const requestDetailsRef = useRef<HTMLElement>(null)
   const { t } = useTranslation()
+  // Declared above the signed-in redirect below, so every hook runs on every render.
+  const today = useMemo(() => new Date(), [])
 
   const activeCaptcha = captchaCodes[captchaIndex]
   const request = requests.find((item) => item.id === requestId)
+  const deadline = request ? getRequestDeadline({ request, today }) : null
 
   useEffect(() => {
     if (request) requestDetailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -149,6 +154,11 @@ export function StatusPage() {
                   <Detail label={t("status.currentStatus")} value={request.status} />
                   <Detail label={t("status.nextAction")} value={request.nextAction} />
                 </dl>
+                {deadline ? (
+                  <div className="mb-4">
+                    <DeadlineNotice appealFor={{ email: request.applicantEmail, registrationNumber: request.id }} deadline={deadline} />
+                  </div>
+                ) : null}
                 <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
                   <p className="text-sm font-semibold text-primary">{t("status.latestUpdate")}</p>
                   <p className="mt-1 text-sm leading-6 text-on-surface-variant">{t("status.latestUpdateText", { status: request.status, nextAction: request.nextAction })}</p>

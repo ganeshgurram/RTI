@@ -12,6 +12,7 @@ import { useAuth } from "@/auth/AuthContext"
 import { indianStatesAndTerritories } from "@/data/indian-states"
 import { mockProfile } from "@/data/mock-profile"
 import { useAccountRequests } from "@/requests/RequestContext"
+import { countOverdueDeadlines } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 type ApplicantForm = {
@@ -216,6 +217,7 @@ export function ProfilePage() {
     { label: t("history.pending"), value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
     { label: t("history.replies"), value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
     { label: t("history.appeals"), value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
+    { label: t("deadline.lapsedMetric"), value: String(countOverdueDeadlines({ requests, today: new Date() })), icon: "event_busy" },
   ]
 
   return (
@@ -246,7 +248,7 @@ export function ProfilePage() {
         </div>
       ) : null}
 
-      <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {requestMetrics.map((metric) => (
           <Card className="border border-outline-variant bg-surface-container-lowest py-4 shadow-sm" key={metric.label}>
             <CardContent>

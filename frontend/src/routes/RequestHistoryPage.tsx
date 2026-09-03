@@ -5,6 +5,7 @@ import { RequestHistoryTable } from "@/components/RequestHistoryTable"
 import { buttonVariants } from "@/components/ui/button"
 import { mockProfile } from "@/data/mock-profile"
 import { useAccountRequests } from "@/requests/RequestContext"
+import { countOverdueDeadlines } from "@/services/statutory-deadlines"
 import { cn } from "@/lib/utils"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -18,6 +19,7 @@ export function RequestHistoryPage() {
     { label: t("history.pending"), value: String(requests.filter((request) => request.status === "Processing" || request.status === "Pending Verification").length), icon: "hourglass_top" },
     { label: t("history.replies"), value: String(requests.filter((request) => request.status === "Reply received" || request.status === "Satisfied").length), icon: "mark_email_read" },
     { label: t("history.appeals"), value: String(requests.filter((request) => request.status.includes("Appeal")).length), icon: "gavel" },
+    { label: t("deadline.lapsedMetric"), value: String(countOverdueDeadlines({ requests, today: new Date() })), icon: "event_busy" },
   ]
 
   return (
@@ -33,7 +35,7 @@ export function RequestHistoryPage() {
         </div>
       </header>
 
-      <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section aria-label="RTI activity overview" className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {metrics.map((metric) => (
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm" key={metric.label}>
             <div className="flex items-center justify-between"><span className="text-sm text-on-surface-variant">{metric.label}</span><MaterialIcon className="text-primary">{metric.icon}</MaterialIcon></div>

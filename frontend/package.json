@@ -15,6 +15,7 @@
     "lint": "oxlint",
     "eval:authorities": "node --experimental-strip-types --no-warnings scripts/eval-authority-recommendations.mjs",
     "eval:privacy": "node --no-warnings scripts/eval-privacy-filter.mjs",
+    "eval:deadlines": "node --experimental-strip-types --no-warnings scripts/eval-deadlines.mjs",
     "preview": "vite preview",
     "build:manual": "node scripts/build-user-manual.mjs"
   },

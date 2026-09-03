@@ -161,6 +161,19 @@ function SearchableDirectorySelect({
   )
 }
 
+/**
+ * A one-line title for the history list, taken from the opening of the request. The request text
+ * itself is stored alongside it: the portal used to pass the whole 3,000-character body in as the
+ * subject, where it was truncated to 120 characters and the rest was lost.
+ */
+function deriveSubject(requestText: string) {
+  const cleaned = requestText.trim().replace(/s+/g, " ")
+  const [firstSentence] = cleaned.split(/(?<=[.?])s/)
+  const candidate = firstSentence && firstSentence.length <= 120 ? firstSentence : cleaned
+
+  return candidate.length <= 120 ? candidate : `${candidate.slice(0, 117).trimEnd()}…`
+}
+
 export function RequestFormPage({ authority }: { authority?: RequestAuthority }) {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -240,12 +253,14 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
       return
     }
 
+    const submittedText = String(formData.get("requestText") ?? "")
     const requestDraft: PaymentRequestDraft = {
       applicantEmail: email,
       applicantName: String(formData.get("fullName") ?? "").trim(),
       applicantPhone: `+91 ${String(formData.get("mobile") ?? "").trim()}`,
       authority: selectedAuthorityOption.label,
-      subject: String(formData.get("requestText") ?? ""),
+      requestText: submittedText,
+      subject: deriveSubject(submittedText),
     }
 
     if (!isBplApplicant) {
