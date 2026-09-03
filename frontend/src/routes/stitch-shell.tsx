@@ -7,7 +7,7 @@ import { IconTooltip } from "@/components/IconTooltip"
 import { usePortalLanguage } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import { useNotifications } from "@/notifications/NotificationContext"
-import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
 import {
   Sheet,
   SheetClose,
@@ -158,7 +158,7 @@ function StitchTopNav() {
   return (
     <>
       <div className="relative z-50 w-full bg-primary text-on-primary/70">
-        <div className="mx-auto flex h-9 w-full max-w-container-max items-center justify-end gap-1 px-3 text-label-sm md:px-margin-desktop">
+        <div className="mx-auto flex h-9 w-full max-w-container-max items-center justify-end gap-1 px-3 text-label-sm navwide:px-margin-desktop">
           <span className="mr-1 hidden sm:inline">{t("nav.textSize")}</span>
           <IconTooltip label={t("nav.increaseText")} render={<button aria-label={t("nav.increaseText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale >= maxTextScale} onClick={() => setTextScale((current) => clampTextScale(current + textScaleStep))} type="button" />} side="bottom">A+</IconTooltip>
           <IconTooltip label={t("nav.resetText")} render={<button aria-label={t("nav.resetText")} className="rounded px-1.5 py-0.5 transition-colors hover:bg-on-primary/10 hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent" disabled={textScale === 1} onClick={() => setTextScale(1)} type="button" />} side="bottom">A</IconTooltip>
@@ -169,16 +169,16 @@ function StitchTopNav() {
           <button aria-label={t("language.switchToHindi")} aria-pressed={language === "hi"} className={`rounded px-2 py-0.5 transition-colors ${language === "hi" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("hi")} type="button">{t("language.hindi")}</button>
         </div>
       </div>
-      <div className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "px-3 pt-3 md:px-6" : "px-0 pt-0"}`}>
+      <div className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "px-3 pt-3 navwide:px-6" : "px-0 pt-0"}`}>
         <nav className={`relative mx-auto w-full border text-on-primary transition-all duration-300 ${isScrolled ? "max-w-container-max rounded-xl border-on-primary/15 bg-[color-mix(in_oklab,var(--on-primary)_10%,var(--primary))] shadow-xl" : "max-w-full rounded-none border-transparent bg-primary shadow-none"}`}>
-          <div className="mx-auto flex h-16 w-full max-w-container-max items-center gap-4 px-3 md:px-margin-desktop">
-          <div className="flex items-center gap-2 md:mr-0">
+          <div className="mx-auto flex h-16 w-full max-w-container-max items-center gap-4 px-3 navwide:px-margin-desktop">
+          <div className="flex items-center gap-2 navwide:mr-0">
             <Sheet>
               <SheetTrigger
                 render={
                   <button
                     aria-label={t("nav.openMenu")}
-                    className="p-1 text-on-primary md:hidden"
+                    className="p-1 text-on-primary navwide:hidden"
                     type="button"
                   />
                 }
@@ -244,9 +244,9 @@ function StitchTopNav() {
                 RTI Online
               </span>
             </Link>
-            <span className="hidden max-w-32 truncate border-l border-on-primary/30 pl-3 text-sm font-medium text-on-primary/80 sm:inline md:hidden">{currentPageLabel}</span>
+            <span className="hidden max-w-32 truncate border-l border-on-primary/30 pl-3 text-sm font-medium text-on-primary/80 sm:inline navwide:hidden">{currentPageLabel}</span>
           </div>
-          <div className="ml-6 hidden h-full items-center gap-3 md:flex">
+          <div className="ml-6 hidden h-full items-center gap-3 navwide:flex">
             {links.map((link) => {
               const isCurrent = isActive(link.path)
               // Both states carry the same box so nothing shifts when the page changes; the
@@ -285,7 +285,7 @@ function StitchTopNav() {
                     <MaterialIcon>notifications</MaterialIcon>
                     {unreadCount ? <span className="absolute -right-1.5 -top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] leading-4 font-bold text-black">{unreadCount}</span> : null}
                   </IconTooltip>
-                  <div className={`fixed left-3 right-3 top-[4.5rem] z-50 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72 ${isNotificationMenuOpen ? "block" : "hidden"}`}>
+                  <div className={`fixed left-3 right-3 z-50 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest shadow-sm ${isScrolled ? "max-sm:top-[5.25rem]" : "max-sm:top-[6.75rem]"} sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-72 ${isNotificationMenuOpen ? "block" : "hidden"}`}>
                     <div className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low p-4">
                       <h3 className="text-[14px] font-bold uppercase tracking-wider text-primary-container">{t("nav.recentNotifications")}</h3>
                       <Button className={unreadCount ? "" : "invisible"} onClick={markAllAsRead} size="sm" type="button">{t("nav.markAllRead")}</Button>

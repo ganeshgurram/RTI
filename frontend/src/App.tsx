@@ -26,7 +26,7 @@ import { RequestHistoryPage } from "@/routes/RequestHistoryPage"
 import { StatusPage } from "@/routes/StatusPage"
 import { NotificationProvider } from "@/notifications/NotificationContext"
 import { PaymentProvider } from "@/payments/PaymentContext"
-import { useRequestGuidelines, type RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
+import { type RequestAuthority, useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
 import { RequestProvider } from "@/requests/RequestContext"
 
 const router = createBrowserRouter([

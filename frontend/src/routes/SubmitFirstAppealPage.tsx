@@ -74,8 +74,13 @@ export function SubmitFirstAppealPage() {
   return (
     <div className="mx-auto flex w-full max-w-container-max flex-1 flex-col items-center px-margin-mobile py-stack-lg md:px-margin-desktop md:py-12">
       <div className="w-full max-w-3xl">
-        <header className="mb-stack-lg border-b border-outline-variant pb-stack-md">
-          <h1 className="mb-stack-sm font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("firstAppeal.title")}</h1>
+        <header className="pb-stack-md">
+          <div className="mb-stack-sm flex items-center justify-between gap-4">
+            <h1 className="font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("firstAppeal.title")}</h1>
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary">
+              <MaterialIcon className="text-2xl">gavel</MaterialIcon>
+            </div>
+          </div>
           <p className="text-body-md text-on-surface-variant">{t("firstAppeal.lookupDescription")}</p>
         </header>
 

@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { AiRewriteAssistant } from "@/components/AiRewriteAssistant"
 import { IconTooltip } from "@/components/IconTooltip"
 import { indianStates, indianUnionTerritories } from "@/data/indian-states"
 import { useRequests } from "@/requests/RequestContext"
@@ -53,6 +54,7 @@ export function FirstAppealFormPage() {
   const { createFirstAppeal, requests } = useRequests()
   const { t } = useTranslation()
   const [captchaIndex, setCaptchaIndex] = useState(0)
+  const [appealText, setAppealText] = useState("")
   const captchaCodes = ["290563", "572946", "814307"]
   const requestId = (location.state as { requestId?: string } | null)?.requestId
   const request = requests.find((item) => item.id === requestId)
@@ -143,7 +145,12 @@ export function FirstAppealFormPage() {
           <div className="rounded border border-outline-variant bg-surface p-4">
             <p className="mb-2 text-label-sm text-on-surface-variant">{t("firstAppeal.appealTextHint")}</p>
             <p className="mb-4 flex items-center gap-1 text-label-sm font-medium italic text-surface-tint">{t("firstAppeal.appealTextNote")}</p>
-            <AppealRow label={t("firstAppeal.appealText")} required><textarea className={`${fieldClassName} min-h-36 resize-y`} maxLength={500} rows={6} /></AppealRow>
+            <AppealRow label={t("firstAppeal.appealText")} required>
+              <div className="space-y-3">
+                <AiRewriteAssistant draft={appealText} maxLength={500} onUseRewrite={setAppealText} type="first-appeal" />
+                <textarea className={`${fieldClassName} min-h-36 resize-y`} id="appeal-text" maxLength={500} name="appealText" onChange={(event) => setAppealText(event.target.value)} required rows={6} value={appealText} />
+              </div>
+            </AppealRow>
           </div>
           <AppealRow hint={t("requestForm.pdfLimit")} label={t("requestForm.supportingDocument")}><input accept=".pdf" className="block w-full cursor-pointer text-sm text-on-surface-variant file:mr-4 file:rounded file:border file:border-outline-variant file:bg-surface-container file:px-4 file:py-2 file:font-label-lg file:text-on-surface hover:file:bg-surface-container-high md:w-2/3" type="file" /></AppealRow>
           <AppealRow label={t("firstAppeal.securityCode")} required>

@@ -1,8 +1,9 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { usePortalLanguage } from "@/i18n"
+import { RequestGuidelinesContext, type RequestAuthority } from "@/request-guidelines/RequestGuidelinesContext"
 import {
   Dialog,
   DialogContent,
@@ -11,18 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-
-/** The office an applicant picked in the directory, carried through to the request form. */
-export type RequestAuthority = {
-  name: string
-  ministryName?: string
-}
-
-type RequestGuidelinesContextValue = {
-  openRequestGuidelines: (options?: { cancelTo?: number | string; authority?: RequestAuthority; journey?: "request" | "firstAppeal" }) => void
-}
-
-const RequestGuidelinesContext = createContext<RequestGuidelinesContextValue | null>(null)
 
 const guidelines = [
   "This portal may be used by Indian citizens to file RTI applications and first appeals online for the Government of India ministries and departments covered by this service.",
@@ -73,6 +62,11 @@ const hindiFirstAppealGuidelines = [
   "अपील-पाठ या सहायक दस्तावेज़ में आधार, पैन, बैंक विवरण, ओटीपी या पासवर्ड न लिखें। केवल प्रासंगिक पीडीएफ, अधिकतम 1 एमबी, अपलोड करें।",
   "जमा करने के बाद प्रथम अपील पंजीकरण नंबर सुरक्षित रखें और उसकी प्रगति ट्रैक करने के लिए पोर्टल का उपयोग करें।",
 ]
+
+// Kept as source material for any future First Appeal-specific guidance update. The dialog
+// intentionally presents the primary RTI guidelines for both journeys.
+void firstAppealGuidelines
+void hindiFirstAppealGuidelines
 
 export function RequestGuidelinesDialogProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
@@ -149,9 +143,10 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
 
   const isFirstAppeal = journey === "firstAppeal"
   const isHindi = language === "hi"
-  const activeGuidelines = isFirstAppeal
-    ? (isHindi ? hindiFirstAppealGuidelines : firstAppealGuidelines)
-    : (isHindi ? hindiGuidelines : guidelines)
+  // The primary RTI guidance is the single source of truth for both journeys. The First Appeal
+  // title and destination remain specific to that flow, but applicants acknowledge the same
+  // main portal guidance before proceeding.
+  const activeGuidelines = isHindi ? hindiGuidelines : guidelines
 
   return (
     <RequestGuidelinesContext.Provider
@@ -224,14 +219,4 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
       </Dialog>
     </RequestGuidelinesContext.Provider>
   )
-}
-
-export function useRequestGuidelines() {
-  const context = useContext(RequestGuidelinesContext)
-
-  if (!context) {
-    throw new Error("useRequestGuidelines must be used within RequestGuidelinesDialogProvider")
-  }
-
-  return context
 }

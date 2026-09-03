@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/auth/AuthContext"
-import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const actionCards = [
@@ -200,7 +200,9 @@ export function HomePage() {
                       {steps.map(([icon, title, body, className], index) => (
                         <div className="relative flex min-w-0 flex-col items-center text-center" key={title}>
                           {index < steps.length - 1 && (
-                            <div aria-hidden="true" className="absolute left-[calc(50%+24px)] right-[calc(-50%+16px)] top-6 h-px bg-outline-variant" />
+                            // The 48px icon has a 24px radius. Inset the line a further 14px at
+                            // each end so it visually connects the steps without ever touching an icon.
+                            <div aria-hidden="true" className="absolute left-[calc(50%+38px)] right-[calc(-50%+30px)] top-6 h-px bg-outline-variant" />
                           )}
                           <div className={`z-10 flex size-12 items-center justify-center rounded-full border-2 transition-colors ${className}`}>
                             <MaterialIcon className="text-2xl">{icon}</MaterialIcon>
@@ -216,7 +218,8 @@ export function HomePage() {
                       {steps.map(([icon, title, body, className], index) => (
                       <div className="relative flex items-start gap-4" key={title}>
                         {index < steps.length - 1 && (
-                          <div aria-hidden="true" className="absolute bottom-[-20px] left-6 top-12 z-0 w-px bg-outline-variant" />
+                          // 14px clear of the current icon's bottom and the next icon's top.
+                          <div aria-hidden="true" className="absolute bottom-[-6px] left-6 top-[62px] z-0 w-px bg-outline-variant" />
                         )}
                         <div className={`z-10 flex size-12 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${className}`}>
                           <MaterialIcon className="text-2xl">{icon}</MaterialIcon>

@@ -2,7 +2,7 @@ import { type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { mockContactDetails } from "@/data/mock-contact"
-import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 function ContactRow({ icon, label, children }: { icon: string; label: string; children: ReactNode }) {

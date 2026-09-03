@@ -31,6 +31,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+    /* The full portal navigation needs roughly 1,200 CSS pixels once its five links, account
+       controls, translated labels, and side padding are present. Keep the compact drawer below
+       that measured width instead of treating a particular tablet model as a desktop. */
+    --breakpoint-navwide: 75rem;
+}
+
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: "SF Pro Display", "Geist Variable", "Segoe UI", sans-serif;

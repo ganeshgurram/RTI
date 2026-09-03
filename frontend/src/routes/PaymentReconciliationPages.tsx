@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { IconTooltip } from "@/components/IconTooltip"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { findTransaction, type PaymentTransaction } from "@/data/mock-transactions"
 import { cn } from "@/lib/utils"
@@ -83,46 +83,48 @@ export function PaymentReconciliationPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12">
-      <header className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-primary-fixed text-primary">
-          <MaterialIcon className="text-2xl">receipt_long</MaterialIcon>
-        </div>
-        <h1 className="font-headline-lg text-3xl text-primary md:text-headline-lg">{t("payment.title")}</h1>
-        <p className="mt-3 text-base leading-7 text-on-surface-variant">{t("payment.subtitle")}</p>
-      </header>
-
-      <div className="mx-auto max-w-3xl">
+    <div className="mx-auto flex w-full max-w-container-max flex-1 flex-col items-center px-margin-mobile py-stack-lg md:px-margin-desktop md:py-12">
+      <div className="w-full max-w-3xl">
+        <header className="pb-stack-md">
+          <div className="mb-stack-sm flex items-center justify-between gap-4">
+            <h1 className="font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("payment.title")}</h1>
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary">
+              <MaterialIcon className="text-2xl">receipt_long</MaterialIcon>
+            </div>
+          </div>
+          <p className="text-body-md text-on-surface-variant">{t("payment.subtitle")}</p>
+        </header>
         <Card className="border border-outline-variant bg-surface-container-lowest shadow-sm">
-          <CardHeader className="border-b border-outline-variant/50">
-            <CardTitle className="text-primary">{t("payment.locateTitle")}</CardTitle>
-            <CardDescription>{t("payment.locateDescription")}</CardDescription>
-            <p className="mt-2 text-xs text-on-surface-variant">{t("payment.mandatory")}</p>
-          </CardHeader>
-          <CardContent>
-            <form className="grid grid-cols-1 gap-5 md:grid-cols-2" noValidate onSubmit={locateTransaction}>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-email">{t("status.emailAddress")} <span className="text-destructive">*</span></label>
+          <CardContent className="p-stack-lg">
+            <form className="flex flex-col gap-stack-md" noValidate onSubmit={locateTransaction}>
+              <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
+                <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="reconciliation-email"><span className="text-error">*</span> {t("status.emailAddress")}</label>
+                <div className="flex-grow">
                 <Input aria-invalid={Boolean(errors.email)} id="reconciliation-email" onChange={(event) => { setEmail(event.target.value); clearErrors() }} placeholder="user@domain.com" type="email" value={email} />
                 {errors.email ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.email}</p> : null}
+                </div>
               </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-mobile">{t("payment.mobileOptional")}</label>
+              <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
+                <label className="flex items-center font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="reconciliation-mobile">{t("payment.mobileOptional")}</label>
+                <div className="flex-grow">
                 <Input aria-invalid={Boolean(errors.mobile)} id="reconciliation-mobile" maxLength={10} onChange={(event) => { setMobile(event.target.value); clearErrors() }} placeholder="98765 43210" type="tel" value={mobile} />
                 {errors.mobile ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.mobile}</p> : null}
+                </div>
               </div>
-              <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium text-foreground" htmlFor="reconciliation-captcha">{t("status.captcha")} <span className="text-destructive">*</span></label>
-                <div className="flex max-w-md gap-2">
+              <div className="flex flex-col gap-stack-sm pt-stack-sm md:flex-row md:gap-gutter">
+                <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="reconciliation-captcha"><span className="text-error">*</span> {t("status.captcha")}</label>
+                <div className="flex flex-grow flex-col gap-stack-sm">
+                  <div className="flex max-w-md items-center gap-2">
                   <Input aria-invalid={Boolean(errors.captcha)} id="reconciliation-captcha" onChange={(event) => { setCaptcha(event.target.value); clearErrors() }} placeholder={t("status.enterCaptcha")} value={captcha} />
                   <span aria-label="Captcha code" className="flex h-8 min-w-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary">{activeCaptcha}</span>
                   <IconTooltip label={t("status.refreshCaptcha")} render={<Button aria-label={t("status.refreshCaptcha")} onClick={refreshCaptcha} size="icon" type="button" variant="outline" />}><MaterialIcon>refresh</MaterialIcon></IconTooltip>
+                  </div>
+                  <p className="text-xs text-on-surface-variant">{t("payment.allCaseInsensitive")}</p>
+                  {errors.captcha ? <p className="text-xs font-medium text-destructive">{errors.captcha}</p> : null}
                 </div>
-                <p className="mt-1.5 text-xs text-on-surface-variant">{t("payment.allCaseInsensitive")}</p>
-                {errors.captcha ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.captcha}</p> : null}
               </div>
-              {errors.lookup ? <p className="text-sm font-medium text-destructive md:col-span-2" role="alert">{errors.lookup}</p> : null}
-              <div className="mt-2 flex flex-wrap justify-end gap-3 border-t border-outline-variant/50 pb-2 pt-6 md:col-span-2">
+              {errors.lookup ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{errors.lookup}</p> : null}
+              <div className="mt-stack-md flex justify-center gap-stack-md border-t border-surface-container-high pt-stack-lg md:justify-start md:pl-[33%]">
                 <Button onClick={resetForm} size="lg" type="button" variant="outline">{t("requestForm.reset")}</Button>
                 <Button size="lg" type="submit"><MaterialIcon>search</MaterialIcon>{t("payment.locate")}</Button>
               </div>

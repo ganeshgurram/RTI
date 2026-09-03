@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 import { IconTooltip } from "@/components/IconTooltip"
 import { Button } from "@/components/ui/button"
 import { usePortalLanguage, type PortalLanguage } from "@/i18n"
-import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesDialog"
+import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
 import type { AuthoritySuggestion } from "@/services/authority-recommendations"
 import {
   askRtiSahayak,

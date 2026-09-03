@@ -3,11 +3,12 @@ import { Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { useAuth } from "@/auth/AuthContext"
+import { AiRewriteAssistant } from "@/components/AiRewriteAssistant"
 import { IconTooltip } from "@/components/IconTooltip"
 import { indianStates, indianUnionTerritories } from "@/data/indian-states"
 import { ministryNames } from "@/data/ministry-names"
 import type { PaymentRequestDraft } from "@/data/mock-transactions"
-import type { RequestAuthority } from "@/request-guidelines/RequestGuidelinesDialog"
+import type { RequestAuthority } from "@/request-guidelines/RequestGuidelinesContext"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -172,6 +173,7 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
   const [hasDirectoryError, setHasDirectoryError] = useState(false)
   const [selectedMinistry, setSelectedMinistry] = useState(authority?.ministryName ?? "")
   const [selectedAuthority, setSelectedAuthority] = useState(authority?.name ?? "")
+  const [requestText, setRequestText] = useState("")
   const captchaCodes = ["915267", "418903", "672154"]
   const captchaCode = captchaCodes[captchaIndex]
   const applicantProfile = user?.profile ?? null
@@ -384,7 +386,10 @@ export function RequestFormPage({ authority }: { authority?: RequestAuthority })
           <div className="space-y-4 border-t border-surface-variant pt-6">
             <label className={labelClassName} htmlFor="request-text">{t("requestForm.requestText")}<Required /></label>
             <p className="rounded border border-primary-fixed-dim bg-primary-fixed/30 p-2 text-label-sm text-surface-tint">{t("requestForm.requestTextNote")}</p>
-            <textarea className="min-h-48 w-full rounded border border-outline-variant bg-surface-container-lowest p-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="request-text" maxLength={3000} name="requestText" placeholder={t("requestForm.requestTextPlaceholder")} required rows={8} />
+            {/* Above the field, not below it: the textarea is 192px tall at minimum, so anything
+                after it fell past the fold and the one control that helps with a blank page went unseen. */}
+            <AiRewriteAssistant draft={requestText} maxLength={3000} onUseRewrite={setRequestText} type="request" />
+            <textarea className="min-h-48 w-full rounded border border-outline-variant bg-surface-container-lowest p-3 text-body-md text-on-surface shadow-sm outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="request-text" maxLength={3000} name="requestText" onChange={(event) => setRequestText(event.target.value)} placeholder={t("requestForm.requestTextPlaceholder")} required rows={8} value={requestText} />
           </div>
           <div className={`${isBplApplicant ? "block" : "hidden"} space-y-2 border-t border-surface-variant pt-6`}>
             <label className={labelClassName} htmlFor="request-document">{t("requestForm.supportingDocument")} <span className="font-normal text-label-sm text-on-surface-variant">({t("requestForm.pdfLimit")})</span><Required /></label>

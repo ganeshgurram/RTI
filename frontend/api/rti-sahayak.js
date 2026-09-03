@@ -27,6 +27,8 @@ const MAX_TRANSLATION_SEGMENT_CHARS = 2000
  * an answer would fail with a 402 rather than simply costing more.
  */
 const MAX_TRANSLATION_TOKENS = MAX_OUTPUT_TOKENS
+const MAX_REWRITE_REQUEST_CHARS = 3000
+const MAX_REWRITE_APPEAL_CHARS = 500
 
 /**
  * Roughly two characters of Devanagari per token, plus headroom for the separators. Asked for
@@ -153,6 +155,23 @@ function getTranslationInstruction(language) {
   ].join("\n")
 }
 
+function getRewriteInstruction({ language, type, maxLength }) {
+  const documentName = type === "first-appeal" ? "First Appeal" : "RTI request"
+  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : "clear English"
+
+  return [
+    "You are a drafting assistant for an RTI Online portal.",
+    "Rewrite the applicant's rough " + documentName + " into " + outputLanguage + ".",
+    "Return only the final text for the form. Do not include a title, commentary, Markdown fence, warning, or a note to the applicant.",
+    "Keep every fact, question, date, and request from the draft. Do not add, remove, assume, or invent facts, identities, registration numbers, legal conclusions, offices, deadlines, or evidence.",
+    "Use a clear, respectful, neutral official tone. Where the draft contains several distinct information requests, make them easy to read as a numbered list.",
+    type === "first-appeal"
+      ? "State the appellant's grounds clearly and respectfully. Do not claim that any legal requirement has been met unless the draft says so."
+      : "Phrase the text as a precise request for information. Do not make accusations or legal claims that are not already in the draft.",
+    "The complete output must be no more than " + maxLength + " characters. Preserve the applicant's meaning within that limit.",
+  ].join("\n")
+}
+
 export function containsSensitiveData(text) {
   return SENSITIVE_PATTERNS.some((pattern) => pattern.test(text))
 }
@@ -171,6 +190,27 @@ function safeMessage(value) {
   }
 
   return value.trim().slice(0, 700)
+}
+
+function getRewriteDraft(value, maxLength) {
+  if (typeof value !== "string") return ""
+
+  return value
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .slice(0, maxLength)
+}
+
+function getRewriteConfig(body) {
+  const type = body.type === "first-appeal" ? "first-appeal" : "request"
+  const allowedLength = type === "first-appeal" ? MAX_REWRITE_APPEAL_CHARS : MAX_REWRITE_REQUEST_CHARS
+  const requestedLength = Number.isInteger(body.maxLength) ? body.maxLength : allowedLength
+  const maxLength = Math.min(Math.max(requestedLength, 1), allowedLength)
+  const draft = getRewriteDraft(body.draft, maxLength)
+
+  return draft ? { draft, maxLength, type } : null
 }
 
 /**
@@ -404,6 +444,38 @@ async function translateMessages(response, { apiKey, language, texts, safetyIden
   return sendJson(response, 200, { translations, usage })
 }
 
+async function rewriteDraft(response, { apiKey, language, rewrite, safetyIdentifier, errors }) {
+  const result = await requestCompletion(apiKey, JSON.stringify({
+    model: OPENROUTER_MODEL,
+    messages: [
+      { role: "system", content: getRewriteInstruction({ language, type: rewrite.type, maxLength: rewrite.maxLength }) },
+      { role: "user", content: rewrite.draft },
+    ],
+    max_completion_tokens: rewrite.type === "first-appeal" ? 300 : MAX_OUTPUT_TOKENS,
+    reasoning: { effort: "low" },
+    user: safetyIdentifier,
+    provider: { data_collection: "deny" },
+  }))
+
+  if (result.failed) {
+    logUpstreamFailure(result)
+    return sendJson(response, result.isRateLimited ? 429 : 502, {
+      error: result.isRateLimited ? errors.busy : errors.prepareFailed,
+    })
+  }
+
+  const output = extractOutput(result.payload)
+    .replace(/^```[a-z]*\n?/i, "")
+    .replace(/\n?```$/, "")
+    .trim()
+
+  if (!output || output.length > rewrite.maxLength) {
+    return sendJson(response, 502, { error: errors.prepareFailed })
+  }
+
+  return sendJson(response, 200, { rewrite: output })
+}
+
 export default async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST")
@@ -445,6 +517,20 @@ export default async function handler(request, response) {
         safetyIdentifier,
         errors: messagesForLanguage,
       })
+    } catch {
+      return sendJson(response, 502, { error: messagesForLanguage.unavailable })
+    }
+  }
+
+  if (body.task === "rewrite") {
+    const rewrite = getRewriteConfig(body)
+
+    if (!rewrite) {
+      return sendJson(response, 400, { error: messagesForLanguage.prepareFailed })
+    }
+
+    try {
+      return await rewriteDraft(response, { apiKey, language, rewrite, safetyIdentifier, errors: messagesForLanguage })
     } catch {
       return sendJson(response, 502, { error: messagesForLanguage.unavailable })
     }
