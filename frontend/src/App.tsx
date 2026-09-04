@@ -21,7 +21,6 @@ import { FirstAppealFormPage } from "@/routes/FirstAppealFormPage"
 import { RequestFormPage } from "@/routes/RequestFormPage"
 import { RequestReviewPage } from "@/routes/RequestReviewPage"
 import { RequestDetailPage } from "@/routes/RequestDetailPage"
-import { ReadinessCheckPage } from "@/routes/ReadinessCheckPage"
 import { SubmitFirstAppealPage } from "@/routes/SubmitFirstAppealPage"
 import { SecondAppealPage } from "@/routes/SecondAppealPage"
 import { SignupPage } from "@/routes/SignupPage"
@@ -46,7 +45,6 @@ const router = createBrowserRouter([
       { path: "faq", element: <FaqPage /> },
       { path: "contact-us", element: <ContactUsPage /> },
       { path: "public-authorities", element: <PublicAuthoritiesPage /> },
-      { path: "readiness-check", element: <ReadinessCheckPage /> },
       { path: "file-with-sahayak", element: <ConversationalFilingPage /> },
       { path: "submit-request", element: <RequestFormRoute /> },
       { path: "request-review", element: <RequestReviewPage /> },
@@ -127,8 +125,10 @@ function FirstAppealRoute() {
 }
 
 function ProtectedProfile() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const location = useLocation()
+
+  if (isLoading) return null
 
   if (!isAuthenticated) {
     return <Navigate replace state={{ from: location.pathname }} to="/login" />
@@ -138,8 +138,10 @@ function ProtectedProfile() {
 }
 
 function ProtectedRequestHistory() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const location = useLocation()
+
+  if (isLoading) return null
 
   if (!isAuthenticated) {
     return <Navigate replace state={{ from: location.pathname }} to="/login" />
@@ -149,8 +151,10 @@ function ProtectedRequestHistory() {
 }
 
 function ProtectedRequestDetail() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const location = useLocation()
+
+  if (isLoading) return null
 
   if (!isAuthenticated) {
     return <Navigate replace state={{ from: location.pathname }} to="/login" />
@@ -160,8 +164,10 @@ function ProtectedRequestDetail() {
 }
 
 function ProtectedNotifications() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const location = useLocation()
+
+  if (isLoading) return null
 
   if (!isAuthenticated) {
     return <Navigate replace state={{ from: location.pathname }} to="/login" />

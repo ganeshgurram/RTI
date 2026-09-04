@@ -6,31 +6,51 @@ import { useAuth } from "@/auth/AuthContext"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { digiLockerMockProfile } from "@/data/mock-profile"
+import { type ApplicantProfile } from "@/data/mock-profile"
 import { emblemUrl, MaterialIcon } from "@/routes/stitch-shell"
+import { api } from "@/services/api"
 
 type AuthorizationStep = "review" | "sharing" | "complete"
 
-const sharedDetails = [
-  { icon: "person", field: "fullName", value: digiLockerMockProfile.fullName },
-  { icon: "calendar_month", field: "dateOfBirth", value: digiLockerMockProfile.dateOfBirth },
-  { icon: "alternate_email", field: "email", value: digiLockerMockProfile.email },
-  { icon: "phone_iphone", field: "mobile", value: digiLockerMockProfile.mobile },
-  { icon: "home", field: "address", value: digiLockerMockProfile.addressText },
-]
+type DigiLockerPreview = Pick<ApplicantProfile, "fullName" | "dateOfBirth" | "email" | "mobile" | "addressText">
 
 export function DigiLockerAuthorizationPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated, loginWithDigiLocker } = useAuth()
   const [step, setStep] = useState<AuthorizationStep>("review")
+  const [preview, setPreview] = useState<DigiLockerPreview | null>(null)
+  const [isLoadingPreview, setIsLoadingPreview] = useState(true)
+  const [previewFailed, setPreviewFailed] = useState(false)
+  const [previewVersion, setPreviewVersion] = useState(0)
+
+  useEffect(() => {
+    let active = true
+    setIsLoadingPreview(true)
+    setPreviewFailed(false)
+
+    void api.digiLockerPreview()
+      .then(({ profile }) => {
+        if (active) setPreview(profile as DigiLockerPreview)
+      })
+      .catch(() => {
+        if (active) setPreviewFailed(true)
+      })
+      .finally(() => {
+        if (active) setIsLoadingPreview(false)
+      })
+
+    return () => { active = false }
+  }, [previewVersion])
 
   useEffect(() => {
     if (step !== "sharing") return
 
     const completeAuthorization = window.setTimeout(() => {
-      loginWithDigiLocker()
-      setStep("complete")
+      void loginWithDigiLocker().then((error) => {
+        if (!error) setStep("complete")
+        else setStep("review")
+      })
     }, 1900)
 
     return () => window.clearTimeout(completeAuthorization)
@@ -49,6 +69,13 @@ export function DigiLockerAuthorizationPage() {
 
   const isSharing = step === "sharing"
   const isComplete = step === "complete"
+  const sharedDetails = preview ? [
+    { icon: "person", field: "fullName", value: preview.fullName },
+    { icon: "calendar_month", field: "dateOfBirth", value: preview.dateOfBirth },
+    { icon: "alternate_email", field: "email", value: preview.email },
+    { icon: "phone_iphone", field: "mobile", value: preview.mobile },
+    { icon: "home", field: "address", value: preview.addressText },
+  ] : []
 
   return (
     <main className="mx-auto flex min-h-[calc(100svh/var(--app-scale)-12rem)] w-full max-w-container-max items-center justify-center px-margin-mobile py-8 md:px-margin-desktop md:py-10">
@@ -96,20 +123,28 @@ export function DigiLockerAuthorizationPage() {
                 {isSharing ? <p aria-live="polite" className="mt-4 text-center text-sm font-medium text-primary">{t("digilocker.fetching")}</p> : null}
               </section>
 
-              <section aria-labelledby="shared-details-title">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div><h2 className="font-medium text-on-surface" id="shared-details-title">{t("digilocker.sharedTitle")}</h2><p className="mt-1 text-sm text-on-surface-variant">{t("digilocker.sharedSubtitle")}</p></div>
-                  <Badge variant="outline">{t("digilocker.detailCount", { count: sharedDetails.length })}</Badge>
-                </div>
-                <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {sharedDetails.map((detail) => (
-                    <div className={`rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 ${detail.field === "address" ? "sm:col-span-2" : ""}`} key={detail.field}>
-                      <dt className="flex items-center gap-2 text-xs font-medium text-on-surface-variant"><MaterialIcon className="text-base text-primary">{detail.icon}</MaterialIcon>{t(`digilocker.fields.${detail.field}`)}</dt>
-                      <dd className="mt-1 pl-6 text-sm text-on-surface">{detail.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </section>
+              {isLoadingPreview || previewFailed ? (
+                <section aria-live="polite" className="flex flex-col items-center rounded-xl border border-outline-variant bg-surface-container-low px-5 py-8 text-center">
+                  <MaterialIcon className={isLoadingPreview ? "animate-spin text-2xl text-primary motion-reduce:animate-none" : "text-2xl text-destructive"}>{isLoadingPreview ? "sync" : "error"}</MaterialIcon>
+                  <p className="mt-3 text-sm text-on-surface-variant">{isLoadingPreview ? "Loading the selected DigiLocker details…" : "We could not load the selected DigiLocker details."}</p>
+                  {previewFailed ? <Button className="mt-4" onClick={() => setPreviewVersion((current) => current + 1)} type="button" variant="outline">Try again</Button> : null}
+                </section>
+              ) : (
+                <section aria-labelledby="shared-details-title">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div><h2 className="font-medium text-on-surface" id="shared-details-title">{t("digilocker.sharedTitle")}</h2><p className="mt-1 text-sm text-on-surface-variant">{t("digilocker.sharedSubtitle")}</p></div>
+                    <Badge variant="outline">{t("digilocker.detailCount", { count: sharedDetails.length })}</Badge>
+                  </div>
+                  <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {sharedDetails.map((detail) => (
+                      <div className={`rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 ${detail.field === "address" ? "sm:col-span-2" : ""}`} key={detail.field}>
+                        <dt className="flex items-center gap-2 text-xs font-medium text-on-surface-variant"><MaterialIcon className="text-base text-primary">{detail.icon}</MaterialIcon>{t(`digilocker.fields.${detail.field}`)}</dt>
+                        <dd className="mt-1 pl-6 text-sm text-on-surface">{detail.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              )}
 
               <p className="rounded-lg border border-outline-variant bg-surface-container-low px-3 py-3 text-xs leading-5 text-on-surface-variant">
                 {t("digilocker.disclaimer")}
@@ -117,7 +152,7 @@ export function DigiLockerAuthorizationPage() {
 
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button disabled={isSharing} onClick={() => navigate("/login")} type="button" variant="outline">{t("common.cancel")}</Button>
-                <Button disabled={isSharing} onClick={() => setStep("sharing")} type="button">
+                <Button disabled={isSharing || isLoadingPreview || previewFailed || !preview} onClick={() => setStep("sharing")} type="button">
                   <MaterialIcon>{isSharing ? "sync" : "verified_user"}</MaterialIcon>{isSharing ? t("digilocker.authorizing") : t("digilocker.authorize")}
                 </Button>
               </div>

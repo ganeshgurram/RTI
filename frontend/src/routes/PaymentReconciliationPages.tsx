@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { findTransaction, type PaymentTransaction } from "@/data/mock-transactions"
+import { type PaymentTransaction } from "@/data/mock-transactions"
 import { cn } from "@/lib/utils"
 import { usePortalLanguage } from "@/i18n"
 import { usePayments } from "@/payments/PaymentContext"
@@ -33,7 +33,7 @@ function Detail({ label, value }: { label: string; value: string }) {
 
 export function PaymentReconciliationPage() {
   const navigate = useNavigate()
-  const { payments } = usePayments()
+  const { reconcilePayment } = usePayments()
   const [email, setEmail] = useState("")
   const [mobile, setMobile] = useState("")
   const [captcha, setCaptcha] = useState("")
@@ -58,27 +58,22 @@ export function PaymentReconciliationPage() {
     clearErrors()
   }
 
-  const locateTransaction = (event: FormEvent<HTMLFormElement>) => {
+  const locateTransaction = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextErrors: LookupErrors = {}
 
     if (!/^\S+@\S+\.\S+$/.test(email)) nextErrors.email = t("payment.errorEmail")
     if (captcha.trim().toUpperCase() !== activeCaptcha) nextErrors.captcha = t("payment.errorCaptcha")
 
-    const { mobileMismatch, transaction } = findTransaction(payments, email, mobile)
-
-    if (!nextErrors.email && !nextErrors.captcha) {
-      if (mobileMismatch) {
-        nextErrors.mobile = t("payment.errorMobile")
-      } else if (!transaction) {
-        nextErrors.lookup = t("payment.errorLookup")
-      }
-    }
-
     setErrors(nextErrors)
 
-    if (!Object.keys(nextErrors).length && transaction) {
+    if (Object.keys(nextErrors).length) return
+
+    try {
+      const transaction = await reconcilePayment(email, mobile)
       navigate("/transaction-status", { state: { transactionId: transaction.transactionId } })
+    } catch {
+      setErrors({ lookup: t("payment.errorLookup") })
     }
   }
 

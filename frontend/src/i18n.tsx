@@ -190,6 +190,7 @@ const resources = {
         showPassword: "Show password",
         hidePassword: "Hide password",
         invalidCredentials: "Use the demo credentials shown below, or the account you created, to sign in.",
+        unavailable: "We could not reach the sign-in service. Please try again.",
         newHere: "New to RTI Online?",
         createAccount: "Create an account",
       },
@@ -228,6 +229,7 @@ const resources = {
         alreadyRegistered: "Already registered?",
         usernameTaken: "That username is already registered. Please choose another.",
         emailTaken: "An account already exists with that email address.",
+        unavailable: "We could not create your account. Please try again.",
         errors: {
           fullName: "Please enter your full name.",
           email: "Please enter a valid email address.",

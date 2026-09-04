@@ -24,12 +24,12 @@ export function MockPaymentPage() {
     return <Navigate replace to="/submit-request" />
   }
 
-  const completeMockPayment = () => {
-    const payment = createPaymentAttempt({ draft, outcome })
+  const completeMockPayment = async () => {
+    const payment = await createPaymentAttempt({ draft, outcome })
 
     if (outcome === "confirmed") {
-      const request = createRequest(draft)
-      markPaymentConfirmed(payment.transactionId, request.id)
+      const request = await createRequest(draft)
+      await markPaymentConfirmed(payment.transactionId, request.id)
       navigate("/request-submission-success", { state: { requestId: request.id } })
       return
     }
@@ -66,7 +66,7 @@ export function MockPaymentPage() {
 
           <div className="flex flex-wrap justify-end gap-3 border-t border-outline-variant/50 pt-6">
             <Button onClick={() => navigate(-1)} size="lg" type="button" variant="outline">{t("mockPayment.back")}</Button>
-            <Button onClick={completeMockPayment} size="lg" type="button"><MaterialIcon>lock</MaterialIcon>{t("mockPayment.complete")}</Button>
+            <Button onClick={() => void completeMockPayment()} size="lg" type="button"><MaterialIcon>lock</MaterialIcon>{t("mockPayment.complete")}</Button>
           </div>
         </CardContent>
       </Card>

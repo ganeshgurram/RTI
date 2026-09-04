@@ -37,8 +37,8 @@ export function LoginPage() {
     setError("")
   }
 
-  const completeLogin = (nextUsername: string, nextPassword: string) => {
-    const loginError = login(nextUsername, nextPassword)
+  const completeLogin = async (nextUsername: string, nextPassword: string) => {
+    const loginError = await login(nextUsername, nextPassword)
 
     if (loginError) {
       setError(loginError)
@@ -56,7 +56,7 @@ export function LoginPage() {
       return
     }
 
-    completeLogin(username, password)
+    void completeLogin(username, password)
   }
 
   const handleDigiLockerSignIn = () => navigate("/digilocker-authorize")

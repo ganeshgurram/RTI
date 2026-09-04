@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react"
+import { useEffect, useState, type FormEvent, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/auth/AuthContext"
 import { indianStatesAndTerritories } from "@/data/indian-states"
-import { mockProfile } from "@/data/mock-profile"
+import { mockProfile, type ApplicantProfile } from "@/data/mock-profile"
 import { useAccountRequests } from "@/requests/RequestContext"
 import { countOverdueDeadlines } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
@@ -36,7 +36,7 @@ type FormErrors = Partial<Record<FieldName, string>>
 
 const digitsOnly = (value: string) => value.replace(/\D/g, "").slice(-10)
 
-function createInitialApplicant(source: typeof mockProfile): ApplicantForm {
+function createInitialApplicant(source: ApplicantProfile): ApplicantForm {
   return {
     fullName: source.fullName,
     email: source.email,
@@ -140,7 +140,7 @@ function ProfileCard({ title, description, icon, children }: { title: string; de
 }
 
 export function ProfilePage() {
-  const { user } = useAuth()
+  const { user, updateProfile } = useAuth()
   const requests = useAccountRequests()
   const accountProfile = user?.profile ?? mockProfile
   const [profile, setProfile] = useState<ApplicantForm>(() => createInitialApplicant(accountProfile))
@@ -150,6 +150,13 @@ export function ProfilePage() {
   const [didSave, setDidSave] = useState(false)
   const [stateSearch, setStateSearch] = useState("")
   const { t } = useTranslation()
+
+  useEffect(() => {
+    if (isEditing) return
+    const next = createInitialApplicant(accountProfile)
+    setProfile(next)
+    setDraft(next)
+  }, [accountProfile, isEditing])
 
   const updateField = (field: FieldName, value: string) => {
     setDraft((current) => ({ ...current, [field]: value }))
@@ -191,20 +198,52 @@ export function ProfilePage() {
     return nextErrors
   }
 
-  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
+  const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextErrors = validate(draft)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
 
-    setProfile({
+    const savedForm = {
       ...draft,
       fullName: draft.fullName.trim(),
       email: draft.email.trim(),
       address: draft.address.trim(),
       countryName: draft.countryName.trim(),
       confirmEmail: "",
-    })
+    }
+    const nameParts = savedForm.fullName.split(/\s+/)
+    const nextProfile: ApplicantProfile = {
+      ...accountProfile,
+      initials: nameParts.map((part) => part[0]).slice(0, 2).join("").toUpperCase(),
+      fullName: savedForm.fullName,
+      email: savedForm.email,
+      mobile: `+91 ${savedForm.mobile}`,
+      alternateMobile: savedForm.alternatePhone ? `+91 ${savedForm.alternatePhone}` : "",
+      gender: savedForm.gender,
+      country: savedForm.country,
+      countryName: savedForm.countryName,
+      areaType: savedForm.areaType,
+      educationalStatus: savedForm.educationalStatus,
+      addressText: savedForm.address,
+      address: {
+        ...accountProfile.address,
+        line1: savedForm.address,
+        line2: "",
+        city: "",
+        district: "",
+        state: savedForm.state,
+        pincode: savedForm.pincode,
+      },
+    }
+    const saveError = await updateProfile(nextProfile)
+    if (saveError) {
+      setErrors({ email: "We could not save your profile. Please try again." })
+      return
+    }
+
+    setProfile(savedForm)
+    setDraft(savedForm)
     setIsEditing(false)
     setDidSave(true)
   }

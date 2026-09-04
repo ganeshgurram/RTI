@@ -85,15 +85,17 @@ export function FirstAppealFormPage() {
   const appellantProfile = user?.profile ?? null
   const appellantMobile = request.applicantPhone.replace(/\D/g, "").slice(-10)
 
-  const submitAppeal = (event: FormEvent<HTMLFormElement>) => {
+  const submitAppeal = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const email = String(formData.get("email") ?? "").trim()
     const phone = `+91 ${String(formData.get("mobile") ?? "").trim()}`
-    const appeal = createFirstAppeal({
+    const appeal = await createFirstAppeal({
       originalRequest: request,
       applicantEmail: email,
       applicantPhone: phone,
+      appealText,
+      ground: String(formData.get("appealGround") ?? ""),
     })
 
     appealDraft.clear()
