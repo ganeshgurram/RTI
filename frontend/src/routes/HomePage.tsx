@@ -36,54 +36,62 @@ const steps = [
 type FlowNodeTone = "action" | "complaint" | "logic" | "notSatisfied" | "satisfied"
 
 /**
- * The five end-to-end journeys a request can take through the map. Every connector belongs to at
- * least one of them, so lighting each route in turn eventually traces the whole diagram.
+ * A small set of applicant situations drives the highlight, while the map itself remains one
+ * decision tree. Shared stages appear once, so users can follow the process without reading every
+ * theoretical end-to-end permutation.
  */
-type RouteId = "answered" | "transferred" | "appealRefused" | "ignored" | "complaint"
+type RouteId = "newRequest" | "replyIssue" | "noReply" | "transferred" | "appealIssue"
 
-const routeOrder: RouteId[] = ["answered", "transferred", "appealRefused", "ignored", "complaint"]
+const routeOrder: RouteId[] = ["newRequest", "replyIssue", "noReply", "transferred", "appealIssue"]
+
+type JourneyGuideId = RouteId
+
+const journeyGuideOrder: JourneyGuideId[] = routeOrder
+
+const journeyGuides: Record<JourneyGuideId, { icon: string; route: RouteId }> = {
+  newRequest: { icon: "description", route: "newRequest" },
+  replyIssue: { icon: "reply", route: "replyIssue" },
+  noReply: { icon: "schedule", route: "noReply" },
+  transferred: { icon: "swap_horiz", route: "transferred" },
+  appealIssue: { icon: "gavel", route: "appealIssue" },
+}
+
+const directRoutes: RouteId[] = ["newRequest", "replyIssue", "noReply", "appealIssue"]
+const replyRoutes: RouteId[] = ["newRequest", "replyIssue", "transferred", "appealIssue"]
+const appealRoutes: RouteId[] = ["replyIssue", "noReply", "appealIssue"]
 
 /**
- * Connectors, in source order, sorted by the y of where each one starts. Because the map only ever
- * flows downwards, that ordering is a topological sort of the whole graph at once - so filtering
- * this list by route yields that route's connectors already in traversal order, with no per-route
- * sequencing to keep in sync.
+ * Connectors are listed in the order a person encounters them. Filtering by a selected situation
+ * therefore gives the light its traversal order without duplicating the visual decision tree.
  */
 const flowEdges: { d: string; routes: RouteId[] }[] = [
-  { d: "M 560 62 V 78 H 113 V 100", routes: ["answered"] },
-  { d: "M 560 62 V 100", routes: ["transferred", "appealRefused", "complaint"] },
-  { d: "M 560 62 V 78 H 935 V 100", routes: ["ignored"] },
-  { d: "M 113 140 V 160", routes: ["answered"] },
-  { d: "M 560 140 V 160", routes: ["transferred", "appealRefused", "complaint"] },
-  { d: "M 935 140 V 160", routes: ["ignored"] },
-  { d: "M 113 200 V 225", routes: ["answered"] },
-  { d: "M 560 200 V 220 H 395 V 245", routes: ["transferred", "appealRefused"] },
-  { d: "M 560 200 V 220 H 677 V 245", routes: ["complaint"] },
-  { d: "M 935 200 V 365 H 770 V 380", routes: ["ignored"] },
-  { d: "M 395 285 V 300", routes: ["transferred", "appealRefused"] },
-  { d: "M 677 285 V 300", routes: ["complaint"] },
-  { d: "M 395 340 V 355", routes: ["transferred", "appealRefused"] },
-  { d: "M 677 340 V 365 H 770 V 380", routes: ["complaint"] },
-  { d: "M 395 395 V 415", routes: ["transferred", "appealRefused"] },
-  { d: "M 770 420 V 450 H 678 V 480", routes: ["ignored"] },
-  { d: "M 770 420 V 450 H 920 V 480", routes: ["complaint"] },
-  { d: "M 395 455 V 530 H 560 V 550", routes: ["transferred", "appealRefused"] },
-  { d: "M 920 520 V 535", routes: ["complaint"] },
-  { d: "M 678 520 V 530 H 560 V 550", routes: ["ignored"] },
-  { d: "M 560 590 V 605 H 405 V 620", routes: ["transferred", "appealRefused"] },
-  { d: "M 560 590 V 605 H 720 V 620", routes: ["ignored"] },
-  { d: "M 405 660 V 680", routes: ["transferred", "appealRefused"] },
-  { d: "M 720 660 V 680", routes: ["ignored"] },
-  { d: "M 405 720 V 755 H 330 V 785", routes: ["transferred"] },
-  { d: "M 405 720 V 755 H 535 V 785", routes: ["appealRefused"] },
-  { d: "M 720 720 V 750", routes: ["ignored"] },
-  { d: "M 720 790 V 895 H 560 V 910", routes: ["ignored"] },
-  { d: "M 535 825 V 845", routes: ["appealRefused"] },
-  { d: "M 535 885 V 895 H 560 V 910", routes: ["appealRefused"] },
+  { d: "M 560 62 V 95", routes: routeOrder },
+  { d: "M 695 115 H 805 V 155", routes: ["transferred"] },
+  { d: "M 805 195 V 215", routes: ["transferred"] },
+  { d: "M 560 135 V 260", routes: directRoutes },
+  { d: "M 805 255 H 560 V 260", routes: ["transferred"] },
+  { d: "M 560 300 V 320", routes: routeOrder },
+  { d: "M 560 360 V 372 H 300 V 385", routes: replyRoutes },
+  { d: "M 560 360 V 372 H 820 V 385", routes: ["noReply"] },
+  { d: "M 300 425 V 445", routes: replyRoutes },
+  { d: "M 820 425 V 445", routes: ["noReply"] },
+  { d: "M 300 485 V 510", routes: ["newRequest", "transferred"] },
+  { d: "M 300 485 V 505 H 560 V 525", routes: ["replyIssue", "appealIssue"] },
+  { d: "M 820 485 V 505 H 560 V 525", routes: ["noReply"] },
+  { d: "M 820 485 V 497 H 920 V 510", routes: ["noReply"] },
+  { d: "M 920 550 V 570", routes: ["noReply"] },
+  { d: "M 560 565 V 585", routes: appealRoutes },
+  { d: "M 560 625 V 655", routes: appealRoutes },
+  { d: "M 560 695 V 715", routes: appealRoutes },
+  { d: "M 560 755 V 770 H 350 V 785", routes: ["replyIssue", "noReply"] },
+  { d: "M 560 755 V 770 H 740 V 785", routes: ["appealIssue"] },
+  { d: "M 740 825 V 840", routes: ["appealIssue"] },
+  { d: "M 740 880 V 890 H 560 V 900", routes: ["appealIssue"] },
 ]
 
 type FlowNodeSpec = {
   className: string
+  descriptionKey?: string
   id: string
   routes: RouteId[]
 } & (
@@ -91,45 +99,36 @@ type FlowNodeSpec = {
   | { kind: "node"; labelKey: string; tone?: FlowNodeTone }
 )
 
-/** `routes` is listed in `routeOrder` order so that `routes[0]` is the route a node falls back to. */
+/** The map has one visible node for every decision or statutory step, regardless of how it was reached. */
 const flowNodes: FlowNodeSpec[] = [
   { id: "request", kind: "node", labelKey: "request", className: "left-[455px] top-[22px] w-[210px]", routes: routeOrder },
+  { id: "authority", kind: "node", labelKey: "publicAuthority", className: "left-[425px] top-[95px] w-[270px]", routes: routeOrder },
 
-  { id: "directClock", kind: "time", days: 30, className: "left-[93px] top-[100px]", routes: ["answered"] },
-  { id: "directReply", kind: "node", labelKey: "reply", className: "left-[43px] top-[160px] w-[140px]", routes: ["answered"] },
-  { id: "directSatisfied", kind: "node", labelKey: "satisfied", tone: "satisfied", className: "left-[33px] top-[225px] w-[160px]", routes: ["answered"] },
+  { id: "transferClock", kind: "time", days: 5, className: "left-[785px] top-[155px]", routes: ["transferred"] },
+  { id: "transfer", kind: "node", labelKey: "transfer", className: "left-[745px] top-[215px] w-[120px]", routes: ["transferred"] },
 
-  { id: "transferClock", kind: "time", days: 5, className: "left-[540px] top-[100px]", routes: ["transferred", "appealRefused", "complaint"] },
-  { id: "transfer", kind: "node", labelKey: "transfer", className: "left-[490px] top-[160px] w-[140px]", routes: ["transferred", "appealRefused", "complaint"] },
+  { id: "responseClock", descriptionKey: "responseClock", kind: "time", days: 30, className: "left-[540px] top-[260px]", routes: routeOrder },
+  { id: "replyReceived", kind: "node", labelKey: "replyReceived", tone: "logic", className: "left-[465px] top-[320px] w-[190px]", routes: routeOrder },
 
-  { id: "transferReplyClock", kind: "time", days: 30, className: "left-[375px] top-[245px]", routes: ["transferred", "appealRefused"] },
-  { id: "transferReply", kind: "node", labelKey: "reply", className: "left-[330px] top-[300px] w-[130px]", routes: ["transferred", "appealRefused"] },
-  { id: "transferNotSatisfied", kind: "node", labelKey: "notSatisfied", tone: "notSatisfied", className: "left-[310px] top-[355px] w-[170px]", routes: ["transferred", "appealRefused"] },
-  { id: "firstAppealClock", kind: "time", days: 30, className: "left-[375px] top-[415px]", routes: ["transferred", "appealRefused"] },
+  { id: "reply", descriptionKey: "directReply", kind: "node", labelKey: "reply", className: "left-[230px] top-[385px] w-[140px]", routes: replyRoutes },
+  { id: "noReply", descriptionKey: "directNoReply", kind: "node", labelKey: "noReply", className: "left-[750px] top-[385px] w-[140px]", routes: ["noReply"] },
+  { id: "informationComplete", kind: "node", labelKey: "informationComplete", tone: "logic", className: "left-[220px] top-[445px] w-[160px]", routes: replyRoutes },
+  { id: "deemedRefusal", kind: "node", labelKey: "deemedRefusal", tone: "logic", className: "left-[750px] top-[445px] w-[140px]", routes: ["noReply"] },
 
-  { id: "transferNoReplyClock", kind: "time", days: 30, className: "left-[657px] top-[245px]", routes: ["complaint"] },
-  { id: "transferNoReply", kind: "node", labelKey: "noReply", className: "left-[605px] top-[300px] w-[144px]", routes: ["complaint"] },
+  { id: "satisfied", descriptionKey: "directSatisfied", kind: "node", labelKey: "satisfied", tone: "satisfied", className: "left-[220px] top-[510px] w-[160px]", routes: ["newRequest", "transferred"] },
+  { id: "firstAppealClock", kind: "time", days: 30, className: "left-[540px] top-[525px]", routes: appealRoutes },
+  { id: "noTimeLimit", kind: "node", labelKey: "noTimeLimit", tone: "logic", className: "left-[860px] top-[510px] w-[120px]", routes: ["noReply"] },
+  { id: "complaint", kind: "node", labelKey: "complaint", tone: "complaint", className: "left-[800px] top-[570px] w-[240px]", routes: ["noReply"] },
 
-  { id: "directNoReplyClock", kind: "time", days: 30, className: "left-[915px] top-[100px]", routes: ["ignored"] },
-  { id: "directNoReply", kind: "node", labelKey: "noReply", className: "left-[865px] top-[160px] w-[140px]", routes: ["ignored"] },
-
-  { id: "deemedRefusal", kind: "node", labelKey: "and", tone: "logic", className: "left-[735px] top-[380px] w-[70px]", routes: ["ignored", "complaint"] },
-  { id: "deemedAppealClock", kind: "time", days: 30, className: "left-[658px] top-[480px]", routes: ["ignored"] },
-  { id: "noTimeLimit", kind: "node", labelKey: "noTimeLimit", tone: "logic", className: "left-[860px] top-[480px] w-[120px]", routes: ["complaint"] },
-  { id: "complaint", kind: "node", labelKey: "complaint", tone: "complaint", className: "left-[800px] top-[535px] w-[240px]", routes: ["complaint"] },
-
-  { id: "firstAppeal", kind: "node", labelKey: "firstAppeal", className: "left-[465px] top-[550px] w-[190px]", routes: ["transferred", "appealRefused", "ignored"] },
-  { id: "decisionClock", kind: "time", days: 45, className: "left-[385px] top-[620px]", routes: ["transferred", "appealRefused"] },
-  { id: "decision", kind: "node", labelKey: "decision", className: "left-[335px] top-[680px] w-[140px]", routes: ["transferred", "appealRefused"] },
-  { id: "appealSatisfied", kind: "node", labelKey: "satisfied", tone: "satisfied", className: "left-[255px] top-[785px] w-[150px]", routes: ["transferred"] },
-  { id: "appealNotSatisfied", kind: "node", labelKey: "notSatisfied", tone: "notSatisfied", className: "left-[450px] top-[785px] w-[170px]", routes: ["appealRefused"] },
-  { id: "secondAppealClock", kind: "time", days: 90, className: "left-[515px] top-[845px]", routes: ["appealRefused"] },
-
-  { id: "noDecisionClock", kind: "time", days: 45, className: "left-[700px] top-[620px]", routes: ["ignored"] },
-  { id: "noDecision", kind: "node", labelKey: "noDecision", className: "left-[645px] top-[680px] w-[150px]", routes: ["ignored"] },
-  { id: "noDecisionSecondAppealClock", kind: "time", days: 90, className: "left-[700px] top-[750px]", routes: ["ignored"] },
-  { id: "secondAppeal", kind: "node", labelKey: "secondAppeal", className: "left-[420px] top-[910px] w-[280px]", routes: ["appealRefused", "ignored"] },
+  { id: "firstAppeal", kind: "node", labelKey: "firstAppeal", className: "left-[465px] top-[585px] w-[190px]", routes: appealRoutes },
+  { id: "appealDecisionClock", descriptionKey: "decisionClock", kind: "time", days: 45, className: "left-[540px] top-[655px]", routes: appealRoutes },
+  { id: "appealDecision", descriptionKey: "decision", kind: "node", labelKey: "decision", className: "left-[490px] top-[715px] w-[140px]", routes: appealRoutes },
+  { id: "appealSatisfied", kind: "node", labelKey: "satisfied", tone: "satisfied", className: "left-[275px] top-[785px] w-[150px]", routes: ["replyIssue", "noReply"] },
+  { id: "appealUnresolved", kind: "node", labelKey: "appealUnresolved", tone: "notSatisfied", className: "left-[650px] top-[785px] w-[180px]", routes: ["appealIssue"] },
+  { id: "secondAppealClock", kind: "time", days: 90, className: "left-[720px] top-[840px]", routes: ["appealIssue"] },
+  { id: "secondAppeal", kind: "node", labelKey: "secondAppeal", className: "left-[420px] top-[900px] w-[280px]", routes: ["appealIssue"] },
 ]
+
 
 /**
  * Every connector is drawn with `M`/`H`/`V` only, so the drawn length is a sum of axis-aligned runs
@@ -266,15 +265,13 @@ export function HomePage() {
   const stepperFrameRef = useRef<HTMLDivElement>(null)
   const [flowchartScale, setFlowchartScale] = useState(1)
   const [isHorizontalStepper, setIsHorizontalStepper] = useState(false)
-  const [cycleIndex, setCycleIndex] = useState(0)
+  const [activeGuide, setActiveGuide] = useState<JourneyGuideId>("newRequest")
   const [hoveredRoute, setHoveredRoute] = useState<RouteId | null>(null)
   const [pinnedRoute, setPinnedRoute] = useState<RouteId | null>(null)
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const viewStatusPath = user ? "/request-history" : "/status"
 
-  const activeRoute = hoveredRoute ?? pinnedRoute ?? routeOrder[cycleIndex]
+  const activeRoute = hoveredRoute ?? pinnedRoute ?? journeyGuides[activeGuide].route
   const activeGeometry = routeGeometry[activeRoute]
-  const isCyclePaused = hoveredRoute !== null || pinnedRoute !== null || prefersReducedMotion
 
   useEffect(() => {
     const frame = flowchartFrameRef.current
@@ -313,29 +310,7 @@ export function HomePage() {
     }
   }, [])
 
-  useEffect(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const updateMotionPreference = () => setPrefersReducedMotion(reducedMotion.matches)
 
-    updateMotionPreference()
-    reducedMotion.addEventListener("change", updateMotionPreference)
-
-    return () => reducedMotion.removeEventListener("change", updateMotionPreference)
-  }, [])
-
-  // Hold each route on screen for one full sweep of the light, then hand over to the next one.
-  useEffect(() => {
-    if (isCyclePaused) {
-      return
-    }
-
-    const timer = window.setTimeout(
-      () => setCycleIndex((index) => (index + 1) % routeOrder.length),
-      (routeGeometry[routeOrder[cycleIndex]].duration + 0.7) * 1000,
-    )
-
-    return () => window.clearTimeout(timer)
-  }, [cycleIndex, isCyclePaused])
 
   return (
     <>
@@ -451,33 +426,52 @@ export function HomePage() {
                     </div>
                   </CardHeader>
                   <CardContent className="overflow-hidden p-0">
-                    <div className="flex flex-wrap items-center gap-2 border-b border-outline-variant px-6 py-4">
-                      {routeOrder.map((route) => {
-                        const isActive = activeRoute === route
-                        const isPinned = pinnedRoute === route
+                    <div className="border-b border-outline-variant px-6 py-5">
+                      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                        <div>
+                          <p className="font-label-lg text-sm font-semibold text-primary">{t("home.lifecycle.guideTitle")}</p>
+                          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-on-surface-variant">{t("home.lifecycle.guideDescription")}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full bg-primary-fixed px-3 py-1 text-xs font-medium text-primary">
+                          {t("home.lifecycle.guideCurrent")}: {t("home.lifecycle.guides." + activeGuide + ".title")}
+                        </span>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+                        {journeyGuideOrder.map((guideId) => {
+                          const guide = journeyGuides[guideId]
+                          const isSelected = activeGuide === guideId
 
-                        return (
-                          <button
-                            aria-pressed={isPinned}
-                            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                              isActive
-                                ? "border-primary bg-primary-fixed text-primary"
-                                : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:border-primary/40 hover:text-on-surface"
-                            }`}
-                            key={route}
-                            onBlur={() => setHoveredRoute(null)}
-                            onClick={() => setPinnedRoute(isPinned ? null : route)}
-                            onFocus={() => setHoveredRoute(route)}
-                            onPointerEnter={() => setHoveredRoute(route)}
-                            onPointerLeave={() => setHoveredRoute(null)}
-                            type="button"
-                          >
-                            <span aria-hidden="true" className={`size-2 rounded-full transition-colors ${isActive ? "bg-primary" : "bg-outline-variant"}`} />
-                            {t(`home.lifecycle.routes.${route}`)}
-                          </button>
-                        )
-                      })}
-                      <span className="ml-auto hidden text-xs text-on-surface-variant lg:inline">{t("home.lifecycle.routeHint")}</span>
+                          return (
+                            <button
+                              aria-pressed={isSelected}
+                              className={[
+                                "group flex min-h-[108px] items-start gap-3 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                                isSelected
+                                  ? "border-primary bg-primary-fixed text-primary"
+                                  : "border-outline-variant bg-surface-container-lowest text-on-surface hover:border-primary/40",
+                              ].join(" ")}
+                              key={guideId}
+                              onClick={() => {
+                                setActiveGuide(guideId)
+                                setPinnedRoute(null)
+                              }}
+                              type="button"
+                            >
+                              <span className={[
+                                "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
+                                isSelected ? "bg-primary text-on-primary" : "bg-surface-container-high text-primary",
+                              ].join(" ")}>
+                                <MaterialIcon className="text-base">{guide.icon}</MaterialIcon>
+                              </span>
+                              <span>
+                                <span className="block text-sm font-semibold leading-tight">{t("home.lifecycle.guides." + guideId + ".title")}</span>
+                                <span className="mt-1 block text-xs leading-relaxed text-on-surface-variant">{t("home.lifecycle.guides." + guideId + ".description")}</span>
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <p className="mt-3 text-xs text-on-surface-variant">{t("home.lifecycle.mapHint")}</p>
                     </div>
                     <div className="px-4 pb-4 pt-2 sm:px-5">
                       <div
@@ -542,7 +536,7 @@ export function HomePage() {
                           const emphasis = isOnActiveRoute
                             ? "opacity-100 ring-2 ring-primary/60 ring-offset-1 ring-offset-surface-container-high"
                             : "opacity-40 saturate-50"
-                          const description = t(`home.lifecycle.nodes.${node.id}`)
+                          const description = t(`home.lifecycle.nodes.${node.descriptionKey ?? node.id}`)
 
                           if (node.kind === "time") {
                             return (

@@ -1,5 +1,6 @@
 import {
   findAuthoritySuggestions,
+  findUnresolvedShortForms,
   type AuthoritySuggestion,
 } from "@/services/authority-recommendations"
 
@@ -63,6 +64,12 @@ const sensitivePatterns = [
 
 export function containsSensitiveData(text: string) {
   return sensitivePatterns.some((pattern) => pattern.test(text))
+}
+
+function getShortFormClarification(shortForms: string[]) {
+  const list = shortForms.map((shortForm) => "'" + shortForm + "'").join(", ")
+  const question = shortForms.length === 1 ? "does it stand for" : "do they stand for"
+  return "I could not identify " + list + " as a public-authority subject. What " + question + " in your case? Please spell it out without sharing personal or application details. I will then briefly explain the relevant department and suggest the most appropriate Central Public Authority."
 }
 
 function getHindiLocalReply(message: string, suggestions: AuthoritySuggestion[]): string {
@@ -175,6 +182,16 @@ export async function askRtiSahayak({
   }
 
   const authoritySuggestions = await findAuthoritySuggestions(message).catch(() => [])
+  const unresolvedShortForms = await findUnresolvedShortForms(message).catch(() => [])
+
+  if (unresolvedShortForms.length) {
+    const clarification = getShortFormClarification(unresolvedShortForms)
+    return {
+      reply: { en: clarification, hi: clarification },
+      source: "local",
+      authoritySuggestions: [],
+    }
+  }
 
   try {
     const response = await fetch("/api/rti-sahayak", {

@@ -48,6 +48,7 @@ const cases = [
   ["port shipping cargo records", "Ports"],
   // money
   ["income tax refund not received", "Income Tax"],
+  ["I want to file an RTI about IPO", "Securities and Exchange Board"],
   ["gst registration records", "GST"],
   ["my provident fund withdrawal is stuck", "Labour"],
   ["I did not get my pension after retiring", "Pension"],

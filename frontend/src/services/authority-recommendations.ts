@@ -70,6 +70,7 @@ const vocabulary: Record<string, string[]> = {
   gratuity: ["provident", "fund", "labour"],
   hospital: ["health", "medical"],
   irctc: ["railway"],
+  ipo: ["sebi"],
   kisan: ["agriculture", "farmer"],
   land: ["land", "resource"],
   loan: ["bank", "financial"],
@@ -136,6 +137,7 @@ const phraseVocabulary: Record<string, string[]> = {
   "ground water": ["ground", "water"],
   "health insurance": ["health"],
   "income tax": ["income", "tax", "revenue"],
+  "initial public offering": ["sebi"],
   "installed capacity": ["power", "electricity"],
   "job card": ["rural", "employment"],
   "minimum wage": ["labour", "employment"],
@@ -173,6 +175,10 @@ const stopWords = new Set([
   "form", "government", "kindly", "list", "name", "number", "paid", "pay", "payment",
   "programme", "project", "provide", "receipt", "record", "report", "scheme", "statement",
   "status", "total", "upi", "year",
+])
+
+const PORTAL_SHORT_FORMS = new Set([
+  "bpl", "cic", "cpio", "faa", "otp", "pan", "rti", "upi",
 ])
 
 const MAX_SUGGESTIONS = 3
@@ -471,6 +477,22 @@ function getOwnTokens(query: string) {
     .filter(Boolean)
     .map(singularize)
     .filter((token) => token.length >= 3 && !stopWords.has(token))
+}
+
+export async function findUnresolvedShortForms(query: string): Promise<string[]> {
+  const shortForms = [...new Set(query.match(/\b[A-Z][A-Z0-9]{1,9}\b/g) ?? [])]
+    .filter((shortForm) => {
+      const normalized = shortForm.toLocaleLowerCase()
+      return !stopWords.has(normalized) && !PORTAL_SHORT_FORMS.has(normalized)
+    })
+
+  if (!shortForms.length) return []
+
+  const index = await loadIndex()
+  return shortForms.filter((shortForm) => {
+    const normalized = singularize(shortForm.toLocaleLowerCase())
+    return !vocabulary[normalized] && !index.officeIdf.has(normalized)
+  })
 }
 
 /** The applicant's own words at full weight, plus official vocabulary they did not use. */

@@ -110,6 +110,11 @@ const resources = {
             noDecision: "No Decision",
             secondAppeal: "Second Appeal to CIC / SIC",
             days: "Days",
+            publicAuthority: "Public Authority / CPIO",
+            replyReceived: "Reply received?",
+            informationComplete: "Information complete?",
+            deemedRefusal: "Deemed refusal",
+            appealUnresolved: "Not satisfied / no decision",
           },
           routes: {
             answered: "Answered in time",
@@ -119,7 +124,38 @@ const resources = {
             complaint: "Section 18 complaint",
           },
           routeHint: "Hover a step for what it means, or pick a path to follow it through.",
+          guideTitle: "Where are you in the process?",
+          guideDescription: "Choose the situation that best matches your request. The highlighted line shows your likely next route; grey branches show the other possible outcomes.",
+          guideCurrent: "Your selected route",
+          guides: {
+            newRequest: {
+              title: "I have just filed an RTI",
+              description: "The public authority normally has 30 days to reply.",
+            },
+            replyIssue: {
+              title: "I received a reply, but it is incomplete",
+              description: "File a First Appeal within 30 days of the reply.",
+            },
+            noReply: {
+              title: "I have not received a reply",
+              description: "After 30 days, file a First Appeal; a Section 18 complaint is another remedy.",
+            },
+            transferred: {
+              title: "My request was transferred",
+              description: "The receiving authority should respond within 30 days.",
+            },
+            appealIssue: {
+              title: "My First Appeal is unresolved",
+              description: "If no decision comes within 45 days, you can file a Second Appeal within 90 days.",
+            },
+          },
+          mapHint: "Hover a step to see what it means.",
           nodes: {
+            authority: "The public authority's CPIO receives and processes the application.",
+            responseClock: "The authority holding the record normally has 30 days to respond.",
+            replyReceived: "The reply determines whether the request closes or moves to an appeal.",
+            informationComplete: "Check whether the response gives the information you requested.",
+            appealUnresolved: "A Second Appeal is available when the First Appeal is not resolved or decided.",
             request: "Your application under Section 6, filed online with the prescribed fee.",
             directClock: "The CPIO has 30 days from receipt to answer.",
             directReply: "The CPIO answers inside the statutory window.",
@@ -889,6 +925,11 @@ const resources = {
             noDecision: "कोई निर्णय नहीं",
             secondAppeal: "सीआईसी / एसआईसी में द्वितीय अपील",
             days: "दिन",
+            publicAuthority: "लोक प्राधिकरण / सीपीआईओ",
+            replyReceived: "उत्तर मिला?",
+            informationComplete: "जानकारी पूरी है?",
+            deemedRefusal: "मानित इनकार",
+            appealUnresolved: "असंतुष्ट / कोई निर्णय नहीं",
           },
           routes: {
             answered: "समय पर उत्तर",
@@ -898,7 +939,38 @@ const resources = {
             complaint: "धारा 18 शिकायत",
           },
           routeHint: "किसी चरण पर कर्सर ले जाकर उसका अर्थ देखें, या कोई मार्ग चुनकर उसे पूरा देखें।",
+          guideTitle: "आप प्रक्रिया में किस चरण पर हैं?",
+          guideDescription: "अपने अनुरोध से मेल खाती स्थिति चुनें। उभरी हुई रेखा आगे का संभावित मार्ग दिखाती है; धूसर शाखाएँ अन्य संभावित परिणाम दिखाती हैं।",
+          guideCurrent: "आपका चयनित मार्ग",
+          guides: {
+            newRequest: {
+              title: "मैंने अभी आरटीआई दायर की है",
+              description: "लोक प्राधिकरण को सामान्यतः 30 दिनों में उत्तर देना होता है।",
+            },
+            replyIssue: {
+              title: "मुझे उत्तर मिला, लेकिन जानकारी अधूरी है",
+              description: "उत्तर मिलने की तारीख से 30 दिनों के भीतर प्रथम अपील दायर करें।",
+            },
+            noReply: {
+              title: "मुझे कोई उत्तर नहीं मिला",
+              description: "30 दिन बाद प्रथम अपील दायर करें; धारा 18 की शिकायत एक अन्य उपाय है।",
+            },
+            transferred: {
+              title: "मेरा अनुरोध स्थानांतरित हुआ है",
+              description: "प्राप्तकर्ता लोक प्राधिकरण को 30 दिनों में उत्तर देना चाहिए।",
+            },
+            appealIssue: {
+              title: "मेरी प्रथम अपील पर निर्णय नहीं हुआ",
+              description: "45 दिनों में निर्णय न मिलने पर 90 दिनों के भीतर द्वितीय अपील की जा सकती है।",
+            },
+          },
+          mapHint: "किसी चरण पर कर्सर ले जाकर उसका अर्थ देखें।",
           nodes: {
+            authority: "लोक प्राधिकरण का सीपीआईओ आवेदन प्राप्त कर उस पर कार्रवाई करता है।",
+            responseClock: "जिस प्राधिकरण के पास अभिलेख है उसे सामान्यतः 30 दिनों में उत्तर देना होता है।",
+            replyReceived: "उत्तर से तय होता है कि अनुरोध पूरा हुआ या अपील की आवश्यकता है।",
+            informationComplete: "देखें कि उत्तर में आपकी मांगी गई जानकारी मिली है या नहीं।",
+            appealUnresolved: "प्रथम अपील का समाधान या निर्णय न होने पर द्वितीय अपील की जा सकती है।",
             request: "धारा 6 के अंतर्गत आपका आवेदन, ऑनलाइन और निर्धारित शुल्क सहित।",
             directClock: "सीपीआईओ को प्राप्ति की तारीख से 30 दिन के भीतर उत्तर देना होता है।",
             directReply: "सीपीआईओ वैधानिक अवधि के भीतर उत्तर देता है।",
