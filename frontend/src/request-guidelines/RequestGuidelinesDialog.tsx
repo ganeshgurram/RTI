@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
+import type { RequestReviewDraft } from "@/data/request-review"
 import { usePortalLanguage } from "@/i18n"
 import { RequestGuidelinesContext, type FirstAppealPrefill, type RequestAuthority } from "@/request-guidelines/RequestGuidelinesContext"
 import {
@@ -76,6 +77,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
   const [hasReachedEnd, setHasReachedEnd] = useState(false)
   const [cancelTo, setCancelTo] = useState<number | string | null>(null)
   const [authority, setAuthority] = useState<RequestAuthority | null>(null)
+  const [reviewDraft, setReviewDraft] = useState<RequestReviewDraft | null>(null)
   const [journey, setJourney] = useState<"request" | "firstAppeal">("request")
   const [appeal, setAppeal] = useState<FirstAppealPrefill | null>(null)
   const guidelinesScrollRef = useRef<HTMLDivElement>(null)
@@ -110,6 +112,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
     // Cleared with the rest, so a later visit from the home page or top nav does not
     // silently reuse the office picked in the directory earlier.
     setAuthority(null)
+    setReviewDraft(null)
     setAppeal(null)
     setJourney("request")
 
@@ -149,7 +152,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
     }
 
     closeDialog()
-    navigate("/submit-request", { state: { guidelinesAccepted: true, authority } })
+    navigate("/submit-request", { state: { guidelinesAccepted: true, authority, reviewDraft } })
   }
 
   const isFirstAppeal = journey === "firstAppeal"
@@ -167,6 +170,7 @@ export function RequestGuidelinesDialogProvider({ children }: { children: ReactN
           setHasReachedEnd(false)
           setCancelTo(options?.cancelTo ?? null)
           setAuthority(options?.authority ?? null)
+          setReviewDraft(options?.reviewDraft ?? null)
           setAppeal(options?.appeal ?? null)
           setJourney(options?.journey ?? "request")
           setIsOpen(true)

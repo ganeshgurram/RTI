@@ -29,6 +29,7 @@ const MAX_TRANSLATION_SEGMENT_CHARS = 2000
 const MAX_TRANSLATION_TOKENS = MAX_OUTPUT_TOKENS
 const MAX_REWRITE_REQUEST_CHARS = 3000
 const MAX_REWRITE_APPEAL_CHARS = 500
+const MAX_FILING_DESCRIPTION_CHARS = 1400
 
 /**
  * Roughly two characters of Devanagari per token, plus headroom for the separators. Asked for
@@ -172,6 +173,21 @@ function getRewriteInstruction({ language, type, maxLength }) {
   ].join("\n")
 }
 
+function getFilingInstruction({ language, authorityContext }) {
+  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : "clear English"
+
+  return [
+    "You are RTI Sahayak, preparing the impersonal part of an RTI application.",
+    "The applicant's personal details are not available and must never be requested, inferred, or included.",
+    "Choose exactly one candidate from the supplied official directory candidates. Do not invent or rename an authority.",
+    "Prepare a concise subject and a factual, respectful request for existing records only in " + outputLanguage + ".",
+    "Preserve the applicant's meaning. Do not invent dates, places, documents, allegations, legal conclusions, or facts.",
+    "Return JSON only, with this exact shape: {\"selectedAuthorityIndex\":0,\"subject\":\"...\",\"requestText\":\"...\"}.",
+    "selectedAuthorityIndex is zero-based, subject is at most 120 characters, and requestText is at most 3000 characters.",
+    authorityContext,
+  ].filter(Boolean).join("\n\n")
+}
+
 export function containsSensitiveData(text) {
   return SENSITIVE_PATTERNS.some((pattern) => pattern.test(text))
 }
@@ -211,6 +227,19 @@ function getRewriteConfig(body) {
   const draft = getRewriteDraft(body.draft, maxLength)
 
   return draft ? { draft, maxLength, type } : null
+}
+
+function getFilingConfig(body) {
+  const description = typeof body.description === "string"
+    ? body.description.replace(/\s+/g, " ").trim().slice(0, MAX_FILING_DESCRIPTION_CHARS)
+    : ""
+  const authoritySuggestions = getAuthoritySuggestions(body.authoritySuggestions)
+
+  if (!description || containsSensitiveData(description) || !authoritySuggestions.length) {
+    return null
+  }
+
+  return { description, authoritySuggestions }
 }
 
 /**
@@ -476,6 +505,44 @@ async function rewriteDraft(response, { apiKey, language, rewrite, safetyIdentif
   return sendJson(response, 200, { rewrite: output })
 }
 
+async function prepareFiling(response, { apiKey, language, filing, safetyIdentifier, errors }) {
+  const authorityContext = buildAuthorityContext(filing.authoritySuggestions)
+  const result = await requestCompletion(apiKey, JSON.stringify({
+    model: OPENROUTER_MODEL,
+    messages: [
+      { role: "system", content: getFilingInstruction({ language, authorityContext }) },
+      { role: "user", content: filing.description },
+    ],
+    max_completion_tokens: MAX_OUTPUT_TOKENS,
+    reasoning: { effort: "low" },
+    user: safetyIdentifier,
+    provider: { data_collection: "deny" },
+  }))
+
+  if (result.failed) {
+    logUpstreamFailure(result)
+    return sendJson(response, result.isRateLimited ? 429 : 502, {
+      error: result.isRateLimited ? errors.busy : errors.prepareFailed,
+    })
+  }
+
+  let prepared
+  try {
+    prepared = JSON.parse(extractOutput(result.payload).replace(/^```json\s*/i, "").replace(/\s*```$/, ""))
+  } catch {
+    return sendJson(response, 502, { error: errors.prepareFailed })
+  }
+
+  const index = prepared?.selectedAuthorityIndex
+  const subject = typeof prepared?.subject === "string" ? prepared.subject.trim() : ""
+  const requestText = typeof prepared?.requestText === "string" ? prepared.requestText.trim() : ""
+  if (!Number.isInteger(index) || index < 0 || index >= filing.authoritySuggestions.length || !subject || subject.length > 120 || !requestText || requestText.length > 3000) {
+    return sendJson(response, 502, { error: errors.prepareFailed })
+  }
+
+  return sendJson(response, 200, { selectedAuthorityIndex: index, subject, requestText })
+}
+
 export default async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST")
@@ -531,6 +598,20 @@ export default async function handler(request, response) {
 
     try {
       return await rewriteDraft(response, { apiKey, language, rewrite, safetyIdentifier, errors: messagesForLanguage })
+    } catch {
+      return sendJson(response, 502, { error: messagesForLanguage.unavailable })
+    }
+  }
+
+  if (body.task === "filing") {
+    const filing = getFilingConfig(body)
+
+    if (!filing) {
+      return sendJson(response, 400, { error: messagesForLanguage.prepareFailed })
+    }
+
+    try {
+      return await prepareFiling(response, { apiKey, language, filing, safetyIdentifier, errors: messagesForLanguage })
     } catch {
       return sendJson(response, 502, { error: messagesForLanguage.unavailable })
     }

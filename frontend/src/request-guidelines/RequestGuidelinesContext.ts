@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react"
+import type { RequestReviewDraft } from "@/data/request-review"
 
 /**
  * The request a first appeal is being filed against, carried through to the lookup so an
@@ -22,7 +23,7 @@ export type RequestAuthority = {
 }
 
 type RequestGuidelinesContextValue = {
-  openRequestGuidelines: (options?: { appeal?: FirstAppealPrefill; cancelTo?: number | string; authority?: RequestAuthority; journey?: "request" | "firstAppeal" }) => void
+  openRequestGuidelines: (options?: { appeal?: FirstAppealPrefill; cancelTo?: number | string; authority?: RequestAuthority; journey?: "request" | "firstAppeal"; reviewDraft?: RequestReviewDraft }) => void
 }
 
 export const RequestGuidelinesContext = createContext<RequestGuidelinesContextValue | null>(null)
