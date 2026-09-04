@@ -75,7 +75,7 @@ under three characters (lines 293, 473, 483).
 or removed rather than left looking live; the same sweep covers ESIC, NPS, PMAY, FASTag and ITR;
 and `npm run eval:authorities` still passes 100%.
 
-## Priority 2 — The differentiating feature
+## Priority 2 — The differentiating feature ✅ Complete
 
 ### 3. Conversational RTI filing
 
@@ -106,11 +106,17 @@ forms" otherwise sounds alarming.
 **Done when:** A citizen reaches a filled confirmation screen from a plain-language description
 without typing an authority name, and nothing is ever submitted directly from the chat.
 
+**Delivered:** `/file-with-sahayak` now accepts an impersonal plain-language description, finds
+directory candidates, creates an editable subject and request draft, and shows a confirmation
+screen. The normal guidelines → official form → review → BPL/payment journey remains mandatory.
+Only the confirmation/form reads the local profile; it is never sent to the assistant. The API has
+a separate `filing` task and the client keeps a conservative local fallback for demos.
+
 **Fallback:** If this is not demonstrable by **5 September**, minute 2 becomes the statutory
 deadline tracker, reframed as rights enforcement rather than date arithmetic. That costs nothing —
 the tracker is finished.
 
-## Priority 3 — Help people choose the right path before filing
+## Priority 3 — Help people choose the right path before filing ✅ Complete
 
 ### 4. RTI Readiness Check
 
@@ -126,6 +132,10 @@ stop you filing the wrong thing" lands fast.
 
 **Done when:** The check takes under two minutes, collects no personal data, and works in English
 and Hindi.
+
+**Delivered:** `/readiness-check` provides a five-question, bilingual, in-memory decision path to
+RTI filing, authority search, First Appeal, Commission guidance, a grievance route, or status.
+It is linked from the home hero and never stores an answer.
 
 ## Priority 4 — Build trust through the interface
 

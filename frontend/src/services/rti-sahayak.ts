@@ -23,6 +23,15 @@ export type RtiSahayakReply = {
   authoritySuggestions: AuthoritySuggestion[]
 }
 
+/** A prepared filing never contains profile data. The authority candidates come from the local directory. */
+export type FilingPreparation = {
+  authoritySuggestions: AuthoritySuggestion[]
+  selectedAuthorityIndex: number
+  subject: string
+  requestText: string
+  source: "gpt-5.6-luna" | "local"
+}
+
 export type TranslationResult = {
   /**
    * Translations for the first N of the texts given, in order. A batch that would be too large
@@ -63,6 +72,89 @@ const sensitivePatterns = [
 
 export function containsSensitiveData(text: string) {
   return sensitivePatterns.some((pattern) => pattern.test(text))
+}
+
+function createLocalFiling(description: string, authoritySuggestions: AuthoritySuggestion[]): FilingPreparation {
+  const normalised = description.replace(/\s+/g, " ").trim()
+  const subjectSource = normalised.split(/[.?!]/)[0] || normalised
+  const subject = subjectSource.length > 120
+    ? `${subjectSource.slice(0, 117).trimEnd()}…`
+    : subjectSource
+
+  return {
+    authoritySuggestions,
+    selectedAuthorityIndex: 0,
+    subject,
+    // This is intentionally conservative: it gives the applicant a clear editable starting
+    // point without fabricating dates, allegations, records, or facts not in their description.
+    requestText: `Please provide the available records and information regarding the following matter:\n\n${description.trim()}`,
+    source: "local",
+  }
+}
+
+/**
+ * Prepares the impersonal part of an RTI filing. The signed-in applicant profile is deliberately
+ * not accepted here and is only read by the confirmation/form route in the browser.
+ */
+export async function prepareRtiFiling({
+  description,
+  language,
+  safetyIdentifier,
+}: {
+  description: string
+  language: RtiSahayakLanguage
+  safetyIdentifier: string
+}): Promise<FilingPreparation> {
+  const trimmed = description.trim()
+
+  if (!trimmed || containsSensitiveData(trimmed)) {
+    throw new Error("sensitive")
+  }
+
+  const authoritySuggestions = await findAuthoritySuggestions(trimmed).catch(() => [])
+  const fallback = createLocalFiling(trimmed, authoritySuggestions)
+
+  if (!authoritySuggestions.length) {
+    return fallback
+  }
+
+  try {
+    const response = await fetch("/api/rti-sahayak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        task: "filing",
+        description: trimmed,
+        language,
+        safetyIdentifier,
+        authoritySuggestions,
+      }),
+    })
+
+    if (!response.ok) throw new Error("RTI Sahayak service is unavailable")
+
+    const data = (await response.json()) as {
+      selectedAuthorityIndex?: unknown
+      subject?: unknown
+      requestText?: unknown
+    }
+    const selectedAuthorityIndex = typeof data.selectedAuthorityIndex === "number" ? data.selectedAuthorityIndex : -1
+    const subject = typeof data.subject === "string" ? data.subject.trim() : ""
+    const requestText = typeof data.requestText === "string" ? data.requestText.trim() : ""
+
+    if (
+      selectedAuthorityIndex < 0 ||
+      selectedAuthorityIndex >= authoritySuggestions.length ||
+      !subject || subject.length > 120 ||
+      !requestText || requestText.length > 3000
+    ) {
+      throw new Error("RTI Sahayak returned an invalid filing")
+    }
+
+    return { authoritySuggestions, selectedAuthorityIndex, subject, requestText, source: "gpt-5.6-luna" }
+  } catch {
+    return fallback
+  }
 }
 
 function getHindiLocalReply(message: string, suggestions: AuthoritySuggestion[]): string {

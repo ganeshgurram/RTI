@@ -281,7 +281,9 @@ export function RequestFormPage({
       applicantPhone: `+91 ${value("mobile")}`,
       authority: selectedAuthorityOption.label,
       requestText: submittedText,
-      subject: deriveSubject(submittedText),
+      // A guided filing can supply a carefully reviewed one-line subject. Keep it until the
+      // applicant changes the request itself; after an edit, derive a fresh truthful subject.
+      subject: submittedText.trim() === draft?.requestText.trim() ? draft.subject : deriveSubject(submittedText),
       ministry: selectedMinistry,
       isBplApplicant,
       citizenship: value("citizenship"),

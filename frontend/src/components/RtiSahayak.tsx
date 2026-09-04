@@ -49,6 +49,7 @@ type ChatCopy = {
   openChat: string
   translating: string
   translationFailed: string
+  guidedFiling: string
   suggestions: string[]
 }
 
@@ -76,6 +77,7 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
     openChat: "Open RTI Sahayak",
     translating: "Translating this conversation into English...",
     translationFailed: "Some earlier messages could not be translated, and are shown as they were written.",
+    guidedFiling: "Prepare an RTI filing with RTI Sahayak",
     suggestions: [
       "Which department handles a passport issue?",
       "What is the RTI fee?",
@@ -106,6 +108,7 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
     openChat: "आरटीआई सहायक खोलें",
     translating: "इस बातचीत का हिन्दी में अनुवाद हो रहा है...",
     translationFailed: "कुछ पुराने संदेशों का अनुवाद नहीं हो सका, वे मूल रूप में दिखाए जा रहे हैं।",
+    guidedFiling: "आरटीआई सहायक के साथ आरटीआई आवेदन तैयार करें",
     suggestions: [
       "पासपोर्ट संबंधी समस्या के लिए कौन-सा विभाग जिम्मेदार है?",
       "आरटीआई शुल्क कितना है?",
@@ -573,6 +576,13 @@ export function RtiSahayak() {
           <div className="border-b border-border bg-muted/50 px-4 py-2 text-xs leading-5 text-muted-foreground">
             <span aria-hidden="true" className="material-symbols-outlined mr-1 align-[-3px] text-sm">shield</span>
             {copy.privacyWarning}
+          </div>
+
+          <div className="border-b border-border bg-background px-4 py-2.5">
+            <Link className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline" onClick={() => setIsOpen(false)} to="/file-with-sahayak">
+              <span aria-hidden="true" className="material-symbols-outlined text-base">auto_awesome</span>
+              {copy.guidedFiling}
+            </Link>
           </div>
 
           <div aria-live="polite" className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-4" ref={messageListRef}>

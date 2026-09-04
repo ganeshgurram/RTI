@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/i18n"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AppLayout } from "@/routes/AppLayout"
 import { ContactUsPage } from "@/routes/ContactUsPage"
+import { ConversationalFilingPage } from "@/routes/ConversationalFilingPage"
 import { DigiLockerAuthorizationPage } from "@/routes/DigiLockerAuthorizationPage"
 import { FaqPage } from "@/routes/FaqPage"
 import { HomePage } from "@/routes/HomePage"
@@ -20,6 +21,7 @@ import { FirstAppealFormPage } from "@/routes/FirstAppealFormPage"
 import { RequestFormPage } from "@/routes/RequestFormPage"
 import { RequestReviewPage } from "@/routes/RequestReviewPage"
 import { RequestDetailPage } from "@/routes/RequestDetailPage"
+import { ReadinessCheckPage } from "@/routes/ReadinessCheckPage"
 import { SubmitFirstAppealPage } from "@/routes/SubmitFirstAppealPage"
 import { SecondAppealPage } from "@/routes/SecondAppealPage"
 import { SignupPage } from "@/routes/SignupPage"
@@ -44,6 +46,8 @@ const router = createBrowserRouter([
       { path: "faq", element: <FaqPage /> },
       { path: "contact-us", element: <ContactUsPage /> },
       { path: "public-authorities", element: <PublicAuthoritiesPage /> },
+      { path: "readiness-check", element: <ReadinessCheckPage /> },
+      { path: "file-with-sahayak", element: <ConversationalFilingPage /> },
       { path: "submit-request", element: <RequestFormRoute /> },
       { path: "request-review", element: <RequestReviewPage /> },
       { path: "payment-reconciliation", element: <PaymentReconciliationPage /> },
@@ -77,7 +81,7 @@ function RequestFormRoute() {
 
   useEffect(() => {
     if (!hasAcceptedGuidelines) {
-      openRequestGuidelines({ cancelTo: -1 })
+      openRequestGuidelines({ cancelTo: -1, authority: routeState?.authority, reviewDraft: routeState?.reviewDraft })
     }
   }, [hasAcceptedGuidelines])
 
@@ -90,7 +94,7 @@ function RequestFormRoute() {
       <section className="max-w-lg rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center shadow-sm">
         <h1 className="font-headline-md text-xl text-primary">Guidelines acknowledgement required</h1>
         <p className="mt-3 text-sm leading-6 text-on-surface-variant">Please review and acknowledge the RTI request guidelines before continuing to the application form.</p>
-        <button className="mt-6 rounded bg-primary px-5 py-2.5 font-label-lg text-on-primary transition-colors hover:bg-primary-container" onClick={() => openRequestGuidelines({ cancelTo: -1 })} type="button">Review Guidelines</button>
+        <button className="mt-6 rounded bg-primary px-5 py-2.5 font-label-lg text-on-primary transition-colors hover:bg-primary-container" onClick={() => openRequestGuidelines({ cancelTo: -1, authority: routeState?.authority, reviewDraft: routeState?.reviewDraft })} type="button">Review Guidelines</button>
       </section>
     </main>
   )
