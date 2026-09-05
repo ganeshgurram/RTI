@@ -13,7 +13,6 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/auth/AuthContext"
-import { usePortalLanguage } from "@/i18n"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const actionCards = [
@@ -259,7 +258,6 @@ function FlowEdge({ path }: { path: string }) {
 
 export function HomePage() {
   const { user } = useAuth()
-  const { language } = usePortalLanguage()
   const { t } = useTranslation()
   const flowchartFrameRef = useRef<HTMLDivElement>(null)
   const stepperFrameRef = useRef<HTMLDivElement>(null)
@@ -321,10 +319,6 @@ export function HomePage() {
             <p className="mx-auto mb-10 max-w-2xl font-body-lg text-body-lg opacity-90 md:text-xl">
               {t("home.subtitle")}
             </p>
-            <Link className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-on-primary/90 underline-offset-4 hover:underline" to="/readiness-check">
-              <MaterialIcon className="text-base">route</MaterialIcon>
-              {language === "hi" ? "कौन-सा आरटीआई कदम सही है?" : "Not sure where to start? Take the RTI Readiness Check"}
-            </Link>
           </div>
         </section>
         <section className="relative z-20 mx-auto -mt-10 mb-20 max-w-container-max px-margin-mobile md:px-margin-desktop">

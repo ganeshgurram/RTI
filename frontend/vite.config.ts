@@ -59,6 +59,17 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss(), rtiSahayakDevRoute()],
+    server: {
+      proxy: {
+        "/api/auth": "http://127.0.0.1:8787",
+        "/api/profile": "http://127.0.0.1:8787",
+        "/api/requests": "http://127.0.0.1:8787",
+        "/api/public": "http://127.0.0.1:8787",
+        "/api/payments": "http://127.0.0.1:8787",
+        "/api/notifications": "http://127.0.0.1:8787",
+        "/api/health": "http://127.0.0.1:8787",
+      },
+    },
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "./src"),

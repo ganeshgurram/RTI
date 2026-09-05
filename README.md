@@ -1,8 +1,8 @@
 # RTI Online Redesign
 
-Frontend-only redesign prototype for the RTI Online portal, built for the Build What Moves India hackathon.
+Full-stack RTI Online redesign prototype for the Build What Moves India hackathon.
 
-This repository contains a Vite + React + TypeScript app using React Router, Tailwind CSS, and shadcn/ui with Base UI primitives. Backend behavior, auth, payment, status, and dashboard data are mocked in the frontend.
+This repository contains a Vite + React + TypeScript app using React Router, Tailwind CSS, and shadcn/ui with Base UI primitives, plus an Express API backed by MongoDB Atlas. Authentication, profiles, requests, appeals, payments, status lookup, and notification read state are persisted through the API.
 
 ## Project Structure
 
@@ -31,13 +31,16 @@ npm run setup
 npm run dev
 ```
 
-`npm run dev`, `npm run build`, and `npm run lint` automatically synchronize frontend dependencies when a pull changes `frontend/package.json` or `frontend/package-lock.json`. This prevents missing-module errors after pulling dependency updates.
+`npm run dev` starts the Express API and Vite application together. The web app proxies its API calls to the local API in development.
 
-The app runs at:
+The web app and API run at:
 
 ```text
-http://127.0.0.1:5173/
+http://localhost:5173/
+http://127.0.0.1:8787/api/health
 ```
+
+Create `frontend/.env.local` from `frontend/.env.example` and set `MONGODB_URI` to your Atlas connection string before starting the app. Do not commit this file.
 
 You can also work directly inside the frontend app:
 
@@ -52,9 +55,12 @@ npm run dev
 From the repository root:
 
 ```bash
-npm run dev      # Start Vite dev server
+npm run dev      # Start the Express API and Vite app
+npm run dev:api  # Start only the Express API
+npm run dev:web  # Start only the Vite app
 npm run build    # Type-check and build production assets
 npm run lint     # Run oxlint
+npm run check    # Check the API and build the frontend
 npm run preview  # Preview production build
 ```
 
@@ -69,7 +75,7 @@ RTI Sahayak is available on every page and answers general questions about using
 
 Switching the portal language keeps the conversation and re-renders it, so earlier messages are shown in the newly selected language rather than being cleared. Text the portal itself writes is held in both languages already; anything the model wrote is translated once and then cached against the message, so switching back and forth costs nothing after the first pass. If a translation cannot be obtained the original text is kept and the panel says so, which reads in the wrong language but never puts the wrong words under a speaker.
 
-The project includes a serverless handler at frontend/api/rti-sahayak.js configured for OpenRouter with GPT-5.6 Luna (openai/gpt-5.6-luna). To activate live AI answers, deploy with frontend as the project root and set OPENROUTER_API_KEY in the host's server-side environment variables. Never use a VITE_ prefix or put the key in browser code. Without a configured server route, the widget safely falls back to local guidance for the demo.
+The project includes serverless handlers in `frontend/api/`: `rti-sahayak.js` serves the chat feature, while `[...path].js` exports the modular Express API for the rest of `/api/*`. To activate live services, deploy with frontend as the project root and set server-side environment variables. Never use a `VITE_` prefix for secrets.
 
 ### Running Luna locally
 
@@ -81,13 +87,20 @@ The Vite development server invokes the same secure API handler as the deployed 
 
 ### Deploying to Vercel
 
-The site and the chat endpoint deploy together: Vercel serves the built assets and runs `frontend/api/rti-sahayak.js` as a serverless function at `/api/rti-sahayak`. Because that is the same origin the page is served from, there is no CORS involved and no endpoint URL to configure.
+The site, Express API, and chat endpoint deploy together. Vercel serves the Vite assets and runs `frontend/api/[...path].js` as the same-origin Express API; `frontend/api/rti-sahayak.js` remains the dedicated chat function. Same-origin routing keeps the HttpOnly `rti_session` cookie first-party, so no separate API URL is needed.
 
 | Setting | Value |
 |---|---|
 | Root Directory | `frontend` |
 | Framework Preset | Vite (build `npm run build`, output `dist`) |
 | Environment Variable | `OPENROUTER_API_KEY` — no `VITE_` prefix, all environments |
+
+Set these Vercel environment variables for Production, Preview, and Development as appropriate:
+
+- `MONGODB_URI`: MongoDB Atlas connection string.
+- `OPENROUTER_API_KEY`: required only for live RTI Sahayak replies.
+- `NODE_ENV=production`: makes the session cookie Secure.
+- `SEED_DEMO_DATA=true`: seeds the mock portal data; set it to `false` for a real-data deployment.
 
 Two things the project already carries so this works:
 

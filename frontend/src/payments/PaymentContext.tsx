@@ -1,81 +1,58 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 
-import {
-  mockTransactions,
-  type PaymentRequestDraft,
-  type PaymentTransaction,
-} from "@/data/mock-transactions"
+import { useAuth } from "@/auth/AuthContext"
+import { mockTransactions, type PaymentRequestDraft, type PaymentTransaction } from "@/data/mock-transactions"
+import { api } from "@/services/api"
 
-type CreatePaymentAttemptInput = {
-  draft: PaymentRequestDraft
-  outcome: PaymentTransaction["outcome"]
-}
+type CreatePaymentAttemptInput = { draft: PaymentRequestDraft; outcome: PaymentTransaction["outcome"] }
 
 type PaymentContextValue = {
-  createPaymentAttempt: (input: CreatePaymentAttemptInput) => PaymentTransaction
-  markPaymentConfirmed: (transactionId: string, registrationNumber: string) => void
+  createPaymentAttempt: (input: CreatePaymentAttemptInput) => Promise<PaymentTransaction>
+  markPaymentConfirmed: (transactionId: string, registrationNumber: string) => Promise<void>
+  reconcilePayment: (email: string, mobile: string) => Promise<PaymentTransaction>
   payments: PaymentTransaction[]
 }
 
-const paymentStorageKey = "rti-demo-payment-transactions"
 const PaymentContext = createContext<PaymentContextValue | undefined>(undefined)
 
-function getStoredPayments() {
-  try {
-    const stored = localStorage.getItem(paymentStorageKey)
-    if (!stored) return mockTransactions
-
-    const parsed = JSON.parse(stored) as PaymentTransaction[]
-    return Array.isArray(parsed) ? parsed : mockTransactions
-  } catch {
-    return mockTransactions
-  }
-}
-
-function formatAttemptedOn(date: Date) {
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date)
-}
-
 export function PaymentProvider({ children }: { children: ReactNode }) {
-  const [payments, setPayments] = useState<PaymentTransaction[]>(getStoredPayments)
+  const { isAuthenticated } = useAuth()
+  const [serverPayments, setServerPayments] = useState<PaymentTransaction[]>([])
 
   useEffect(() => {
-    localStorage.setItem(paymentStorageKey, JSON.stringify(payments))
-  }, [payments])
+    let cancelled = false
+    if (!isAuthenticated) {
+      setServerPayments([])
+      return
+    }
+
+    void api.listPayments().then(({ payments }) => {
+      if (!cancelled) setServerPayments(payments as PaymentTransaction[])
+    }).catch(() => {
+      if (!cancelled) setServerPayments([])
+    })
+
+    return () => { cancelled = true }
+  }, [isAuthenticated])
+
+  const payments = isAuthenticated ? serverPayments : mockTransactions
 
   const value = useMemo<PaymentContextValue>(() => ({
     payments,
-    createPaymentAttempt: ({ draft, outcome }) => {
-      const now = new Date()
-      const transaction: PaymentTransaction = {
-        transactionId: `TXN_${String(now.getTime()).slice(-7)}`,
-        applicantName: draft.applicantName,
-        email: draft.applicantEmail,
-        mobile: draft.applicantPhone.replace(/\D/g, "").slice(-10),
-        amount: "₹ 10.00",
-        method: "Mock payment gateway",
-        attemptedOn: formatAttemptedOn(now),
-        authority: draft.authority,
-        purpose: "RTI application fee",
-        outcome,
-        refundReference: outcome === "refunded" ? `RRN-${String(now.getTime()).slice(-10)}` : undefined,
-      }
-
-      setPayments((current) => [transaction, ...current])
-      return transaction
+    createPaymentAttempt: async ({ draft, outcome }) => {
+      const { payment } = await api.createPayment(draft, outcome)
+      const created = payment as PaymentTransaction
+      setServerPayments((current) => [created, ...current])
+      return created
     },
-    markPaymentConfirmed: (transactionId, registrationNumber) => {
-      setPayments((current) => current.map((transaction) => (
-        transaction.transactionId === transactionId
-          ? { ...transaction, outcome: "confirmed", registrationNumber }
-          : transaction
-      )))
+    markPaymentConfirmed: async (transactionId, registrationNumber) => {
+      const { payment } = await api.confirmPayment(transactionId, registrationNumber)
+      const confirmed = payment as PaymentTransaction
+      setServerPayments((current) => current.map((item) => item.transactionId === transactionId ? confirmed : item))
+    },
+    reconcilePayment: async (email, mobile) => {
+      const { payment } = await api.reconcilePayment(email, mobile)
+      return payment as PaymentTransaction
     },
   }), [payments])
 
@@ -84,10 +61,6 @@ export function PaymentProvider({ children }: { children: ReactNode }) {
 
 export function usePayments() {
   const context = useContext(PaymentContext)
-
-  if (!context) {
-    throw new Error("usePayments must be used within PaymentProvider")
-  }
-
+  if (!context) throw new Error("usePayments must be used within PaymentProvider")
   return context
 }

@@ -186,7 +186,7 @@ export function SignupPage() {
     otpRefs.current[Math.min(pasted.length, otpLength - 1)]?.focus()
   }
 
-  const handleVerify = (event: FormEvent<HTMLFormElement>) => {
+  const handleVerify = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const entered = otpDigits.join("")
 
@@ -200,7 +200,7 @@ export function SignupPage() {
       return
     }
 
-    const signupError = signup({
+    const signupError = await signup({
       fullName: form.fullName,
       email: form.email,
       mobile: form.mobile,

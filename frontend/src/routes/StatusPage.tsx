@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { useRequests } from "@/requests/RequestContext"
+import { type RtiRequest } from "@/requests/RequestContext"
+import { api } from "@/services/api"
 import { getRequestDeadline } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -34,20 +35,18 @@ function Detail({ label, value }: { label: string; value: string }) {
 
 export function StatusPage() {
   const { isAuthenticated } = useAuth()
-  const { requests } = useRequests()
   const [registrationNumber, setRegistrationNumber] = useState("")
   const [email, setEmail] = useState("")
   const [captcha, setCaptcha] = useState("")
   const [captchaIndex, setCaptchaIndex] = useState(0)
   const [errors, setErrors] = useState<LookupErrors>({})
-  const [requestId, setRequestId] = useState<string | null>(null)
+  const [request, setRequest] = useState<RtiRequest | null>(null)
   const requestDetailsRef = useRef<HTMLElement>(null)
   const { t } = useTranslation()
   // Declared above the signed-in redirect below, so every hook runs on every render.
   const today = useMemo(() => new Date(), [])
 
   const activeCaptcha = captchaCodes[captchaIndex]
-  const request = requests.find((item) => item.id === requestId)
   const deadline = request ? getRequestDeadline({ request, today }) : null
 
   useEffect(() => {
@@ -62,22 +61,27 @@ export function StatusPage() {
     setErrors((current) => ({ ...current, captcha: undefined }))
   }
 
-  const checkStatus = (event: FormEvent<HTMLFormElement>) => {
+  const checkStatus = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextErrors: LookupErrors = {}
-    const matchingRequest = requests.find((item) => item.id.toLowerCase() === registrationNumber.trim().toLowerCase())
 
     if (!registrationNumber.trim()) nextErrors.registrationNumber = t("status.errorRegistration")
     if (!/^\S+@\S+\.\S+$/.test(email)) nextErrors.email = t("status.errorEmail")
     if (captcha.trim().toUpperCase() !== activeCaptcha) nextErrors.captcha = t("status.errorCaptcha")
-    if (!nextErrors.registrationNumber && !nextErrors.email && !nextErrors.captcha) {
-      if (!matchingRequest || email.trim().toLowerCase() !== matchingRequest.applicantEmail.toLowerCase()) {
-        nextErrors.lookup = t("status.errorLookup")
-      }
-    }
 
     setErrors(nextErrors)
-    setRequestId(Object.keys(nextErrors).length ? null : matchingRequest?.id ?? null)
+    if (Object.keys(nextErrors).length) {
+      setRequest(null)
+      return
+    }
+
+    try {
+      const result = await api.lookupRequest(registrationNumber.trim(), email.trim())
+      setRequest(result.request as RtiRequest)
+    } catch {
+      setRequest(null)
+      setErrors({ lookup: t("status.errorLookup") })
+    }
   }
 
   return (

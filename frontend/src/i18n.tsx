@@ -226,6 +226,7 @@ const resources = {
         showPassword: "Show password",
         hidePassword: "Hide password",
         invalidCredentials: "Use the demo credentials shown below, or the account you created, to sign in.",
+        unavailable: "We could not reach the sign-in service. Please try again.",
         newHere: "New to RTI Online?",
         createAccount: "Create an account",
       },
@@ -264,6 +265,7 @@ const resources = {
         alreadyRegistered: "Already registered?",
         usernameTaken: "That username is already registered. Please choose another.",
         emailTaken: "An account already exists with that email address.",
+        unavailable: "We could not create your account. Please try again.",
         errors: {
           fullName: "Please enter your full name.",
           email: "Please enter a valid email address.",
@@ -1041,6 +1043,7 @@ const resources = {
         showPassword: "पासवर्ड दिखाएँ",
         hidePassword: "पासवर्ड छिपाएँ",
         invalidCredentials: "साइन इन करने के लिए नीचे दिखाए गए डेमो क्रेडेंशियल या अपने बनाए गए खाते का उपयोग करें।",
+        unavailable: "साइन इन सेवा तक नहीं पहुँचा जा सका। कृपया फिर से प्रयास करें।",
         newHere: "आरटीआई ऑनलाइन पर नए हैं?",
         createAccount: "खाता बनाएँ",
       },
@@ -1079,6 +1082,7 @@ const resources = {
         alreadyRegistered: "पहले से पंजीकृत हैं?",
         usernameTaken: "यह उपयोगकर्ता नाम पहले से पंजीकृत है। कृपया दूसरा चुनें।",
         emailTaken: "इस ईमेल पते से पहले ही एक खाता मौजूद है।",
+        unavailable: "आपका खाता नहीं बनाया जा सका। कृपया फिर से प्रयास करें।",
         errors: {
           fullName: "कृपया अपना पूरा नाम दर्ज करें।",
           email: "कृपया एक मान्य ईमेल पता दर्ज करें।",

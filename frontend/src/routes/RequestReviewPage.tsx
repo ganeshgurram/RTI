@@ -68,13 +68,13 @@ export function RequestReviewPage() {
     })
   }
 
-  const continueSubmission = () => {
+  const continueSubmission = async () => {
     if (!draft.isBplApplicant) {
       navigate("/mock-payment", { state: { draft } })
       return
     }
 
-    const request = createRequest({
+    const request = await createRequest({
       ...draft,
       isBplApplicant: draft.isBplApplicant,
       supportingDocumentName: draft.bpl?.supportingDocumentName,
@@ -141,7 +141,7 @@ export function RequestReviewPage() {
           </div>
           <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-5">
             <Button onClick={() => edit("request")} type="button" variant="outline">{t("requestReview.backToForm")}</Button>
-            <Button onClick={continueSubmission} type="button">
+            <Button onClick={() => void continueSubmission()} type="button">
               <MaterialIcon className="text-[18px]">{draft.isBplApplicant ? "send" : "payments"}</MaterialIcon>
               {draft.isBplApplicant ? t("requestReview.submitRequest") : t("requestReview.continueToPayment")}
             </Button>

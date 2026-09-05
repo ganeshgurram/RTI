@@ -25,7 +25,6 @@ const dependenciesMissing = directDependencies.some((packageName) => !existsSync
 const installationIsOutdated =
   !existsSync(installedLockfilePath) ||
   dependenciesMissing ||
-  isNewerThanInstalledLockfile(manifestPath) ||
   isNewerThanInstalledLockfile(lockfilePath)
 
 if (installationIsOutdated) {
