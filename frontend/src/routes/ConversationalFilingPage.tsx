@@ -210,12 +210,16 @@ export function ConversationalFilingPage() {
   const hasAuthority = Boolean(prepared?.authoritySuggestions[selected])
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-margin-mobile py-stack-lg md:px-margin-desktop md:py-8">
-      <header className="mb-4">
-        <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><MaterialIcon>auto_awesome</MaterialIcon></div>
-        <p className="text-sm font-semibold text-primary">{text.step} {prepared ? "2" : "1"} / 2</p>
-        <h1 className="mt-1 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{text.title}</h1>
-        <p className="mt-2 max-w-3xl text-body-md text-on-surface-variant">{text.subtitle}</p>
+    <main className="mx-auto w-full max-w-3xl px-margin-mobile py-stack-lg md:px-margin-desktop md:py-8">
+      <header className="pb-3">
+        <div className="mb-stack-sm flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-primary">{text.step} {prepared ? "2" : "1"} / 2</p>
+            <h1 className="mt-1 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{text.title}</h1>
+          </div>
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary"><MaterialIcon className="text-2xl">auto_awesome</MaterialIcon></div>
+        </div>
+        <p className="text-body-md text-on-surface-variant">{text.subtitle}</p>
       </header>
 
       {!prepared ? (
