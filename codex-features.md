@@ -57,9 +57,9 @@ RTI Online already demonstrates a complete prototype journey:
 
 **Done when:** One request detail view answers “what did I submit, where is it, and what should I do next?”
 
-## Priority 3 — Help people choose the right path before filing
+## Priority 3 — Help people choose the right path before filing ✅ Complete (Readiness Check intentionally excluded)
 
-### 6. RTI Readiness Check
+### 6. RTI Readiness Check — Intentionally excluded
 
 **Experience:** Ask four or five plain-language questions before a user begins: whether the matter concerns a Central Public Authority, whether they seek existing information, whether they know the authority, and whether a prior request exists.
 
@@ -69,7 +69,9 @@ RTI Online already demonstrates a complete prototype journey:
 
 **Done when:** The decision takes under two minutes, collects no personal data, and works in English and Hindi.
 
-### 7. Guided authority finder
+**Product decision:** This was deliberately removed from the prototype so applicants can enter the filing journey directly.
+
+### 7. Guided authority finder ✅
 
 **Experience:** Build on the Public Authorities Directory with a conversational topic search: “passport delay,” “railway refund,” or “pension records” should explain why an authority is suggested and offer a direct File RTI action.
 
@@ -77,7 +79,7 @@ RTI Online already demonstrates a complete prototype journey:
 
 **Done when:** Results explain their match in plain language and always allow the user to verify or change the authority.
 
-### 8. Better First Appeal preparation
+### 8. Better First Appeal preparation ✅
 
 **Experience:** When an appeal becomes eligible, prefill the original request context, explain the relevant ground, and provide a short checklist of documents before the form begins.
 
@@ -85,25 +87,27 @@ RTI Online already demonstrates a complete prototype journey:
 
 **Done when:** An applicant can move from an eligible request to a prepared First Appeal without re-entering known information.
 
-## Priority 4 — Build trust through the interface
+## Priority 4 — Build trust through the interface ✅ Complete
 
-### 9. Plain-language privacy and prototype notices
+### 9. Plain-language privacy and prototype notices ✅
 
 **Experience:** Clearly explain what is mock data, what stays on the device, what DigiLocker simulation means, and what information should never be entered into RTI Sahayak.
 
 **Why it matters:** Trust is part of the product, especially for a portal handling personal contact information.
 
-### 10. First-visit guidance
+### 10. First-visit guidance ✅
 
 **Experience:** Offer a dismissible, three-step orientation: find an authority, submit a request, track progress.
 
 **Why it matters:** It helps first-time applicants understand the portal without adding clutter for returning users.
 
-### 11. News and service updates
+### 11. News and service updates ✅
 
-**Experience:** Add one accessible announcement area beneath the navigation for important RTI updates, maintenance notices, or guidance changes.
+**Experience:** Add one accessible, home-page-only announcement area beneath the navigation for important RTI updates, maintenance notices, or guidance changes. It stays static and reflows into a clear two-row layout on mobile.
 
-**Design rule:** Use a static, readable announcement strip — not an auto-scrolling marquee.
+**Design rule:** Keep the service label fixed and animate only the announcement text. Respect reduced-motion preferences by showing static text.
+
+**Done when:** The strip is visible only on the home page, with a compact desktop row and a readable mobile layout.
 
 ## Presentation priorities
 

@@ -117,9 +117,9 @@ export function SubmitFirstAppealPage() {
   const saveDraft = () => window.requestAnimationFrame(() => lookupDraft.save(formRef.current))
 
   return (
-    <div className="mx-auto flex w-full max-w-container-max flex-1 flex-col items-center px-margin-mobile py-stack-lg md:px-margin-desktop md:py-12">
+    <div className="mx-auto flex w-full max-w-container-max flex-1 flex-col items-center px-margin-mobile py-stack-lg md:px-margin-desktop md:py-8">
       <div className="w-full max-w-3xl">
-        <header className="pb-stack-md">
+        <header className="pb-3">
           <div className="mb-stack-sm flex items-center justify-between gap-4">
             <h1 className="font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("firstAppeal.title")}</h1>
             <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary">
@@ -135,23 +135,23 @@ export function SubmitFirstAppealPage() {
           </div>
         </header>
 
-        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-stack-lg">
-          <form className="flex flex-col gap-stack-md" key={formResetKey} noValidate onChange={saveDraft} onReset={resetLookup} onSubmit={beginAppeal} ref={formRef}>
-            <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
+        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-5 md:p-6">
+          <form className="flex flex-col gap-3" key={formResetKey} noValidate onChange={saveDraft} onReset={resetLookup} onSubmit={beginAppeal} ref={formRef}>
+            <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-5">
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-registration-number"><span className="text-error">*</span> {t("firstAppeal.registrationNumber")}</label>
               <div className="flex-grow">
                 <input aria-invalid={Boolean(errors.registrationNumber)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-registration-number" name="registrationNumber" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined, timing: undefined })) }} placeholder="RTI-2026-11842" type="text" value={registrationNumber} />
                 {errors.registrationNumber ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.registrationNumber}</p> : null}
               </div>
             </div>
-            <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
+            <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-5">
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-email"><span className="text-error">*</span> {t("firstAppeal.emailPrompt")}</label>
               <div className="flex-grow">
                 <input aria-invalid={Boolean(errors.email)} className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary" id="appeal-email" name="email" onChange={(event) => { setEmail(event.target.value); setErrors((current) => ({ ...current, email: undefined, lookup: undefined, timing: undefined })) }} placeholder={t("status.emailAddress")} type="email" value={email} />
                 {errors.email ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.email}</p> : null}
               </div>
             </div>
-            <div className="flex flex-col gap-stack-sm pt-stack-sm md:flex-row md:gap-gutter">
+            <div className="flex flex-col gap-stack-sm pt-1 md:flex-row md:items-start md:gap-5">
               <label className="flex items-center gap-1 font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="appeal-captcha"><span className="text-error">*</span> {t("firstAppeal.securityCode")}</label>
               <div className="flex flex-grow flex-col gap-stack-sm">
                 <div className="flex max-w-md items-center gap-2">
@@ -169,7 +169,7 @@ export function SubmitFirstAppealPage() {
                 {blockedDeadline ? <DeadlineNotice deadline={blockedDeadline} showAppealAction={false} /> : null}
               </div>
             ) : null}
-            <div className="mt-stack-md flex justify-center gap-stack-md border-t border-surface-container-high pt-stack-lg md:justify-start md:pl-[33%]">
+            <div className="mt-2 flex justify-center gap-stack-md border-t border-surface-container-high pt-4 md:justify-start md:pl-[calc(33.333%+1.25rem)]">
               <button className="min-w-30 rounded-lg bg-primary px-6 py-2 font-label-lg text-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit">{t("firstAppeal.submit")}</button>
               <button className="min-w-30 rounded-lg border border-outline-variant bg-surface-container px-6 py-2 font-label-lg text-label-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface" type="reset">{t("firstAppeal.reset")}</button>
             </div>

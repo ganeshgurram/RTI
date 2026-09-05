@@ -9,13 +9,14 @@ import { IconTooltip } from "@/components/IconTooltip"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { type RtiRequest } from "@/requests/RequestContext"
 import { api } from "@/services/api"
 import { getRequestDeadline } from "@/services/statutory-deadlines"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const captchaCodes = ["7KQ2P", "M4N8R", "T6B3X"]
+const fieldClassName = "w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary"
+const captchaRefreshClassName = "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-on-surface outline-none transition-all hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px"
 
 type LookupErrors = {
   registrationNumber?: string
@@ -85,9 +86,9 @@ export function StatusPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-container-max flex-1 flex-col items-center px-margin-mobile py-stack-lg md:px-margin-desktop md:py-12">
+    <div className="mx-auto flex w-full max-w-container-max flex-1 flex-col items-center px-margin-mobile py-stack-lg md:px-margin-desktop md:py-8">
       <div className="w-full max-w-3xl">
-        <header className="pb-stack-md">
+        <header className="pb-3">
           <div className="mb-stack-sm flex items-center justify-between gap-4">
             <h1 className="font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{t("status.title")}</h1>
             <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary">
@@ -96,41 +97,39 @@ export function StatusPage() {
           </div>
           <p className="text-body-md text-on-surface-variant">{t("status.subtitle")}</p>
         </header>
-        <Card className="border border-outline-variant bg-surface-container-lowest shadow-sm">
-          <CardContent className="p-stack-lg">
-            <form className="flex flex-col gap-stack-md" noValidate onSubmit={checkStatus}>
-              <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
+        <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-5 md:p-6">
+            <form className="flex flex-col gap-3" noValidate onSubmit={checkStatus}>
+              <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-5">
                 <label className="flex items-center font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="registration-number">{t("status.registrationNumber")}</label>
                 <div className="flex-grow">
-                <Input aria-invalid={Boolean(errors.registrationNumber)} id="registration-number" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined })) }} placeholder="RTI-2026-11842" value={registrationNumber} />
+                <input aria-invalid={Boolean(errors.registrationNumber)} className={fieldClassName} id="registration-number" onChange={(event) => { setRegistrationNumber(event.target.value); setErrors((current) => ({ ...current, registrationNumber: undefined, lookup: undefined })) }} placeholder="RTI-2026-11842" type="text" value={registrationNumber} />
                 {errors.registrationNumber ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.registrationNumber}</p> : null}
                 </div>
               </div>
-              <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-gutter">
+              <div className="flex flex-col gap-stack-sm md:flex-row md:items-start md:gap-5">
                 <label className="flex items-center font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="request-email">{t("status.emailAddress")}</label>
                 <div className="flex-grow">
-                <Input aria-invalid={Boolean(errors.email)} id="request-email" onChange={(event) => { setEmail(event.target.value); setErrors((current) => ({ ...current, email: undefined, lookup: undefined })) }} placeholder="user@domain.com" type="email" value={email} />
+                <input aria-invalid={Boolean(errors.email)} className={fieldClassName} id="request-email" onChange={(event) => { setEmail(event.target.value); setErrors((current) => ({ ...current, email: undefined, lookup: undefined })) }} placeholder="user@domain.com" type="email" value={email} />
                 {errors.email ? <p className="mt-1.5 text-xs font-medium text-destructive">{errors.email}</p> : null}
                 </div>
               </div>
-              <div className="flex flex-col gap-stack-sm pt-stack-sm md:flex-row md:gap-gutter">
+              <div className="flex flex-col gap-stack-sm pt-1 md:flex-row md:items-start md:gap-5">
                 <label className="flex items-center font-label-lg text-label-lg text-on-surface md:mt-2 md:w-1/3" htmlFor="status-captcha">{t("status.captcha")}</label>
                 <div className="flex flex-grow flex-col gap-stack-sm">
                   <div className="flex max-w-md items-center gap-2">
-                  <Input aria-invalid={Boolean(errors.captcha)} id="status-captcha" onChange={(event) => { setCaptcha(event.target.value); setErrors((current) => ({ ...current, captcha: undefined, lookup: undefined })) }} placeholder={t("status.enterCaptcha")} value={captcha} />
-                  <span aria-label="Captcha code" className="flex h-8 min-w-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary">{activeCaptcha}</span>
-                  <IconTooltip label={t("status.refreshCaptcha")} render={<Button aria-label={t("status.refreshCaptcha")} onClick={refreshCaptcha} size="icon" type="button" variant="outline" />}><MaterialIcon>refresh</MaterialIcon></IconTooltip>
+                  <input aria-invalid={Boolean(errors.captcha)} className={`${fieldClassName} h-10 flex-1 py-0`} id="status-captcha" onChange={(event) => { setCaptcha(event.target.value); setErrors((current) => ({ ...current, captcha: undefined, lookup: undefined })) }} placeholder={t("status.enterCaptcha")} type="text" value={captcha} />
+                  <span aria-label="Captcha code" className="flex h-10 min-w-24 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-low px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary">{activeCaptcha}</span>
+                  <IconTooltip label={t("status.refreshCaptcha")} render={<button aria-label={t("status.refreshCaptcha")} className={captchaRefreshClassName} onClick={refreshCaptcha} type="button" />}><MaterialIcon className="text-lg">refresh</MaterialIcon></IconTooltip>
                   </div>
                   {errors.captcha ? <p className="text-xs font-medium text-destructive">{errors.captcha}</p> : null}
                 </div>
               </div>
               {errors.lookup ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{errors.lookup}</p> : null}
-              <div className="mt-stack-md flex justify-center border-t border-surface-container-high pt-stack-lg md:justify-start md:pl-[33%]">
-                <Button size="lg" type="submit"><MaterialIcon>search</MaterialIcon>{t("status.checkStatus")}</Button>
+              <div className="mt-2 flex justify-center border-t border-surface-container-high pt-4 md:justify-start md:pl-[calc(33.333%+1.25rem)]">
+                <button className="min-w-30 rounded-lg bg-primary px-6 py-2 font-label-lg text-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><MaterialIcon className="mr-1 text-lg">search</MaterialIcon>{t("status.checkStatus")}</button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+        </div>
 
         {request ? (
           <section className="print-request-details mt-6" aria-live="polite" ref={requestDetailsRef}>

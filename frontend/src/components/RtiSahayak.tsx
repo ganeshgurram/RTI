@@ -37,6 +37,7 @@ type ChatCopy = {
   authorityTitle: string
   backToTop: string
   relatedOffices: string
+  whySuggested: string
   confirmAuthority: string
   fileRti: string
   preparing: string
@@ -65,6 +66,7 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
     authorityTitle: "Possible filing targets",
     backToTop: "Back to top",
     relatedOffices: "Related offices",
+    whySuggested: "Why this is suggested",
     confirmAuthority: "Confirm in Public Authorities",
     fileRti: "File RTI",
     preparing: "RTI Sahayak is preparing an answer...",
@@ -96,6 +98,7 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
     authorityTitle: "संभावित दाखिला प्राधिकरण",
     backToTop: "ऊपर जाएँ",
     relatedOffices: "संबंधित कार्यालय",
+    whySuggested: "यह सुझाव क्यों दिया गया है",
     confirmAuthority: "लोक प्राधिकरणों में पुष्टि करें",
     fileRti: "आरटीआई दायर करें",
     preparing: "आरटीआई सहायक उत्तर तैयार कर रहा है...",
@@ -290,6 +293,11 @@ function AuthorityMatches({
             <p className="text-xs font-semibold leading-5 text-foreground">{suggestion.authorityName}</p>
             {suggestion.ministryName && (
               <p className="mt-1 text-xs leading-4 text-muted-foreground">{suggestion.ministryName}</p>
+            )}
+            {suggestion.matchReason && (
+              <p className="mt-1.5 text-xs leading-4 text-muted-foreground">
+                <span className="font-medium text-foreground">{copy.whySuggested}:</span> {suggestion.matchReason}
+              </p>
             )}
             {suggestion.relatedOffices.length > 0 && (
               <p className="mt-1.5 text-xs leading-4 text-muted-foreground">
@@ -578,10 +586,11 @@ export function RtiSahayak() {
             {copy.privacyWarning}
           </div>
 
-          <div className="border-b border-border bg-background px-4 py-2.5">
-            <Link className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline" onClick={() => setIsOpen(false)} to="/file-with-sahayak">
-              <span aria-hidden="true" className="material-symbols-outlined text-base">auto_awesome</span>
-              {copy.guidedFiling}
+          <div className="border-b border-border bg-background px-4 py-3">
+            <Link className="group flex w-full items-center gap-3 rounded-lg border border-primary/25 bg-primary px-3 py-2.5 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2" onClick={() => setIsOpen(false)} to="/file-with-sahayak">
+              <span aria-hidden="true" className="flex size-7 shrink-0 items-center justify-center rounded-md bg-on-primary/15"><span className="material-symbols-outlined text-base">auto_awesome</span></span>
+              <span className="min-w-0 flex-1 text-xs font-semibold leading-5">{copy.guidedFiling}</span>
+              <span aria-hidden="true" className="material-symbols-outlined shrink-0 text-base">arrow_forward</span>
             </Link>
           </div>
 
