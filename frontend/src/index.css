@@ -371,6 +371,34 @@
   }
 }
 
+@keyframes service-update-message-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .service-update-message-marquee {
+    animation: service-update-message-marquee 28s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-update-message-marquee {
+    display: block;
+    width: auto;
+    white-space: normal;
+  }
+
+  .service-update-message-marquee > span[aria-hidden="true"] {
+    display: none;
+  }
+}
+
 @media print {
   body * {
     visibility: hidden !important;

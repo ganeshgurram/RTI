@@ -11,8 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { FirstVisitGuide } from "@/components/FirstVisitGuide"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/auth/AuthContext"
+import { usePortalLanguage } from "@/i18n"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
 const actionCards = [
@@ -24,6 +26,34 @@ const actionCards = [
 
 const flowchartWidth = 1120
 const flowchartHeight = 970
+
+function ServiceUpdateNotice() {
+  const { language } = usePortalLanguage()
+  const notice = language === "hi"
+    ? {
+        label: "सेवा अपडेट",
+        message: "आरटीआई ऑनलाइन एक इंटरैक्टिव प्रोटोटाइप है। केवल नमूना जानकारी का उपयोग करें — अनुरोध, भुगतान और सूचनाओं की यात्राएँ सिमुलेट की गई हैं।",
+      }
+    : {
+        label: "Service update",
+        message: "RTI Online is an interactive prototype. Use sample information only — request, payment, and notification journeys are simulated.",
+      }
+
+  return (
+    <aside aria-label={notice.label} className="bg-primary text-on-primary">
+      <div className="mx-auto grid w-full max-w-container-max grid-cols-[minmax(0,1fr)] gap-y-1 px-margin-mobile py-2 text-sm leading-5 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:items-center sm:gap-x-3 md:px-margin-desktop">
+        <span className="inline-flex items-center gap-1.5 font-semibold text-on-primary"><MaterialIcon className="text-base">campaign</MaterialIcon>{notice.label}</span>
+        <span aria-hidden="true" className="hidden h-4 border-l border-on-primary/30 sm:inline" />
+        <div className="min-w-0 overflow-hidden text-on-primary/85">
+          <p className="service-update-message-marquee flex w-max whitespace-nowrap">
+            <span className="pr-12">{notice.message}</span>
+            <span aria-hidden="true" className="pr-12">{notice.message}</span>
+          </p>
+        </div>
+      </div>
+    </aside>
+  )
+}
 
 const steps = [
   ["person", "home.lifecycle.steps.citizenTitle", "home.lifecycle.steps.citizenDescription", "border-primary bg-primary-fixed/20 text-primary group-hover:bg-primary group-hover:text-on-primary"],
@@ -312,9 +342,10 @@ export function HomePage() {
 
   return (
     <>
-        <section className="relative -mt-25 overflow-hidden bg-primary-container pb-24 pt-41 text-on-primary md:pb-32 md:pt-49">
+        <section className="relative -mt-25 overflow-hidden bg-primary-container pb-24 pt-25 text-on-primary md:pb-32">
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(var(--primary-foreground)_1px,transparent_1px)] [background-size:24px_24px]" />
-          <div className="relative z-10 mx-auto flex max-w-container-max flex-col items-center px-margin-mobile text-center md:px-margin-desktop">
+          <ServiceUpdateNotice />
+          <div className="relative z-10 mx-auto flex max-w-container-max flex-col items-center px-margin-mobile pt-10 text-center md:px-margin-desktop md:pt-12">
             <h1 className="mb-4 max-w-4xl font-display-lg text-headline-lg-mobile font-bold tracking-tight md:text-display-lg">{t("home.title")}</h1>
             <p className="mx-auto mb-10 max-w-2xl font-body-lg text-body-lg opacity-90 md:text-xl">
               {t("home.subtitle")}
@@ -357,6 +388,7 @@ export function HomePage() {
             })}
           </div>
         </section>
+        <FirstVisitGuide />
         <section className="border-t border-surface-variant bg-surface py-20">
           <div className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
             <div className="mb-16 text-center">

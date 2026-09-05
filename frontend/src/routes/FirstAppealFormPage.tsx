@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { indianStates, indianUnionTerritories } from "@/data/indian-states"
 import { useFormDraft } from "@/hooks/useFormDraft"
+import { usePortalLanguage } from "@/i18n"
 import { useRequests } from "@/requests/RequestContext"
 import { MaterialIcon } from "@/routes/stitch-shell"
 
@@ -18,6 +19,41 @@ const labelClassName = "block text-label-lg font-semibold text-on-surface"
 // the refresh as an outline icon button on the right.
 const captchaCodeClassName = "flex h-10 min-w-24 shrink-0 items-center justify-center rounded-lg border border-input bg-muted px-3 font-mono text-sm font-bold tracking-[0.2em] text-primary"
 const captchaRefreshClassName = "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-on-surface outline-none transition-all hover:bg-muted focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15 active:translate-y-px"
+
+const appealPreparationCopy = {
+  en: {
+    title: "Prepare your First Appeal",
+    description: "Review the original request and keep the relevant documents ready before completing the form.",
+    originalRequest: "Original RTI request",
+    authority: "Public Authority",
+    submitted: "Filed on",
+    informationRequested: "Information requested",
+    suggestedGround: "Suggested ground",
+    noResponseGround: "No response within the time limit",
+    noResponseAdvice: "No reply is recorded for this request, so this ground is selected. You can change it below.",
+    responseAdvice: "A response is recorded for this request. Review it and choose the ground that best fits below.",
+    documentsTitle: "Keep these ready",
+    documentRegistration: "The original RTI registration number; it is already filled in below.",
+    documentResponse: "The CPIO reply, fee notice, or other response you want to challenge, if one was received.",
+    documentSupporting: "A relevant supporting PDF, if you rely on one. Do not include identity, banking, or OTP details.",
+  },
+  hi: {
+    title: "अपनी प्रथम अपील तैयार करें",
+    description: "फॉर्म भरने से पहले मूल अनुरोध की समीक्षा करें और प्रासंगिक दस्तावेज़ तैयार रखें।",
+    originalRequest: "मूल आरटीआई अनुरोध",
+    authority: "लोक प्राधिकरण",
+    submitted: "दाखिल करने की तिथि",
+    informationRequested: "मांगी गई जानकारी",
+    suggestedGround: "सुझाया गया आधार",
+    noResponseGround: "समय-सीमा के भीतर कोई उत्तर नहीं मिला",
+    noResponseAdvice: "इस अनुरोध के लिए कोई उत्तर दर्ज नहीं है, इसलिए यह आधार चुना गया है। आप इसे नीचे बदल सकते हैं।",
+    responseAdvice: "इस अनुरोध के लिए एक उत्तर दर्ज है। उसकी समीक्षा करें और नीचे सबसे उपयुक्त आधार चुनें।",
+    documentsTitle: "ये दस्तावेज़ तैयार रखें",
+    documentRegistration: "मूल आरटीआई पंजीकरण संख्या; यह नीचे पहले से भरी हुई है।",
+    documentResponse: "सीपीआईओ का उत्तर, शुल्क सूचना या वह अन्य उत्तर जिसे आप चुनौती देना चाहते हैं, यदि प्राप्त हुआ हो।",
+    documentSupporting: "यदि आप किसी पर भरोसा करते हैं तो एक प्रासंगिक सहायक PDF। पहचान, बैंकिंग या OTP विवरण शामिल न करें।",
+  },
+} as const
 
 function AppealRow({ children, className = "", label, hint, required = false }: { children: ReactNode; className?: string; label: string; hint?: string; required?: boolean }) {
   return (
@@ -63,6 +99,7 @@ export function FirstAppealFormPage() {
   const { user } = useAuth()
   const { createFirstAppeal, requests } = useRequests()
   const { t } = useTranslation()
+  const { language } = usePortalLanguage()
   const appealDraft = useFormDraft(`rti-demo-first-appeal-form-v1:${(location.state as { requestId?: string } | null)?.requestId ?? "unknown"}`, { exclude: ["appealCaptcha", "appealSupportingDocument"] })
   const [captchaIndex, setCaptchaIndex] = useState(0)
   const [appealText, setAppealText] = useState(appealDraft.value("appealText", ""))
@@ -77,6 +114,10 @@ export function FirstAppealFormPage() {
   if (!request) {
     return <Navigate replace to="/submit-first-appeal" />
   }
+
+  const preparation = appealPreparationCopy[language]
+  const hasRecordedResponse = request.status === "Reply received"
+  const suggestedGround = hasRecordedResponse ? "" : t("firstAppeal.noResponse")
 
   // Name, email and phone come from the request being appealed rather than from the session:
   // the appellant is whoever filed it, which is also the only answer that works signed out.
@@ -136,6 +177,51 @@ export function FirstAppealFormPage() {
         </div>
       </header>
 
+      <section className="mb-5 rounded-xl border border-primary/20 bg-primary/5 p-5 shadow-sm sm:p-6">
+        <div className="flex items-start gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"><MaterialIcon className="text-[20px]">fact_check</MaterialIcon></span>
+          <div>
+            <h2 className="font-headline-md text-lg text-primary">{preparation.title}</h2>
+            <p className="mt-1 text-sm leading-5 text-on-surface-variant">{preparation.description}</p>
+          </div>
+        </div>
+
+        <dl className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">{preparation.originalRequest}</dt>
+            <dd className="mt-1 text-sm font-semibold text-on-surface">{request.id}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">{preparation.authority}</dt>
+            <dd className="mt-1 text-sm font-medium text-on-surface">{request.authority}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">{preparation.submitted}</dt>
+            <dd className="mt-1 text-sm text-on-surface">{request.submittedOn}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-on-surface-variant">{preparation.informationRequested}</dt>
+            <dd className="mt-1 text-sm text-on-surface">{request.subject}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-5 grid gap-4 border-t border-primary/15 pt-5 md:grid-cols-2">
+          <div className="rounded-lg border border-border bg-background/70 p-4">
+            <p className="flex items-center gap-2 text-sm font-semibold text-on-surface"><MaterialIcon className="text-base text-primary">inventory_2</MaterialIcon>{preparation.documentsTitle}</p>
+            <ul className="mt-3 space-y-2 text-sm leading-5 text-on-surface-variant">
+              {[preparation.documentRegistration, preparation.documentResponse, preparation.documentSupporting].map((item) => (
+                <li className="flex gap-2" key={item}><MaterialIcon className="mt-0.5 shrink-0 text-base text-primary">check_circle</MaterialIcon><span>{item}</span></li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-lg border border-border bg-background/70 p-4">
+            <p className="flex items-center gap-2 text-sm font-semibold text-on-surface"><MaterialIcon className="text-base text-primary">gavel</MaterialIcon>{preparation.suggestedGround}</p>
+            {!hasRecordedResponse ? <p className="mt-3 text-sm font-medium leading-5 text-on-surface">{preparation.noResponseGround}</p> : null}
+            <p className="mt-2 text-sm leading-5 text-on-surface-variant">{hasRecordedResponse ? preparation.responseAdvice : preparation.noResponseAdvice}</p>
+          </div>
+        </div>
+      </section>
+
       <form className="space-y-5" key={formResetKey} onChange={saveDraft} onReset={resetAppeal} onSubmit={submitAppeal} ref={formRef}>
         <AppealSection icon="account_balance" title={t("firstAppeal.publicAuthorityDetails")}>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -166,7 +252,7 @@ export function FirstAppealFormPage() {
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <AppealRow label={t("requestForm.citizenship")}><Select defaultValue="Indian" disabled><SelectTrigger className="!w-full !h-10 text-body-md text-on-surface"><SelectValue /></SelectTrigger><SelectContent align="start" alignItemWithTrigger={false}><SelectItem value="Indian">{t("requestForm.indian")}</SelectItem></SelectContent></Select></AppealRow>
             <AppealRow label={t("requestForm.bplQuestion")} required><Select defaultValue={appealDraft.value("appealBpl", "No")} name="appealBpl" onValueChange={saveDraft}><SelectTrigger className="!w-full !h-10 text-body-md text-on-surface"><SelectValue /></SelectTrigger><SelectContent align="start" alignItemWithTrigger={false}><SelectItem value="Yes">{t("requestForm.yes")}</SelectItem><SelectItem value="No">{t("requestForm.no")}</SelectItem></SelectContent></Select></AppealRow>
-            <AppealRow className="md:col-span-2" label={t("firstAppeal.ground")} required><Select defaultValue={appealDraft.value("appealGround", "")} name="appealGround" onValueChange={saveDraft} required><SelectTrigger className="!w-full !h-10 text-body-md text-on-surface"><SelectValue placeholder={t("firstAppeal.select")} /></SelectTrigger><SelectContent align="start" alignItemWithTrigger={false}><SelectItem value={t("firstAppeal.refused")}>{t("firstAppeal.refused")}</SelectItem><SelectItem value={t("firstAppeal.noResponse")}>{t("firstAppeal.noResponse")}</SelectItem><SelectItem value={t("firstAppeal.unreasonableFee")}>{t("firstAppeal.unreasonableFee")}</SelectItem><SelectItem value={t("firstAppeal.incompleteInfo")}>{t("firstAppeal.incompleteInfo")}</SelectItem><SelectItem value={t("firstAppeal.otherGround")}>{t("firstAppeal.otherGround")}</SelectItem></SelectContent></Select><AppealGuidance>{t("formGuidance.appealGround")}</AppealGuidance></AppealRow>
+            <AppealRow className="md:col-span-2" label={t("firstAppeal.ground")} required><Select defaultValue={appealDraft.value("appealGround", suggestedGround)} name="appealGround" onValueChange={saveDraft} required><SelectTrigger className="!w-full !h-10 text-body-md text-on-surface"><SelectValue placeholder={t("firstAppeal.select")} /></SelectTrigger><SelectContent align="start" alignItemWithTrigger={false}><SelectItem value={t("firstAppeal.refused")}>{t("firstAppeal.refused")}</SelectItem><SelectItem value={t("firstAppeal.noResponse")}>{t("firstAppeal.noResponse")}</SelectItem><SelectItem value={t("firstAppeal.unreasonableFee")}>{t("firstAppeal.unreasonableFee")}</SelectItem><SelectItem value={t("firstAppeal.incompleteInfo")}>{t("firstAppeal.incompleteInfo")}</SelectItem><SelectItem value={t("firstAppeal.otherGround")}>{t("firstAppeal.otherGround")}</SelectItem></SelectContent></Select><AppealGuidance>{t("formGuidance.appealGround")}</AppealGuidance></AppealRow>
             <div className="space-y-4 rounded-xl border border-border bg-muted/40 p-4 md:col-span-2">
               <p className="text-label-sm text-on-surface-variant">{t("firstAppeal.appealTextHint")}</p>
               <p className="flex items-center gap-1 text-label-sm font-medium italic text-surface-tint">{t("firstAppeal.appealTextNote")}</p>
