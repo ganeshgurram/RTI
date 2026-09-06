@@ -123,7 +123,9 @@ const flowEdges: { d: string; routes: RouteId[] }[] = [
   { d: "M 695 115 H 805 V 155", routes: ["transferred"] },
   { d: "M 805 195 V 215", routes: ["transferred"] },
   { d: "M 560 135 V 260", routes: directRoutes },
-  { d: "M 805 255 H 560 V 260", routes: ["transferred"] },
+  // The transferred branch returns beneath the response clock, leaving its top entry for the
+  // standard filing route. This keeps both arrowheads distinct at every display scale.
+  { d: "M 805 255 V 310 H 560 V 300", routes: ["transferred"] },
   { d: "M 560 300 V 320", routes: routeOrder },
   { d: "M 560 360 V 372 H 300 V 385", routes: replyRoutes },
   { d: "M 560 360 V 372 H 820 V 385", routes: ["noReply"] },
