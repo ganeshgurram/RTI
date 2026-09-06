@@ -77,12 +77,12 @@ type JourneyGuideId = RouteId
 
 const journeyGuideOrder: JourneyGuideId[] = routeOrder
 
-const journeyGuides: Record<JourneyGuideId, { icon: string; route: RouteId }> = {
-  newRequest: { icon: "description", route: "newRequest" },
-  replyIssue: { icon: "reply", route: "replyIssue" },
-  noReply: { icon: "schedule", route: "noReply" },
-  transferred: { icon: "swap_horiz", route: "transferred" },
-  appealIssue: { icon: "gavel", route: "appealIssue" },
+const journeyGuides: Record<JourneyGuideId, { descriptionKey: string; icon: string; route: RouteId; titleKey: string }> = {
+  newRequest: { descriptionKey: "home.lifecycle.guides.newRequest.description", icon: "description", route: "newRequest", titleKey: "home.lifecycle.guides.newRequest.title" },
+  replyIssue: { descriptionKey: "home.lifecycle.guides.replyIssue.description", icon: "reply", route: "replyIssue", titleKey: "home.lifecycle.guides.replyIssue.title" },
+  noReply: { descriptionKey: "home.lifecycle.guides.noReply.description", icon: "schedule", route: "noReply", titleKey: "home.lifecycle.guides.noReply.title" },
+  transferred: { descriptionKey: "home.lifecycle.guides.transferred.description", icon: "swap_horiz", route: "transferred", titleKey: "home.lifecycle.guides.transferred.title" },
+  appealIssue: { descriptionKey: "home.lifecycle.guides.appealIssue.description", icon: "gavel", route: "appealIssue", titleKey: "home.lifecycle.guides.appealIssue.title" },
 }
 
 const directRoutes: RouteId[] = ["newRequest", "replyIssue", "noReply", "appealIssue"]
@@ -455,7 +455,7 @@ export function HomePage() {
                           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-on-surface-variant">{t("home.lifecycle.guideDescription")}</p>
                         </div>
                         <span className="shrink-0 rounded-full bg-primary-fixed px-3 py-1 text-xs font-medium text-primary">
-                          {t("home.lifecycle.guideCurrent")}: {t("home.lifecycle.guides." + activeGuide + ".title")}
+                          {t("home.lifecycle.guideCurrent")}: {t(journeyGuides[activeGuide].titleKey)}
                         </span>
                       </div>
                       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
@@ -486,8 +486,8 @@ export function HomePage() {
                                 <MaterialIcon className="text-base">{guide.icon}</MaterialIcon>
                               </span>
                               <span>
-                                <span className="block text-sm font-semibold leading-tight">{t("home.lifecycle.guides." + guideId + ".title")}</span>
-                                <span className="mt-1 block text-xs leading-relaxed text-on-surface-variant">{t("home.lifecycle.guides." + guideId + ".description")}</span>
+                                <span className="block text-sm font-semibold leading-tight">{t(guide.titleKey)}</span>
+                                <span className="mt-1 block text-xs leading-relaxed text-on-surface-variant">{t(guide.descriptionKey)}</span>
                               </span>
                             </button>
                           )
