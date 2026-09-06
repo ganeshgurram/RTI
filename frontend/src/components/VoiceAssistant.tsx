@@ -1,11 +1,14 @@
-import { GoogleGenAI, Modality, Type, type FunctionCall, type LiveServerMessage, type Session } from "@google/genai"
+import { EndSensitivity, GoogleGenAI, Modality, StartSensitivity, Type, type FunctionCall, type LiveServerMessage, type Session } from "@google/genai"
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+import { useAuth } from "@/auth/AuthContext"
 import { Button } from "@/components/ui/button"
+import type { RequestReviewDraft } from "@/data/request-review"
 import { usePortalLanguage, type PortalLanguage } from "@/i18n"
 import { api } from "@/services/api"
 import { findAuthoritySuggestions } from "@/services/authority-recommendations"
+import { prepareAuthorityDraft } from "@/services/rti-sahayak"
 import { recordVoiceTranscript } from "@/services/voice-conversation"
 
 type VoiceStatus = "idle" | "connecting" | "listening" | "answering" | "permissionRequired" | "unavailable"
@@ -46,6 +49,11 @@ const voiceCopy: Record<PortalLanguage, VoiceCopy> = {
 
 const INPUT_SAMPLE_RATE = 16_000
 const OUTPUT_SAMPLE_RATE = 24_000
+// Gemini still performs server-side VAD. This lightweight browser check only gives it a
+// dependable end-of-turn signal when a continuously open microphone has a noisy floor.
+const SPEECH_LEVEL_THRESHOLD = 0.012
+const END_OF_SPEECH_SILENCE_MS = 800
+const AUDIO_PRE_ROLL_CHUNKS = 4
 const PAGE_PATHS = {
   submit_request: "/submit-request",
   request_history: "/request-history",
@@ -62,7 +70,16 @@ The user explicitly started this microphone session, but remain quiet until they
 
 Offer general guidance about RTI applications, first appeals, fees, Public Authorities, and request status. When the user asks which Central Public Authority could hold information, use search_public_authorities before answering. Explain that the returned candidates are suggestions from the portal directory, name no more than three, and ask the applicant to confirm the office before filing. Do not claim to be a government officer or give legal advice. Do not ask for or repeat OTPs, passwords, Aadhaar/PAN, payment card data, or documents.
 
+To prepare an RTI request by voice: first call search_public_authorities, explain the best directory candidate, and ask the user to clearly confirm that they want an editable draft for that authority. Only after that confirmation, call prepare_rti_request_draft with the original general issue, the exact authorityId returned by the directory, and the language the user spoke. This opens the normal guideline-gated request form with a draft the user can edit. Never say the request has been submitted.
+
 You cannot submit an RTI, make a payment, edit a profile, or take any irreversible action. If a signed-in user asks about their personal requests, use only the provided functions. Never invent request data. Use page navigation only when the user clearly asks to open that page.`
+
+function getVoiceSystemInstruction(portalLanguage: PortalLanguage) {
+  const greetingLanguage = portalLanguage === "hi" ? "Hindi written in Devanagari" : "English"
+  return `${VOICE_SYSTEM_INSTRUCTION}
+
+For the initial greeting only, use ${greetingLanguage} to match the portal language the applicant selected. Treat the wake phrase as language-neutral; it must not change the greeting language. After the greeting, continue to use the user's complete spoken request to determine the reply language.`
+}
 
 function audioToBase64(samples: Float32Array, sampleRate: number) {
   const ratio = sampleRate / INPUT_SAMPLE_RATE
@@ -84,6 +101,16 @@ function audioToBase64(samples: Float32Array, sampleRate: number) {
   return btoa(binary)
 }
 
+function getAudioLevel(samples: Float32Array) {
+  let sumOfSquares = 0
+  for (let index = 0; index < samples.length; index += 1) {
+    const sample = samples[index] ?? 0
+    sumOfSquares += sample * sample
+  }
+
+  return Math.sqrt(sumOfSquares / Math.max(samples.length, 1))
+}
+
 function base64ToBytes(value: string) {
   const binary = atob(value)
   const bytes = new Uint8Array(binary.length)
@@ -91,8 +118,15 @@ function base64ToBytes(value: string) {
   return bytes
 }
 
+function cleanVoiceTranscript(value: string) {
+  return value
+    .replace(/<\s*(?:noise|silence|inaudible|unknown|unintelligible)\s*>/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
 function appendTranscript(current: string, incoming: string) {
-  const next = incoming.trim()
+  const next = cleanVoiceTranscript(incoming)
   if (!next) return current
   if (!current || next.startsWith(current)) return next
   if (current.endsWith(next)) return current
@@ -109,6 +143,7 @@ function isPortalPage(value: unknown): value is PortalPage {
  */
 export function VoiceAssistant() {
   const { language } = usePortalLanguage()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const copy = voiceCopy[language]
   const [isEnabled, setIsEnabled] = useState(false)
@@ -123,6 +158,10 @@ export function VoiceAssistant() {
   const outputSourcesRef = useRef(new Set<AudioBufferSourceNode>())
   const outputEndTimeRef = useRef(0)
   const isEnabledRef = useRef(false)
+  const isStartingRef = useRef(false)
+  const audioStreamOpenRef = useRef(false)
+  const lastDetectedSpeechAtRef = useRef(0)
+  const preRollAudioRef = useRef<string[]>([])
   const languageRef = useRef(language)
   const assistantTranscriptRef = useRef("")
   const pendingInputTranscriptRef = useRef("")
@@ -160,7 +199,11 @@ export function VoiceAssistant() {
   }
 
   const stopVoiceAssistant = () => {
+    isStartingRef.current = false
     isEnabledRef.current = false
+    audioStreamOpenRef.current = false
+    lastDetectedSpeechAtRef.current = 0
+    preRollAudioRef.current = []
     setIsEnabled(false)
     setStatus("idle")
     assistantTranscriptRef.current = ""
@@ -216,13 +259,68 @@ export function VoiceAssistant() {
   }
 
   const completeAssistantTranscript = () => {
-    const text = assistantTranscriptRef.current.trim()
+    const text = cleanVoiceTranscript(assistantTranscriptRef.current)
     assistantTranscriptRef.current = ""
     if (text) recordVoiceTranscript({ role: "assistant", text, language: languageRef.current })
   }
 
+  const openDraftedRequestForm = async (args: Record<string, unknown>) => {
+    const description = String(args.description ?? "").trim().slice(0, 1400)
+    const authorityId = String(args.authorityId ?? "").trim()
+    const draftLanguage: PortalLanguage = args.language === "hi" ? "hi" : "en"
+    if (!description || !authorityId) {
+      return { error: "A general issue and a directory authority ID are required before drafting." }
+    }
+
+    const suggestions = await findAuthoritySuggestions(description)
+    const authority = suggestions.find((candidate) => candidate.authorityId === authorityId)
+    if (!authority) {
+      return { error: "That authority was not returned by the directory for this issue. Search again and ask the user to choose a listed authority." }
+    }
+
+    const generated = await prepareAuthorityDraft({
+      authority,
+      description,
+      language: draftLanguage,
+      safetyIdentifier: `gemini-live-${crypto.randomUUID()}`,
+    })
+    const profile = user?.profile
+    const reviewDraft: RequestReviewDraft = {
+      applicantEmail: profile?.email ?? "",
+      applicantName: profile?.fullName ?? "",
+      applicantPhone: profile?.mobile ?? "",
+      authority: authority.authorityName,
+      ministry: authority.ministryName ?? authority.authorityName,
+      subject: generated.subject,
+      requestText: generated.requestText,
+      isBplApplicant: false,
+      citizenship: profile?.citizenship ?? "Indian",
+      applicant: {
+        gender: profile?.gender ?? "",
+        addressLine1: profile?.address.line1 ?? "",
+        addressLine2: profile?.address.line2 ?? "",
+        addressLine3: profile?.address.city ?? "",
+        pincode: profile?.address.pincode ?? "",
+        country: profile?.country ?? "India",
+        state: profile?.address.state ?? "",
+        areaType: profile?.areaType ?? "",
+        educationalStatus: profile?.educationalStatus ?? "",
+      },
+    }
+
+    navigate("/submit-request", {
+      state: {
+        authority: { name: authority.authorityName, ministryName: authority.ministryName ?? authority.authorityName },
+        reviewDraft,
+      },
+    })
+    return {
+      result: "An editable RTI draft has been placed in the request form. The applicant must read the guidelines and review the form before submitting.",
+    }
+  }
+
   const completeInputTranscript = () => {
-    const text = pendingInputTranscriptRef.current.trim()
+    const text = cleanVoiceTranscript(pendingInputTranscriptRef.current)
     pendingInputTranscriptRef.current = ""
     if (text) recordVoiceTranscript({ role: "user", text, language: languageRef.current })
   }
@@ -237,6 +335,7 @@ export function VoiceAssistant() {
         response = suggestions.length
           ? {
               candidates: suggestions.map((suggestion) => ({
+                authorityId: suggestion.authorityId,
                 authority: suggestion.authorityName,
                 ministry: suggestion.ministryName ?? null,
                 relatedOffices: suggestion.relatedOffices,
@@ -245,6 +344,8 @@ export function VoiceAssistant() {
               note: "These are directory suggestions only. The applicant must confirm which authority holds the records before filing.",
             }
           : { candidates: [], note: "No relevant directory candidate was found. Ask the applicant to try the Public Authorities Directory." }
+      } else if (call.name === "prepare_rti_request_draft") {
+        response = await openDraftedRequestForm(call.args ?? {})
       } else if (call.name === "get_my_request_summary") {
         response = await api.runVoiceAction<Record<string, unknown>>("get_my_request_summary")
       } else if (call.name === "get_my_request_status") {
@@ -312,27 +413,30 @@ export function VoiceAssistant() {
   }
 
   const startVoiceAssistant = async () => {
-    if (isEnabledRef.current || !navigator.mediaDevices?.getUserMedia) {
+    if (isEnabledRef.current || isStartingRef.current || !navigator.mediaDevices?.getUserMedia) {
       if (!navigator.mediaDevices?.getUserMedia) setStatus("unavailable")
       return
     }
 
-    isEnabledRef.current = true
-    setIsEnabled(true)
+    isStartingRef.current = true
     setStatus("connecting")
-    const context = new AudioContext()
-    audioContextRef.current = context
-    void context.resume()
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       })
-      if (!isEnabledRef.current) {
+      if (!isStartingRef.current) {
         for (const track of stream.getTracks()) track.stop()
         return
       }
       streamRef.current = stream
+
+      // The voice assistant itself begins only after the user has explicitly granted access.
+      const context = new AudioContext()
+      audioContextRef.current = context
+      void context.resume()
+      isEnabledRef.current = true
+      setIsEnabled(true)
 
       const token = await api.createVoiceSessionToken()
       if (!isEnabledRef.current) return
@@ -344,13 +448,35 @@ export function VoiceAssistant() {
           responseModalities: [Modality.AUDIO],
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          systemInstruction: VOICE_SYSTEM_INSTRUCTION,
+          realtimeInputConfig: {
+            automaticActivityDetection: {
+              disabled: false,
+              startOfSpeechSensitivity: StartSensitivity.START_SENSITIVITY_HIGH,
+              endOfSpeechSensitivity: EndSensitivity.END_SENSITIVITY_HIGH,
+              prefixPaddingMs: 120,
+              silenceDurationMs: END_OF_SPEECH_SILENCE_MS,
+            },
+          },
+          systemInstruction: getVoiceSystemInstruction(language),
           tools: [{
             functionDeclarations: [
               {
                 name: "search_public_authorities",
                 description: "Search the official in-app directory of Central Public Authorities for the office likely to hold records about the user's general issue. Use this before suggesting an authority.",
                 parameters: { type: Type.OBJECT, properties: { query: { type: Type.STRING, description: "The user's general issue or subject to search for." } }, required: ["query"] },
+              },
+              {
+                name: "prepare_rti_request_draft",
+                description: "Create an editable RTI draft and open the guideline-gated request form. Call only after search_public_authorities returned this exact authorityId and the user clearly confirmed they want a draft for it. This never submits an RTI.",
+                parameters: {
+                  type: Type.OBJECT,
+                  properties: {
+                    description: { type: Type.STRING, description: "The user's general, non-sensitive information request." },
+                    authorityId: { type: Type.STRING, description: "The exact authorityId returned by search_public_authorities." },
+                    language: { type: Type.STRING, enum: ["en", "hi"], description: "The language used in the user's request." },
+                  },
+                  required: ["description", "authorityId"],
+                },
               },
               {
                 name: "get_my_request_summary",
@@ -394,22 +520,56 @@ export function VoiceAssistant() {
       processorRef.current = processor
       mutedGainRef.current = mutedGain
       processor.onaudioprocess = (event) => {
-        if (!isEnabledRef.current || !sessionRef.current) return
-        const audio = audioToBase64(event.inputBuffer.getChannelData(0), context.sampleRate)
-        sessionRef.current.sendRealtimeInput({ audio: { data: audio, mimeType: "audio/pcm;rate=16000" } })
+        const activeSession = sessionRef.current
+        if (!isEnabledRef.current || !activeSession) return
+
+        const samples = event.inputBuffer.getChannelData(0)
+        const audio = audioToBase64(samples, context.sampleRate)
+        const isSpeech = getAudioLevel(samples) >= SPEECH_LEVEL_THRESHOLD
+        const now = performance.now()
+
+        if (!audioStreamOpenRef.current) {
+          const preRoll = preRollAudioRef.current
+          preRoll.push(audio)
+          if (preRoll.length > AUDIO_PRE_ROLL_CHUNKS) preRoll.shift()
+          if (!isSpeech) return
+
+          audioStreamOpenRef.current = true
+          lastDetectedSpeechAtRef.current = now
+          for (const chunk of preRoll) {
+            activeSession.sendRealtimeInput({ audio: { data: chunk, mimeType: "audio/pcm;rate=16000" } })
+          }
+          preRollAudioRef.current = []
+          return
+        }
+
+        activeSession.sendRealtimeInput({ audio: { data: audio, mimeType: "audio/pcm;rate=16000" } })
+        if (isSpeech) {
+          lastDetectedSpeechAtRef.current = now
+          return
+        }
+
+        if (now - lastDetectedSpeechAtRef.current >= END_OF_SPEECH_SILENCE_MS) {
+          activeSession.sendRealtimeInput({ audioStreamEnd: true })
+          audioStreamOpenRef.current = false
+          lastDetectedSpeechAtRef.current = 0
+          setStatus("answering")
+        }
       }
       setStatus("listening")
     } catch (error) {
       const name = typeof error === "object" && error && "name" in error ? String(error.name) : ""
       stopVoiceAssistant()
       setStatus(name === "NotAllowedError" ? "permissionRequired" : "unavailable")
+    } finally {
+      isStartingRef.current = false
     }
   }
 
   useEffect(() => () => stopVoiceAssistant(), [])
 
   const toggleVoiceAssistant = () => {
-    if (isEnabledRef.current) stopVoiceAssistant()
+    if (isEnabledRef.current || isStartingRef.current) stopVoiceAssistant()
     else void startVoiceAssistant()
   }
 
