@@ -1,15 +1,14 @@
 import { EndSensitivity, GoogleGenAI, Modality, StartSensitivity, Type, type FunctionCall, type LiveServerMessage, type Session } from "@google/genai"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useEffectEvent, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { useAuth } from "@/auth/AuthContext"
-import { Button } from "@/components/ui/button"
 import type { RequestReviewDraft } from "@/data/request-review"
 import { usePortalLanguage, type PortalLanguage } from "@/i18n"
 import { api } from "@/services/api"
-import { findAuthoritySuggestions } from "@/services/authority-recommendations"
+import { findAuthoritySuggestions, type AuthoritySuggestion } from "@/services/authority-recommendations"
 import { prepareAuthorityDraft } from "@/services/rti-sahayak"
-import { recordVoiceTranscript } from "@/services/voice-conversation"
+import { publishVoiceStatus, recordVoiceTranscript, VOICE_TOGGLE_EVENT } from "@/services/voice-conversation"
 
 type VoiceStatus = "idle" | "connecting" | "listening" | "answering" | "permissionRequired" | "unavailable"
 
@@ -45,6 +44,26 @@ const voiceCopy: Record<PortalLanguage, VoiceCopy> = {
     permissionRequired: "वॉइस सहायक इस्तेमाल करने के लिए माइक्रोफ़ोन की अनुमति दें।",
     unavailable: "वॉइस सहायक अभी उपलब्ध नहीं है। कृपया फिर कोशिश करें।",
   },
+  te: {
+    name: "వాయిస్ సహాయకుడు",
+    activate: "వాయిస్ సహాయకుడిని ప్రారంభించండి",
+    deactivate: "వాయిస్ సహాయకుడిని ఆపండి",
+    connecting: "సురక్షిత వాయిస్ సెషన్ ప్రారంభమవుతోంది...",
+    listening: "ప్రారంభించడానికి “హే RTI” అని చెప్పండి",
+    answering: "RTI సహాయక్ సమాధానం ఇస్తోంది...",
+    permissionRequired: "వాయిస్ సహాయాన్ని ఉపయోగించడానికి మైక్రోఫోన్ అనుమతిని ఇవ్వండి.",
+    unavailable: "వాయిస్ సహాయం ప్రస్తుతం అందుబాటులో లేదు. దయచేసి మళ్లీ ప్రయత్నించండి.",
+  },
+  kn: {
+    name: "ಧ್ವನಿ ಸಹಾಯಕ",
+    activate: "ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
+    deactivate: "ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ನಿಲ್ಲಿಸಿ",
+    connecting: "ಸುರಕ್ಷಿತ ಧ್ವನಿ ಅವಧಿಯನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ...",
+    listening: "ಪ್ರಾರಂಭಿಸಲು “ಹೇ RTI” ಎಂದು ಹೇಳಿ",
+    answering: "RTI ಸಹಾಯಕ ಉತ್ತರಿಸುತ್ತಿದೆ...",
+    permissionRequired: "ಧ್ವನಿ ಸಹಾಯವನ್ನು ಬಳಸಲು ಮೈಕ್ರೊಫೋನ್ ಅನುಮತಿ ನೀಡಿ.",
+    unavailable: "ಧ್ವನಿ ಸಹಾಯವು ಇದೀಗ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  },
 }
 
 const INPUT_SAMPLE_RATE = 16_000
@@ -64,21 +83,32 @@ const PAGE_PATHS = {
 
 type PortalPage = keyof typeof PAGE_PATHS
 
+type VoiceAuthoritySearch = {
+  description: string
+  suggestions: AuthoritySuggestion[]
+}
+
 const VOICE_SYSTEM_INSTRUCTION = `You are RTI Sahayak, the concise, respectful voice guide for India's RTI Online portal.
 
-The user explicitly started this microphone session, but remain quiet until they first address you with “Hey RTI”, “Hi RTI”, “Hello RTI”, or the Hindi equivalent “हे आरटीआई”. Once activated, have a natural ongoing conversation until the session ends. Reply in the language used in the user's most recent spoken turn—English, Hindi, or a natural mix. Do not use the portal's selected display language to decide this. If the spoken language is unclear, reply in English. Keep answers short enough for voice.
+The user explicitly started this microphone session, but remain quiet until they first address you with “Hey RTI”, “Hi RTI”, “Hello RTI”, or the Hindi equivalent “हे आरटीआई”. Once activated, have a natural ongoing conversation until the session ends. After the initial greeting, determine the reply language only from the applicant's current complete spoken request—not from the website language, a previous reply, or the wake phrase. If the applicant speaks English, reply entirely in English. Do not translate English speech into Hindi, Telugu, or Kannada. If the spoken language is unclear, reply in English. Keep answers short enough for voice.
 
 Offer general guidance about RTI applications, first appeals, fees, Public Authorities, and request status. When the user asks which Central Public Authority could hold information, use search_public_authorities before answering. Explain that the returned candidates are suggestions from the portal directory, name no more than three, and ask the applicant to confirm the office before filing. Do not claim to be a government officer or give legal advice. Do not ask for or repeat OTPs, passwords, Aadhaar/PAN, payment card data, or documents.
 
-To prepare an RTI request by voice: first call search_public_authorities, explain the best directory candidate, and ask the user to clearly confirm that they want an editable draft for that authority. Only after that confirmation, call prepare_rti_request_draft with the original general issue, the exact authorityId returned by the directory, and the language the user spoke. This opens the normal guideline-gated request form with a draft the user can edit. Never say the request has been submitted.
+To prepare an RTI request by voice: first call search_public_authorities, explain the best directory candidate, and ask the user to clearly confirm that they want an editable draft for that authority. A response such as “yes”, “go ahead”, “proceed”, or “create the draft” after you named an authority is clear confirmation. Immediately call prepare_rti_request_draft with the original general issue, the exact authorityId returned by the directory, and the language the user spoke. Do not merely describe the next step or ask them to use another form. This opens the normal guideline-gated request form with a draft the user can edit. Never say the request has been submitted.
 
 You cannot submit an RTI, make a payment, edit a profile, or take any irreversible action. If a signed-in user asks about their personal requests, use only the provided functions. Never invent request data. Use page navigation only when the user clearly asks to open that page.`
 
 function getVoiceSystemInstruction(portalLanguage: PortalLanguage) {
-  const greetingLanguage = portalLanguage === "hi" ? "Hindi written in Devanagari" : "English"
+  const greetingLanguage = portalLanguage === "hi"
+    ? "Hindi written in Devanagari"
+    : portalLanguage === "te"
+      ? "Telugu written in Telugu script"
+      : portalLanguage === "kn"
+        ? "Kannada written in Kannada script"
+      : "English"
   return `${VOICE_SYSTEM_INSTRUCTION}
 
-For the initial greeting only, use ${greetingLanguage} to match the portal language the applicant selected. Treat the wake phrase as language-neutral; it must not change the greeting language. After the greeting, continue to use the user's complete spoken request to determine the reply language.`
+For the initial greeting only, use ${greetingLanguage} to match the portal language the applicant selected. Treat the wake phrase as language-neutral; it must not change the greeting language. After that one greeting, do not let the portal language influence the conversation: use the language in the applicant's latest complete spoken request.`
 }
 
 function audioToBase64(samples: Float32Array, sampleRate: number) {
@@ -120,9 +150,44 @@ function base64ToBytes(value: string) {
 
 function cleanVoiceTranscript(value: string) {
   return value
-    .replace(/<\s*(?:noise|silence|inaudible|unknown|unintelligible)\s*>/gi, " ")
+    // Gemini 2.5 Live occasionally leaks internal control tokens such as <ctrl46>
+    // into its transcription stream around a function call. They are not speech.
+    .replace(/<\s*(?:ctrl\d+|noise|silence|inaudible|unknown|unintelligible)\s*>/gi, " ")
     .replace(/\s+/g, " ")
     .trim()
+}
+
+/** Keep a transliterated English wake phrase readable in the visible chat. */
+function normalizeWakePhraseTranscript(value: string) {
+  const text = cleanVoiceTranscript(value)
+  const withoutPunctuation = text.replace(/[.!?।]+$/u, "")
+  const compact = withoutPunctuation.replace(/[\s.]/g, "")
+
+  if (/^(?:hey|hi|hello)rti$/i.test(compact)) {
+    return "Hey RTI"
+  }
+
+  // Gemini may render an English “Hey RTI” in Devanagari when it hears an
+  // Indian accent. Those variants are still the English wake phrase, not a
+  // language selection for the conversation.
+  if (/^(?:हे|है|हाय|हेलो|हैलो)आरटी(?:आई|आय)$/u.test(compact)) {
+    return "Hey RTI"
+  }
+
+  return text
+}
+
+/**
+ * Live transcript events do not carry a language field. Keeping the portal's UI
+ * language on those events made an English transcript appear to be Kannada or
+ * Telugu, which could then trigger an unnecessary translation in the chat.
+ */
+function detectTranscriptLanguage(text: string, fallback: PortalLanguage): PortalLanguage {
+  if (/[\u0C80-\u0CFF]/u.test(text)) return "kn"
+  if (/[\u0C00-\u0C7F]/u.test(text)) return "te"
+  if (/[\u0900-\u097F]/u.test(text)) return "hi"
+  if (/[A-Za-z]/.test(text)) return "en"
+  return fallback
 }
 
 function appendTranscript(current: string, incoming: string) {
@@ -131,6 +196,17 @@ function appendTranscript(current: string, incoming: string) {
   if (!current || next.startsWith(current)) return next
   if (current.endsWith(next)) return current
   return `${current} ${next}`.trim()
+}
+
+function getConfirmedAuthority(text: string, suggestions: AuthoritySuggestion[]) {
+  const normalized = text.trim().toLowerCase()
+  const isAffirmative = /^(?:yes|yeah|yep|go ahead|please go ahead|proceed|please proceed|continue|do it|create (?:the )?draft|draft it|haan|han|ha|avunu|haudu)\b/i.test(normalized)
+  if (!isAffirmative) return null
+
+  if (/\b(?:second|2nd)\b/i.test(normalized)) return suggestions[1] ?? null
+  if (/\b(?:third|3rd)\b/i.test(normalized)) return suggestions[2] ?? null
+  // The assistant presents the best directory match first before asking for confirmation.
+  return suggestions[0] ?? null
 }
 
 function isPortalPage(value: unknown): value is PortalPage {
@@ -148,7 +224,6 @@ export function VoiceAssistant() {
   const copy = voiceCopy[language]
   const [isEnabled, setIsEnabled] = useState(false)
   const [status, setStatus] = useState<VoiceStatus>("idle")
-  const launcherRef = useRef<HTMLDivElement>(null)
   const sessionRef = useRef<Session | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
@@ -164,27 +239,30 @@ export function VoiceAssistant() {
   const preRollAudioRef = useRef<string[]>([])
   const languageRef = useRef(language)
   const assistantTranscriptRef = useRef("")
+  const assistantTranscriptIdRef = useRef<string | null>(null)
   const pendingInputTranscriptRef = useRef("")
+  const authoritySearchRef = useRef<VoiceAuthoritySearch | null>(null)
+  const isPreparingDraftRef = useRef(false)
 
   useEffect(() => {
     languageRef.current = language
   }, [language])
 
-  useEffect(() => {
-    const updateLauncherPosition = () => {
-      const footer = document.querySelector<HTMLElement>("[data-site-footer]")
-      const footerOffset = footer ? Math.max(0, Math.round(window.innerHeight - footer.getBoundingClientRect().top)) : 0
-      if (launcherRef.current) launcherRef.current.style.bottom = `calc(1.25rem + ${footerOffset}px)`
+  const discardAssistantTranscript = () => {
+    const id = assistantTranscriptIdRef.current
+    if (id) {
+      recordVoiceTranscript({
+        role: "assistant",
+        text: "",
+        language: languageRef.current,
+        id,
+        isFinal: true,
+        isDiscarded: true,
+      })
     }
-
-    updateLauncherPosition()
-    window.addEventListener("scroll", updateLauncherPosition, { passive: true })
-    window.addEventListener("resize", updateLauncherPosition)
-    return () => {
-      window.removeEventListener("scroll", updateLauncherPosition)
-      window.removeEventListener("resize", updateLauncherPosition)
-    }
-  }, [])
+    assistantTranscriptRef.current = ""
+    assistantTranscriptIdRef.current = null
+  }
 
   const stopOutput = () => {
     for (const source of outputSourcesRef.current) {
@@ -206,8 +284,9 @@ export function VoiceAssistant() {
     preRollAudioRef.current = []
     setIsEnabled(false)
     setStatus("idle")
-    assistantTranscriptRef.current = ""
+    discardAssistantTranscript()
     pendingInputTranscriptRef.current = ""
+    authoritySearchRef.current = null
     stopOutput()
 
     try {
@@ -258,71 +337,123 @@ export function VoiceAssistant() {
     source.start(startsAt)
   }
 
-  const completeAssistantTranscript = () => {
+  const publishAssistantTranscript = (isFinal = false) => {
     const text = cleanVoiceTranscript(assistantTranscriptRef.current)
+    if (!text) return
+
+    const id = assistantTranscriptIdRef.current ?? crypto.randomUUID()
+    assistantTranscriptIdRef.current = id
+    recordVoiceTranscript({
+      role: "assistant",
+      text,
+      language: detectTranscriptLanguage(text, languageRef.current),
+      id,
+      isFinal,
+    })
+  }
+
+  const completeAssistantTranscript = () => {
+    publishAssistantTranscript(true)
     assistantTranscriptRef.current = ""
-    if (text) recordVoiceTranscript({ role: "assistant", text, language: languageRef.current })
+    assistantTranscriptIdRef.current = null
   }
 
   const openDraftedRequestForm = async (args: Record<string, unknown>) => {
-    const description = String(args.description ?? "").trim().slice(0, 1400)
+    if (isPreparingDraftRef.current) {
+      return { result: "The portal is already preparing the editable RTI draft." }
+    }
+
+    const cachedSearch = authoritySearchRef.current
+    const description = String(args.description ?? cachedSearch?.description ?? "").trim().slice(0, 1400)
     const authorityId = String(args.authorityId ?? "").trim()
-    const draftLanguage: PortalLanguage = args.language === "hi" ? "hi" : "en"
+    const draftLanguage: PortalLanguage = args.language === "hi" || args.language === "te" || args.language === "kn" ? args.language : "en"
     if (!description || !authorityId) {
       return { error: "A general issue and a directory authority ID are required before drafting." }
     }
 
-    const suggestions = await findAuthoritySuggestions(description)
-    const authority = suggestions.find((candidate) => candidate.authorityId === authorityId)
+    // Gemini may shorten or paraphrase the previous search query when it calls the next
+    // tool. Reuse the directory candidates it was given instead of searching again and
+    // accidentally losing the confirmed authority.
+    const authorityFromRecentSearch = cachedSearch?.suggestions.find((candidate) => candidate.authorityId === authorityId)
+    const suggestions = authorityFromRecentSearch && cachedSearch
+      ? cachedSearch.suggestions
+      : await findAuthoritySuggestions(description)
+    const authority = authorityFromRecentSearch ?? suggestions.find((candidate) => candidate.authorityId === authorityId)
     if (!authority) {
       return { error: "That authority was not returned by the directory for this issue. Search again and ask the user to choose a listed authority." }
     }
 
-    const generated = await prepareAuthorityDraft({
-      authority,
-      description,
-      language: draftLanguage,
-      safetyIdentifier: `gemini-live-${crypto.randomUUID()}`,
-    })
-    const profile = user?.profile
-    const reviewDraft: RequestReviewDraft = {
-      applicantEmail: profile?.email ?? "",
-      applicantName: profile?.fullName ?? "",
-      applicantPhone: profile?.mobile ?? "",
-      authority: authority.authorityName,
-      ministry: authority.ministryName ?? authority.authorityName,
-      subject: generated.subject,
-      requestText: generated.requestText,
-      isBplApplicant: false,
-      citizenship: profile?.citizenship ?? "Indian",
-      applicant: {
-        gender: profile?.gender ?? "",
-        addressLine1: profile?.address.line1 ?? "",
-        addressLine2: profile?.address.line2 ?? "",
-        addressLine3: profile?.address.city ?? "",
-        pincode: profile?.address.pincode ?? "",
-        country: profile?.country ?? "India",
-        state: profile?.address.state ?? "",
-        areaType: profile?.areaType ?? "",
-        educationalStatus: profile?.educationalStatus ?? "",
-      },
-    }
+    isPreparingDraftRef.current = true
+    try {
+      const generated = await prepareAuthorityDraft({
+        authority,
+        description,
+        language: draftLanguage,
+        safetyIdentifier: `gemini-live-${crypto.randomUUID()}`,
+      })
+      const profile = user?.profile
+      const reviewDraft: RequestReviewDraft = {
+        applicantEmail: profile?.email ?? "",
+        applicantName: profile?.fullName ?? "",
+        applicantPhone: profile?.mobile ?? "",
+        authority: authority.authorityName,
+        ministry: authority.ministryName ?? authority.authorityName,
+        subject: generated.subject,
+        requestText: generated.requestText,
+        isBplApplicant: false,
+        citizenship: profile?.citizenship ?? "Indian",
+        applicant: {
+          gender: profile?.gender ?? "",
+          addressLine1: profile?.address.line1 ?? "",
+          addressLine2: profile?.address.line2 ?? "",
+          addressLine3: profile?.address.city ?? "",
+          pincode: profile?.address.pincode ?? "",
+          country: profile?.country ?? "India",
+          state: profile?.address.state ?? "",
+          areaType: profile?.areaType ?? "",
+          educationalStatus: profile?.educationalStatus ?? "",
+        },
+      }
 
-    navigate("/submit-request", {
-      state: {
-        authority: { name: authority.authorityName, ministryName: authority.ministryName ?? authority.authorityName },
-        reviewDraft,
-      },
-    })
-    return {
-      result: "An editable RTI draft has been placed in the request form. The applicant must read the guidelines and review the form before submitting.",
+      navigate("/submit-request", {
+        state: {
+          authority: { name: authority.authorityName, ministryName: authority.ministryName ?? authority.authorityName },
+          reviewDraft,
+        },
+      })
+      return {
+        result: "An editable RTI draft has been placed in the request form. The applicant must read the guidelines and review the form before submitting.",
+      }
+    } catch (error) {
+      isPreparingDraftRef.current = false
+      throw error
     }
   }
 
+  const prepareConfirmedVoiceDraft = (text: string, draftLanguage: PortalLanguage) => {
+    const previousSearch = authoritySearchRef.current
+    const authority = previousSearch ? getConfirmedAuthority(text, previousSearch.suggestions) : null
+    if (!previousSearch || !authority || isPreparingDraftRef.current) return
+
+    void openDraftedRequestForm({
+      description: previousSearch.description,
+      authorityId: authority.authorityId,
+      language: draftLanguage,
+    }).catch(() => {
+      // The Live model still receives this turn and can give the applicant a recovery message.
+      // Keep the microphone session available when draft generation has a transient failure.
+      if (isEnabledRef.current) setStatus("listening")
+    })
+  }
+
   const completeInputTranscript = () => {
-    const text = cleanVoiceTranscript(pendingInputTranscriptRef.current)
+    const text = normalizeWakePhraseTranscript(pendingInputTranscriptRef.current)
     pendingInputTranscriptRef.current = ""
-    if (text) recordVoiceTranscript({ role: "user", text, language: languageRef.current })
+    if (text) {
+      const transcriptLanguage = detectTranscriptLanguage(text, languageRef.current)
+      recordVoiceTranscript({ role: "user", text, language: transcriptLanguage })
+      prepareConfirmedVoiceDraft(text, transcriptLanguage)
+    }
   }
 
   const resolveFunctionCall = async (call: FunctionCall) => {
@@ -332,6 +463,7 @@ export function VoiceAssistant() {
       if (call.name === "search_public_authorities") {
         const query = String(call.args?.query ?? "").trim().slice(0, 700)
         const suggestions = query ? await findAuthoritySuggestions(query) : []
+        authoritySearchRef.current = suggestions.length ? { description: query, suggestions } : null
         response = suggestions.length
           ? {
               candidates: suggestions.map((suggestion) => ({
@@ -385,7 +517,7 @@ export function VoiceAssistant() {
     if (!content) return
     if (content.interrupted) {
       stopOutput()
-      assistantTranscriptRef.current = ""
+      discardAssistantTranscript()
       setStatus("listening")
     }
 
@@ -396,6 +528,7 @@ export function VoiceAssistant() {
     if (outputText) {
       completeInputTranscript()
       assistantTranscriptRef.current = appendTranscript(assistantTranscriptRef.current, outputText)
+      publishAssistantTranscript()
     }
     for (const part of content.modelTurn?.parts ?? []) {
       if (part.inlineData?.data) {
@@ -441,12 +574,31 @@ export function VoiceAssistant() {
       const token = await api.createVoiceSessionToken()
       if (!isEnabledRef.current) return
 
-      const ai = new GoogleGenAI({ apiKey: token.token, httpOptions: { apiVersion: "v1alpha" } })
+      const ai = new GoogleGenAI({ apiKey: token.token, httpOptions: { apiVersion: "v1beta" } })
       const session = await ai.live.connect({
         model: token.model,
         config: {
           responseModalities: [Modality.AUDIO],
-          inputAudioTranscription: {},
+          // Aoede is the selected softer female-presenting portal voice. Native audio chooses the
+          // spoken language naturally, so this does not lock the conversation to English.
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } },
+          inputAudioTranscription: {
+            // These are recognition hints, not a forced portal-language setting.
+            // English comes first as the portal's default, while the other supported
+            // Indian languages remain available for automatic turn-by-turn detection.
+            languageCodes: ["en-IN", "hi-IN", "te-IN", "kn-IN"],
+            customVocabulary: [
+              "Hey RTI",
+              "Hi RTI",
+              "Hello RTI",
+              "RTI",
+              "RTI Sahayak",
+              "Public Authority",
+              "CPIO",
+              "First Appeal",
+              "pension scheme",
+            ],
+          },
           outputAudioTranscription: {},
           realtimeInputConfig: {
             automaticActivityDetection: {
@@ -473,9 +625,11 @@ export function VoiceAssistant() {
                   properties: {
                     description: { type: Type.STRING, description: "The user's general, non-sensitive information request." },
                     authorityId: { type: Type.STRING, description: "The exact authorityId returned by search_public_authorities." },
-                    language: { type: Type.STRING, enum: ["en", "hi"], description: "The language used in the user's request." },
+                    language: { type: Type.STRING, enum: ["en", "hi", "te", "kn"], description: "The language used in the user's request." },
                   },
-                  required: ["description", "authorityId"],
+                  // The client keeps the previous directory query, so the model only needs
+                  // to carry the confirmed authority ID into this follow-up tool call.
+                  required: ["authorityId"],
                 },
               },
               {
@@ -568,31 +722,26 @@ export function VoiceAssistant() {
 
   useEffect(() => () => stopVoiceAssistant(), [])
 
-  const toggleVoiceAssistant = () => {
+  const toggleVoiceAssistant = useEffectEvent(() => {
     if (isEnabledRef.current || isStartingRef.current) stopVoiceAssistant()
     else void startVoiceAssistant()
-  }
+  })
 
-  const label = isEnabled ? copy.deactivate : copy.activate
-  const activeStatus = status === "idle" ? null : copy[status]
-  const launcherClassName = isEnabled
-    ? "rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary"
-    : "rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:supports-backdrop-filter:backdrop-blur-sm"
+  useEffect(() => {
+    publishVoiceStatus({
+      isActive: isEnabled || isStartingRef.current,
+      label: status === "idle" ? null : copy[status],
+      status,
+    })
+  }, [copy, isEnabled, status])
 
-  return (
-    <div className="fixed bottom-5 right-[5.25rem] z-50 flex flex-col items-end" aria-live="polite" ref={launcherRef}>
-      {activeStatus && <span className="mb-2 max-w-64 rounded-full border border-border bg-background px-3 py-1.5 text-right text-xs font-medium text-foreground shadow-sm">{activeStatus}</span>}
-      <Button
-        aria-label={label}
-        aria-pressed={isEnabled}
-        className={`group/voice h-12 w-12 justify-start gap-0 overflow-hidden rounded-full px-0 transition-[width] duration-200 ease-out hover:w-[10.5rem] focus-visible:w-[10.5rem] motion-reduce:transition-none ${launcherClassName}`}
-        onClick={toggleVoiceAssistant}
-        size="lg"
-        type="button"
-      >
-        <span className="flex size-12 shrink-0 items-center justify-center"><span aria-hidden="true" className={`material-symbols-outlined ${isEnabled && status === "listening" ? "animate-pulse" : ""}`}>{isEnabled ? "graphic_eq" : "mic"}</span></span>
-        <span className="max-w-0 overflow-hidden whitespace-nowrap pr-0 text-sm font-semibold opacity-0 transition-[max-width,opacity,padding] duration-200 ease-out group-hover/voice:max-w-32 group-hover/voice:pr-3 group-hover/voice:opacity-100 group-focus-visible/voice:max-w-32 group-focus-visible/voice:pr-3 group-focus-visible/voice:opacity-100 motion-reduce:transition-none">{copy.name}</span>
-      </Button>
-    </div>
-  )
+  useEffect(() => {
+    const onVoiceToggle = () => toggleVoiceAssistant()
+    window.addEventListener(VOICE_TOGGLE_EVENT, onVoiceToggle)
+    return () => window.removeEventListener(VOICE_TOGGLE_EVENT, onVoiceToggle)
+  }, [])
+
+  // The visible microphone control lives in RTI Sahayak's unified composer. This component
+  // owns only the secure Live session, audio stream, and portal actions.
+  return null
 }

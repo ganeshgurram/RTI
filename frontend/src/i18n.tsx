@@ -2,7 +2,17 @@ import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 
-export type PortalLanguage = "en" | "hi"
+import kannadaTranslation from "@/locales/kn.json"
+import teluguTranslation from "@/locales/te.json"
+
+/** The portal's languages, in the order the switcher offers them. */
+export const portalLanguages = ["en", "hi", "te", "kn"] as const
+
+export type PortalLanguage = (typeof portalLanguages)[number]
+
+function isPortalLanguage(value: unknown): value is PortalLanguage {
+  return portalLanguages.includes(value as PortalLanguage)
+}
 
 const languageStorageKey = "rti-demo-language"
 
@@ -12,8 +22,12 @@ const resources = {
       language: {
         english: "English",
         hindi: "Hindi",
+        telugu: "Telugu",
+        kannada: "Kannada",
         switchToEnglish: "Switch to English",
         switchToHindi: "Switch to Hindi",
+        switchToTelugu: "Switch to Telugu",
+        switchToKannada: "Switch to Kannada",
       },
       common: {
         cancel: "Cancel",
@@ -829,8 +843,12 @@ const resources = {
       language: {
         english: "अंग्रेज़ी",
         hindi: "हिन्दी",
+        telugu: "तेलुगु",
+        kannada: "कन्नड़",
         switchToEnglish: "अंग्रेज़ी में बदलें",
         switchToHindi: "हिन्दी में बदलें",
+        switchToTelugu: "तेलुगु में बदलें",
+        switchToKannada: "कन्नड़ में बदलें",
       },
       common: {
         cancel: "रद्द करें",
@@ -1641,11 +1659,18 @@ const resources = {
       },
     },
   },
+  te: {
+    translation: teluguTranslation,
+  },
+  kn: {
+    translation: kannadaTranslation,
+  },
 } as const
 
 function readStoredLanguage(): PortalLanguage {
   try {
-    return localStorage.getItem(languageStorageKey) === "hi" ? "hi" : "en"
+    const storedLanguage = localStorage.getItem(languageStorageKey)
+    return isPortalLanguage(storedLanguage) ? storedLanguage : "en"
   } catch {
     return "en"
   }
@@ -1670,7 +1695,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void i18n.changeLanguage(language)
-    document.documentElement.lang = language === "hi" ? "hi" : "en"
+    document.documentElement.lang = language
     document.documentElement.dataset.language = language
 
     try {

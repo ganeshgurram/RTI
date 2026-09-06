@@ -203,6 +203,10 @@ function StitchTopNav() {
           <button aria-label={t("language.switchToEnglish")} aria-pressed={language === "en"} className={`rounded px-2 py-0.5 transition-colors ${language === "en" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("en")} type="button">{t("language.english")}</button>
           <span aria-hidden="true" className="opacity-50">|</span>
           <button aria-label={t("language.switchToHindi")} aria-pressed={language === "hi"} className={`rounded px-2 py-0.5 transition-colors ${language === "hi" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("hi")} type="button">{t("language.hindi")}</button>
+          <span aria-hidden="true" className="opacity-50">|</span>
+          <button aria-label={t("language.switchToTelugu")} aria-pressed={language === "te"} className={`rounded px-2 py-0.5 transition-colors ${language === "te" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("te")} type="button">{t("language.telugu")}</button>
+          <span aria-hidden="true" className="opacity-50">|</span>
+          <button aria-label={t("language.switchToKannada")} aria-pressed={language === "kn"} className={`rounded px-2 py-0.5 transition-colors ${language === "kn" ? "bg-on-primary font-semibold text-primary shadow-sm" : "hover:bg-on-primary/10 hover:text-on-primary"}`} onClick={() => setLanguage("kn")} type="button">{t("language.kannada")}</button>
         </div>
       </div>
       <div className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? "px-3 pt-3 navwide:px-6" : "px-0 pt-0"}`}>

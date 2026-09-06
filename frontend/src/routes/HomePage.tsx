@@ -37,6 +37,16 @@ function ServiceUpdateNotice() {
         label: "सेवा अपडेट",
         message: "नया: आरटीआई सहायक वॉइस असिस्टेंट उपलब्ध है। माइक्रोफ़ोन दबाएँ और सामान्य आरटीआई प्रश्न पूछने के लिए ‘हे आरटीआई’ कहें।",
       }
+    : language === "te"
+      ? {
+        label: "సేవా నవీకరణ",
+        message: "కొత్తది: RTI సహాయక్ వాయిస్ అసిస్టెంట్ ఇప్పుడు అందుబాటులో ఉంది. సాధారణ RTI ప్రశ్నలు అడగడానికి మైక్రోఫోన్‌ను ఎంచుకుని “హే RTI” అని చెప్పండి.",
+      }
+    : language === "kn"
+      ? {
+        label: "ಸೇವಾ ನವೀಕರಣ",
+        message: "ಹೊಸದು: RTI ಸಹಾಯಕ ಧ್ವನಿ ಸಹಾಯಕ ಈಗ ಲಭ್ಯವಿದೆ. ಸಾಮಾನ್ಯ RTI ಪ್ರಶ್ನೆಗಳನ್ನು ಕೇಳಲು ಮೈಕ್ರೊಫೋನ್ ಆಯ್ಕೆಮಾಡಿ ಮತ್ತು “ಹೇ RTI” ಎಂದು ಹೇಳಿ.",
+      }
     : {
         label: "Service update",
         message: "New: RTI Sahayak Voice Assistant is available. Select the microphone and say “Hey RTI” to ask general RTI questions.",

@@ -4,7 +4,8 @@ import { requireAuth } from "../middleware/auth.js"
 
 export const voiceRouter = Router()
 
-const GEMINI_TOKEN_ENDPOINT = "https://generativelanguage.googleapis.com/v1alpha/auth_tokens"
+const GEMINI_TOKEN_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/auth_tokens"
+const DEFAULT_GEMINI_LIVE_MODEL = "gemini-3.1-flash-live-preview"
 
 function requestSummary(record) {
   return {
@@ -27,6 +28,7 @@ function expiry(minutesFromNow) {
 voiceRouter.post("/token", async (_request, response) => {
   const apiKey = process.env.GEMINI_API_KEY?.trim()
   if (!apiKey) return response.status(503).json({ error: "voiceUnavailable" })
+  const model = process.env.GEMINI_LIVE_MODEL?.trim() || DEFAULT_GEMINI_LIVE_MODEL
 
   try {
     const tokenResponse = await fetch(GEMINI_TOKEN_ENDPOINT, {
@@ -48,7 +50,7 @@ voiceRouter.post("/token", async (_request, response) => {
     return response.json({
       token: payload.name,
       expiresAt: payload.expireTime ?? expiry(30),
-      model: process.env.GEMINI_LIVE_MODEL?.trim() || "gemini-2.5-flash-native-audio-latest",
+      model,
     })
   } catch (error) {
     console.error("Unable to reach Gemini Live", error)

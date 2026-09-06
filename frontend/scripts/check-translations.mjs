@@ -20,6 +20,8 @@ import { fileURLToPath } from "node:url"
 
 const frontendDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const i18nFile = path.join(frontendDir, "src", "i18n.tsx")
+const teluguCatalogFile = path.join(frontendDir, "src", "locales", "te.json")
+const kannadaCatalogFile = path.join(frontendDir, "src", "locales", "kn.json")
 
 /**
  * The resources are a plain object literal in a .tsx file, which the type stripper cannot import
@@ -55,7 +57,15 @@ function readResources() {
     throw new Error(`${i18nFile}: could not find the end of the resources object`)
   }
 
-  return new Function(`return (${source.slice(start + declaration.length, end)})`)()
+  // Telugu is kept as JSON so the sizable static catalog remains easy to review and regenerate.
+  // Pass it into the evaluated resource literal just as the module import does at runtime.
+  const teluguTranslation = JSON.parse(readFileSync(teluguCatalogFile, "utf8"))
+  const kannadaTranslation = JSON.parse(readFileSync(kannadaCatalogFile, "utf8"))
+  return new Function(
+    "teluguTranslation",
+    "kannadaTranslation",
+    `return (${source.slice(start + declaration.length, end)})`,
+  )(teluguTranslation, kannadaTranslation)
 }
 
 /** Every leaf path in one language, as "a.b.c" strings. */

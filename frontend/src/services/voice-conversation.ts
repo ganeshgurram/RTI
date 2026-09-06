@@ -1,5 +1,7 @@
 export const VOICE_MESSAGE_EVENT = "rti-sahayak:voice-message"
 export const VOICE_TRANSCRIPT_EVENT = "rti-sahayak:voice-transcript"
+export const VOICE_TOGGLE_EVENT = "rti-sahayak:voice-toggle"
+export const VOICE_STATUS_EVENT = "rti-sahayak:voice-status"
 
 export type VoiceMessageEventDetail = {
   message: string
@@ -11,7 +13,28 @@ export type VoiceMessageEventDetail = {
 export type VoiceTranscriptEventDetail = {
   role: "user" | "assistant"
   text: string
-  language: "en" | "hi"
+  language: "en" | "hi" | "te" | "kn"
+  /** A stable ID lets the chat update one spoken reply in place as words arrive. */
+  id?: string
+  /** The final transcript is eligible for normal conversation translation. */
+  isFinal?: boolean
+  /** A Live interruption removes its unfinished assistant bubble. */
+  isDiscarded?: boolean
+}
+
+/** State shared with RTI Sahayak's unified text-and-voice composer. */
+export type VoiceStatusEventDetail = {
+  isActive: boolean
+  label: string | null
+  status: "idle" | "connecting" | "listening" | "answering" | "permissionRequired" | "unavailable"
+}
+
+export function requestVoiceToggle() {
+  window.dispatchEvent(new Event(VOICE_TOGGLE_EVENT))
+}
+
+export function publishVoiceStatus(detail: VoiceStatusEventDetail) {
+  window.dispatchEvent(new CustomEvent<VoiceStatusEventDetail>(VOICE_STATUS_EVENT, { detail }))
 }
 
 export function recordVoiceTranscript(detail: VoiceTranscriptEventDetail) {

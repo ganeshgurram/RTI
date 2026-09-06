@@ -1,8 +1,9 @@
 const MAX_OUTPUT_TOKENS = 1400
 
-const OPENROUTER_MODEL = (process.env.OPENROUTER_MODEL ?? "z-ai/glm-5.2:free").trim() || "z-ai/glm-5.2:free"
+// Draft generation needs a model that reliably follows structured-output instructions.
+// The general free router can select smaller experimental models that return control tokens.
+const OPENROUTER_MODEL = (process.env.OPENROUTER_MODEL ?? "minimax/minimax-m2.7:free").trim() || "minimax/minimax-m2.7:free"
 const OPENROUTER_FREE_FALLBACK_MODELS = [
-  "minimax/minimax-m2.7:free",
   "liquid/lfm-2.5-2.6b:free",
 ]
 /**
@@ -132,20 +133,46 @@ const localizedErrors = {
     emptyAnswer: "आरटीआई सहायक ने कोई उत्तर नहीं दिया",
     unavailable: "आरटीआई सहायक अस्थायी रूप से उपलब्ध नहीं है",
   },
+  te: {
+    sensitive: "సున్నితమైన సమాచారాన్ని RTI సహాయక్‌కు పంపకూడదు.",
+    notConfigured: "RTI సహాయక్ కాన్ఫిగర్ చేయబడలేదు",
+    busy: "RTI సహాయక్ ప్రస్తుతం బిజీగా ఉంది. దయచేసి కొద్దిసేపటి తర్వాత మళ్లీ ప్రయత్నించండి.",
+    prepareFailed: "RTI సహాయక్ సమాధానాన్ని సిద్ధం చేయలేకపోయింది",
+    emptyAnswer: "RTI సహాయక్ ఖాళీ సమాధానాన్ని అందించింది",
+    unavailable: "RTI సహాయక్ తాత్కాలికంగా అందుబాటులో లేదు",
+  },
+  kn: {
+    sensitive: "ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು RTI ಸಹಾಯಕನಿಗೆ ಸಲ್ಲಿಸಬಾರದು.",
+    notConfigured: "RTI ಸಹಾಯಕವನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿಲ್ಲ",
+    busy: "RTI ಸಹಾಯಕ ಈಗ ಕಾರ್ಯನಿರತವಾಗಿದೆ. ದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    prepareFailed: "RTI ಸಹಾಯಕ ಉತ್ತರವನ್ನು ಸಿದ್ಧಪಡಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+    emptyAnswer: "RTI ಸಹಾಯಕ ಖಾಲಿ ಉತ್ತರವನ್ನು ನೀಡಿದೆ",
+    unavailable: "RTI ಸಹಾಯಕ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ",
+  },
 }
 
 function getLanguage(value) {
-  return value === "hi" ? "hi" : "en"
+  return value === "hi" || value === "te" || value === "kn" ? value : "en"
 }
 
 function getLanguageInstruction(language) {
-  return language === "hi"
-    ? "The selected portal language is Hindi. Write every response only in clear Hindi using Devanagari script, even when the user writes in English. Refer to yourself as ‘आरटीआई सहायक’. Keep an official proper noun or a necessary acronym only when translation would make it unclear; do not add English sentences."
-    : "The selected portal language is English. Write every response only in clear English, even when the user writes in Hindi. Refer to yourself as ‘RTI Sahayak’."
+  if (language === "hi") {
+    return "The selected portal language is Hindi. Write every response only in clear Hindi using Devanagari script, even when the user writes in English. Refer to yourself as ‘आरटीआई सहायक’. Keep an official proper noun or a necessary acronym only when translation would make it unclear; do not add English sentences."
+  }
+
+  if (language === "te") {
+    return "The selected portal language is Telugu. Write every response only in clear Telugu using Telugu script, even when the user writes in English. Refer to yourself as ‘RTI సహాయక్’. Keep an official proper noun or a necessary acronym only when translation would make it unclear; do not add English sentences."
+  }
+
+  if (language === "kn") {
+    return "The selected portal language is Kannada. Write every response only in clear Kannada using Kannada script, even when the user writes in English. Refer to yourself as ‘RTI ಸಹಾಯಕ’. Keep an official proper noun or a necessary acronym only when translation would make it unclear; do not add English sentences."
+  }
+
+  return "The selected portal language is English. Write every response only in clear English, even when the user writes in Hindi. Refer to yourself as ‘RTI Sahayak’."
 }
 
 function getTranslationInstruction(language) {
-  const target = language === "hi" ? "Hindi, written in Devanagari script" : "English"
+  const target = language === "hi" ? "Hindi, written in Devanagari script" : language === "te" ? "Telugu, written in Telugu script" : language === "kn" ? "Kannada, written in Kannada script" : "English"
 
   return [
     "You translate chat messages for an RTI Online portal. Translate every segment into " + target + ".",
@@ -162,7 +189,7 @@ function getTranslationInstruction(language) {
 
 function getRewriteInstruction({ language, type, maxLength }) {
   const documentName = type === "first-appeal" ? "First Appeal" : "RTI request"
-  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : "clear English"
+  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : language === "te" ? "clear Telugu in Telugu script" : language === "kn" ? "clear Kannada in Kannada script" : "clear English"
 
   return [
     "You are a drafting assistant for an RTI Online portal.",
@@ -178,7 +205,7 @@ function getRewriteInstruction({ language, type, maxLength }) {
 }
 
 function getFilingInstruction({ language, authorityContext }) {
-  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : "clear English"
+  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : language === "te" ? "clear Telugu in Telugu script" : language === "kn" ? "clear Kannada in Kannada script" : "clear English"
 
   return [
     "You are RTI Sahayak, preparing the impersonal part of an RTI application.",
@@ -193,7 +220,7 @@ function getFilingInstruction({ language, authorityContext }) {
 }
 
 function getAuthorityDraftInstruction({ language, authorityContext }) {
-  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : "clear English"
+  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : language === "te" ? "clear Telugu in Telugu script" : language === "kn" ? "clear Kannada in Kannada script" : "clear English"
 
   return [
     "You are RTI Sahayak, drafting the impersonal information-request portion of an RTI application.",
@@ -380,6 +407,10 @@ function extractOutput(payload) {
     .map((item) => item?.text ?? "")
     .join("")
     .trim()
+}
+
+function isInvalidModelOutput(value) {
+  return /^<ctrl\d+>$/i.test(value.trim())
 }
 
 /**
@@ -577,6 +608,7 @@ async function prepareFiling(response, { apiKey, language, filing, safetyIdentif
       { role: "user", content: filing.description },
     ],
     max_completion_tokens: MAX_OUTPUT_TOKENS,
+    response_format: { type: "json_object" },
     reasoning: { effort: "low" },
     user: safetyIdentifier,
     provider: { data_collection: "deny" },
@@ -616,6 +648,7 @@ async function prepareAuthorityDraft(response, { apiKey, language, draft, safety
       { role: "user", content: draft.description },
     ],
     max_tokens: MAX_OUTPUT_TOKENS,
+    response_format: { type: "json_object" },
     user: safetyIdentifier,
   }))
 
@@ -803,7 +836,12 @@ export default async function handler(request, response) {
     }
 
     const reply = extractOutput(result.payload)
-    if (!reply) {
+    if (!reply || isInvalidModelOutput(reply)) {
+      if (isInvalidModelOutput(reply)) {
+        console.warn("[RTI Sahayak] Ignoring an invalid control-token response", {
+          model: result.payload?.model ?? OPENROUTER_MODEL,
+        })
+      }
       return sendJson(response, 502, { error: messagesForLanguage.emptyAnswer })
     }
 

@@ -115,7 +115,7 @@ export function FirstAppealFormPage() {
     return <Navigate replace to="/submit-first-appeal" />
   }
 
-  const preparation = appealPreparationCopy[language]
+  const preparation = appealPreparationCopy[language === "hi" ? "hi" : "en"]
   const hasRecordedResponse = request.status === "Reply received"
   const suggestedGround = hasRecordedResponse ? "" : t("firstAppeal.noResponse")
 

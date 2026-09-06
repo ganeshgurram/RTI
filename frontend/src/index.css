@@ -4,6 +4,8 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/noto-sans-devanagari";
+@import "@fontsource-variable/noto-sans-kannada";
+@import "@fontsource-variable/noto-sans-telugu";
 
 @font-face {
     font-family: "SF Pro Display";
@@ -267,6 +269,38 @@
     --font-headline-lg: "Noto Sans Devanagari Variable", sans-serif;
     --font-headline-lg-mobile: "Noto Sans Devanagari Variable", sans-serif;
     --font-display-lg: "Noto Sans Devanagari Variable", sans-serif;
+}
+
+:root[data-language="te"] {
+    --font-sans: "Noto Sans Telugu Variable", sans-serif;
+    --font-label: "Noto Sans Telugu Variable", sans-serif;
+    --font-body: "Noto Sans Telugu Variable", sans-serif;
+    --font-headline: "Noto Sans Telugu Variable", sans-serif;
+    --font-display: "Noto Sans Telugu Variable", sans-serif;
+    --font-label-sm: "Noto Sans Telugu Variable", sans-serif;
+    --font-label-lg: "Noto Sans Telugu Variable", sans-serif;
+    --font-body-md: "Noto Sans Telugu Variable", sans-serif;
+    --font-body-lg: "Noto Sans Telugu Variable", sans-serif;
+    --font-headline-md: "Noto Sans Telugu Variable", sans-serif;
+    --font-headline-lg: "Noto Sans Telugu Variable", sans-serif;
+    --font-headline-lg-mobile: "Noto Sans Telugu Variable", sans-serif;
+    --font-display-lg: "Noto Sans Telugu Variable", sans-serif;
+}
+
+:root[data-language="kn"] {
+    --font-sans: "Noto Sans Kannada Variable", sans-serif;
+    --font-label: "Noto Sans Kannada Variable", sans-serif;
+    --font-body: "Noto Sans Kannada Variable", sans-serif;
+    --font-headline: "Noto Sans Kannada Variable", sans-serif;
+    --font-display: "Noto Sans Kannada Variable", sans-serif;
+    --font-label-sm: "Noto Sans Kannada Variable", sans-serif;
+    --font-label-lg: "Noto Sans Kannada Variable", sans-serif;
+    --font-body-md: "Noto Sans Kannada Variable", sans-serif;
+    --font-body-lg: "Noto Sans Kannada Variable", sans-serif;
+    --font-headline-md: "Noto Sans Kannada Variable", sans-serif;
+    --font-headline-lg: "Noto Sans Kannada Variable", sans-serif;
+    --font-headline-lg-mobile: "Noto Sans Kannada Variable", sans-serif;
+    --font-display-lg: "Noto Sans Kannada Variable", sans-serif;
 }
 
 .dark {

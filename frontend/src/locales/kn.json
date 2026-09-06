@@ -1,0 +1,969 @@
+{
+  "language": {
+    "english": "ಇಂಗ್ಲಿಷ್",
+    "hindi": "ಹಿಂದಿ",
+    "telugu": "ತೆಲುಗು",
+    "kannada": "ಕನ್ನಡ",
+    "switchToEnglish": "ಇಂಗ್ಲಿಷ್‌ಗೆ ಬದಲಾಯಿಸಿ",
+    "switchToHindi": "ಹಿಂದಿಗೆ ಬದಲಾಯಿಸಿ",
+    "switchToTelugu": "ತೆಲುಗಿಗೆ ಬದಲಾಯಿಸಿ",
+    "switchToKannada": "ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿಸಿ"
+  },
+  "common": {
+    "cancel": "ರದ್ದುಮಾಡಿ",
+    "continue": "ಮುಂದುವರಿಸಿ",
+    "backToHome": "RTI Online ಗೆ ಹಿಂತಿರುಗಿ",
+    "required": "ಅವಶ್ಯಕ"
+  },
+  "nav": {
+    "textSize": "ಪಠ್ಯ ಗಾತ್ರ",
+    "increaseText": "ಪಠ್ಯ ಗಾತ್ರ ಹೆಚ್ಚಿಸಿ",
+    "resetText": "ಪಠ್ಯ ಗಾತ್ರ ಮರುಹೊಂದಿಸಿ",
+    "decreaseText": "ಪಠ್ಯ ಗಾತ್ರ ಕಡಿಮೆಮಾಡಿ",
+    "openMenu": "ನ್ಯಾವಿಗೇಶನ್ ಮೆನು ತೆರೆಯಿರಿ",
+    "navigation": "ನ್ಯಾವಿಗೇಶನ್",
+    "home": "ಮುಖಪುಟ",
+    "request": "RTI ವಿನಂತಿ",
+    "firstAppeal": "ಪ್ರಥಮ ಅಪೀಲಿ",
+    "secondAppeal": "ದ್ವಿತೀಯ ಅಪೀಲಿ",
+    "viewStatus": "ಸ್ಥಿತಿ ವೀಕ್ಷಿಸಿ",
+    "paymentReconciliation": "ಪಾವತಿ ಸಾಮರಸ್ಯ",
+    "faqs": "ಪುನರಾವೃತ್ತಿ ಪ್ರಶ್ನೆಗಳು",
+    "login": "ಪ್ರವೇಶ",
+    "notifications": "ಅಧಿಸೂಚನೆಗಳು",
+    "recentNotifications": "ಇತ್ತೀಚಿನ ಅಧಿಸೂಚನೆಗಳು",
+    "markAllRead": "ಎಲ್ಲವನ್ನು ಓದಿತಾಗಿ ಗುರುತಿಸಿ",
+    "viewAllNotifications": "ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
+    "profile": "ಪ್ರೊಫೈಲ್",
+    "profileDescription": "ವೈಯಕ್ತಿಕ ಮತ್ತು ಸಂಪರ್ಕ ವಿವರಗಳು",
+    "requestHistory": "RTI ವಿನಂತಿ ಇತಿಹಾಸ",
+    "requestHistoryDescription": "ನಿಮ್ಮ ಸಲ್ಲುಕೊಡಿದ ಅರ್ಜಿಗಳನ್ನು ಅನುಸರಿಸಿ",
+    "logout": "ನಿರ್ಗಮನ",
+    "openProfileMenu": "ಪ್ರೊಫೈಲ್ ಮೆನು ತೆರೆಯಿರಿ",
+    "signUp": "ನೋಂದಣಿ",
+    "signIn": "ಪ್ರವೇಶ ಮಾಡಿ",
+    "publicAuthorities": "ಸಾರ್ವಜನಿಕ ಅಧಿಕಾರಿಗಳು",
+    "userManual": "ಬಳಕೆದಾರ ಮಾನುಯಲ್",
+    "contactUs": "ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ",
+    "allRightsReserved": "ಎಲ್ಲಾ ಹಕ್ಕುಗಳು ಕಾಯದೆಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ."
+  },
+  "home": {
+    "title": "ಮಾಹಿತಿ ಹಕ್ಕು ಆನ್‌ಲೈನ್",
+    "subtitle": "ಸಿಬ್ಬಂದಿ ಮತ್ತು ತರಬೇತಿ ಇಲಾಖೆಯ, ಭಾರತ ಸರ್ಕಾರದ ಉಪಕ್ರಮ; ನಾಗರಿಕರು ಮಾಹಿತಿಯನ್ನು ಪಡೆಯಲು ಹಾಗೂ ಆಡಳಿತದಲ್ಲಿ ಪಾರದರ್ಶಕತೆಯನ್ನು ಉತ್ತೇಜಿಸಲು ಇದನ್ನು ರೂಪಿಸಲಾಗಿದೆ.",
+    "submitRequest": "ವಿನಂತಿ ಸಲ್ಲಿಸಿ",
+    "actions": {
+      "request": {
+        "title": "ವಿನಂತಿ ಸಲ್ಲಿಸಿ",
+        "description": "ಭಾರತ ಸರ್ಕಾರದ ಸಚಿವಾಲಯಗಳು/ಇಲಾಖೆಗಳಿಂದ ಮಾಹಿತಿ ಪಡೆಯಲು ಹೊಸ RTI ಅರ್ಜಿಯನ್ನು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಸಲ್ಲಿಸಿ.",
+        "cta": "ಅರ್ಜಿಯನ್ನು ಆರಂಭಿಸಿ"
+      },
+      "firstAppeal": {
+        "title": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ",
+        "description": "ನಿಮ್ಮ RTI ಅರ್ಜಿಯ ಉತ್ತರದಿಂದ ತೃಪ್ತಿಯಿಲ್ಲದಿದ್ದರೆ ಅಥವಾ ಉತ್ತರ ಸಿಗದಿದ್ದರೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ.",
+        "cta": "ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ"
+      },
+      "status": {
+        "title": "ಸ್ಥಿತಿ ವೀಕ್ಷಿಸಿ",
+        "description": "ನಿಮ್ಮ ನೋಂದಣಿ ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ ಈ ಹಿಂದೆ ಸಲ್ಲಿಸಿದ RTI ಅರ್ಜಿ ಅಥವಾ ಪ್ರಥಮ ಮೇಲ್ಮನವಿಯ ಪ್ರಸ್ತುತ ಸ್ಥಿತಿಯನ್ನು ಪರಿಶೀಲಿಸಿ.",
+        "cta": "ಸ್ಥಿತಿ ವೀಕ್ಷಿಸಿ"
+      },
+      "secondAppeal": {
+        "title": "ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ",
+        "description": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರದ ತೀರ್ಮಾನದಿಂದ ತೃಪ್ತಿಯಿಲ್ಲದಿದ್ದರೆ ಆಯೋಗಕ್ಕೆ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ.",
+        "cta": "ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ"
+      }
+    },
+    "lifecycle": {
+      "sectionTitle": "RTI ವಿನಂತಿಯ ಜೀವನಚಕ್ರ",
+      "sectionDescription": "ಮಾಹಿತಿ ಹಕ್ಕು ಅರ್ಜಿಯ ಸಲ್ಲಿಕೆಯಿಂದ ಪರಿಹಾರದವರೆಗಿನ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ.",
+      "processMap": "ಪ್ರಕ್ರಿಯೆಯ ನಕ್ಷೆ",
+      "cardTitle": "RTI ವಿನಂತಿಯ ಜೀವನಚಕ್ರ",
+      "cardDescription": "ಮಾಹಿತಿ ಹಕ್ಕಿನ ಚೌಕಟ್ಟಿನ ಅಡಿಯಲ್ಲಿ ಕಾಲಾವಧಿ ಮತ್ತು ಮುಂದಿನ ಹಂತಗಳ ಪ್ರಕ್ರಿಯೆ.",
+      "steps": {
+        "citizenTitle": "1. ನಾಗರಿಕರು ವಿನಂತಿ ಸಲ್ಲಿಸುತ್ತಾರೆ",
+        "citizenDescription": "ಅರ್ಜಿದಾರರು ಸುರಕ್ಷಿತ ಪೋರ್ಟಲ್ ಮೂಲಕ RTI ವಿನಂತಿಯನ್ನು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಸಲ್ಲಿಸಿ ನಿಗದಿತ ಶುಲ್ಕ ಪಾವತಿಸುತ್ತಾರೆ.",
+        "nodalTitle": "2. ನೋಡಲ್ ಅಧಿಕಾರಿ ಸ್ವೀಕರಿಸುತ್ತಾರೆ",
+        "nodalDescription": "ಸಂಬಂಧಿತ ಸಚಿವಾಲಯ/ಇಲಾಖೆಯ ನೋಡಲ್ ಅಧಿಕಾರಿ ವಿನಂತಿಯನ್ನು ಸ್ವೀಕರಿಸಿ ಪರಿಶೀಲಿಸುತ್ತಾರೆ.",
+        "cpioTitle": "3. CPIO ಗೆ ರವಾನೆ",
+        "cpioDescription": "ಪ್ರಕ್ರಿಯೆಗಾಗಿ ವಿನಂತಿಯನ್ನು ಕೇಂದ್ರ ಸಾರ್ವಜನಿಕ ಮಾಹಿತಿ ಅಧಿಕಾರಿ (CPIO) ಅವರಿಗೆ ಹಂಚಲಾಗುತ್ತದೆ.",
+        "respondsTitle": "4. CPIO ಉತ್ತರಿಸುತ್ತಾರೆ",
+        "respondsDescription": "ಕಾನೂನುಬದ್ಧ 30 ದಿನಗಳ ಅವಧಿಯೊಳಗೆ CPIO ನಾಗರಿಕರಿಗೆ ಕೋರಿದ ಮಾಹಿತಿಯನ್ನು ಒದಗಿಸುತ್ತಾರೆ."
+      },
+      "graph": {
+        "request": "RTI ವಿನಂತಿ",
+        "reply": "ಉತ್ತರ",
+        "satisfied": "ತೃಪ್ತಿಯಾಗಿದೆ",
+        "transfer": "ರವಾನೆ",
+        "notSatisfied": "ತೃಪ್ತಿಯಿಲ್ಲ",
+        "noReply": "ಉತ್ತರ ಇಲ್ಲ",
+        "and": "ಮತ್ತು",
+        "noTimeLimit": "ಕಾಲಮಿತಿ\nಇಲ್ಲ",
+        "complaint": "CIC ಗೆ ವಿಭಾಗ 18 ದೂರು",
+        "firstAppeal": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ",
+        "decision": "ತೀರ್ಮಾನ",
+        "noDecision": "ತೀರ್ಮಾನ ಇಲ್ಲ",
+        "secondAppeal": "CIC / SIC ಗೆ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ",
+        "days": "ದಿನಗಳು",
+        "publicAuthority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ / CPIO",
+        "replyReceived": "ಉತ್ತರ ಸಿಕ್ಕಿದೆಯೇ?",
+        "informationComplete": "ಮಾಹಿತಿ ಸಂಪೂರ್ಣವಾಗಿದೆಯೇ?",
+        "deemedRefusal": "ಕಲ್ಪಿತ ನಿರಾಕರಣೆ",
+        "appealUnresolved": "ತೃಪ್ತಿಯಿಲ್ಲ / ತೀರ್ಮಾನ ಇಲ್ಲ"
+      },
+      "routes": {
+        "answered": "ಸಮಯಕ್ಕೆ ಉತ್ತರಿಸಲಾಗಿದೆ",
+        "transferred": "ರವಾನಿಸಲಾಗಿದೆ, ಮೇಲ್ಮನವಿ ಎತ್ತಿಹಿಡಿಯಲಾಗಿದೆ",
+        "appealRefused": "ಮೇಲ್ಮನವಿ ನಿರಾಕರಿಸಲಾಗಿದೆ",
+        "ignored": "ಉತ್ತರ ಇಲ್ಲ, ತೀರ್ಮಾನ ಇಲ್ಲ",
+        "complaint": "ವಿಭಾಗ 18 ದೂರು"
+      },
+      "routeHint": "ಅದರ ಅರ್ಥ ತಿಳಿಯಲು ಹಂತದ ಮೇಲೆ ಕರ್ಸರ್ ಇರಿಸಿ, ಅಥವಾ ಅದನ್ನು ಅನುಸರಿಸಲು ಮಾರ್ಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+      "guideTitle": "ನೀವು ಪ್ರಕ್ರಿಯೆಯ ಯಾವ ಹಂತದಲ್ಲಿದ್ದೀರಿ?",
+      "guideDescription": "ನಿಮ್ಮ ವಿನಂತಿಗೆ ಹೆಚ್ಚು ಹೊಂದುವ ಪರಿಸ್ಥಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ. ಗುರುತಿಸಲಾದ ರೇಖೆಯು ಮುಂದಿನ ಸಂಭವನೀಯ ಮಾರ್ಗವನ್ನು ತೋರಿಸುತ್ತದೆ; ಬೂದು ಶಾಖೆಗಳು ಇತರ ಸಾಧ್ಯ ಫಲಿತಾಂಶಗಳನ್ನು ತೋರಿಸುತ್ತವೆ.",
+      "guideCurrent": "ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಮಾರ್ಗ",
+      "guides": {
+        "newRequest": {
+          "title": "ನಾನು ಈಗಷ್ಟೇ RTI ಸಲ್ಲಿಸಿದ್ದೇನೆ",
+          "description": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರವು ಸಾಮಾನ್ಯವಾಗಿ ಉತ್ತರಿಸಲು 30 ದಿನಗಳನ್ನು ಹೊಂದಿರುತ್ತದೆ."
+        },
+        "replyIssue": {
+          "title": "ನನಗೆ ಉತ್ತರ ಬಂದಿದೆ, ಆದರೆ ಅದು ಅಪೂರ್ಣವಾಗಿದೆ",
+          "description": "ಉತ್ತರ ಬಂದ 30 ದಿನಗಳೊಳಗೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ."
+        },
+        "noReply": {
+          "title": "ನನಗೆ ಉತ್ತರ ಬಂದಿಲ್ಲ",
+          "description": "30 ದಿನಗಳ ನಂತರ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ; ವಿಭಾಗ 18 ದೂರು ಮತ್ತೊಂದು ಪರಿಹಾರವಾಗಿದೆ."
+        },
+        "transferred": {
+          "title": "ನನ್ನ ವಿನಂತಿಯನ್ನು ರವಾನಿಸಲಾಗಿದೆ",
+          "description": "ಸ್ವೀಕರಿಸುವ ಪ್ರಾಧಿಕಾರವು 30 ದಿನಗಳೊಳಗೆ ಉತ್ತರಿಸಬೇಕು."
+        },
+        "appealIssue": {
+          "title": "ನನ್ನ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಇನ್ನೂ ಇತ್ಯರ್ಥವಾಗಿಲ್ಲ",
+          "description": "45 ದಿನಗಳೊಳಗೆ ತೀರ್ಮಾನ ಬರದಿದ್ದರೆ, 90 ದಿನಗಳೊಳಗೆ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು."
+        }
+      },
+      "mapHint": "ಅದರ ಅರ್ಥ ತಿಳಿಯಲು ಹಂತದ ಮೇಲೆ ಕರ್ಸರ್ ಇರಿಸಿ.",
+      "nodes": {
+        "authority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರದ CPIO ಅರ್ಜಿಯನ್ನು ಸ್ವೀಕರಿಸಿ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುತ್ತಾರೆ.",
+        "responseClock": "ದಾಖಲೆಯನ್ನು ಹೊಂದಿರುವ ಪ್ರಾಧಿಕಾರವು ಸಾಮಾನ್ಯವಾಗಿ ಉತ್ತರಿಸಲು 30 ದಿನಗಳನ್ನು ಹೊಂದಿರುತ್ತದೆ.",
+        "replyReceived": "ವಿನಂತಿ ಮುಕ್ತಾಯವಾಗಬೇಕೇ ಅಥವಾ ಮೇಲ್ಮನವಿಗೆ ಹೋಗಬೇಕೇ ಎಂಬುದನ್ನು ಉತ್ತರ ನಿರ್ಧರಿಸುತ್ತದೆ.",
+        "informationComplete": "ಉತ್ತರದಲ್ಲಿ ನೀವು ಕೋರಿದ ಮಾಹಿತಿ ಇದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ.",
+        "appealUnresolved": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿಗೆ ಇತ್ಯರ್ಥ ಅಥವಾ ತೀರ್ಮಾನ ಆಗದಿದ್ದರೆ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ ಲಭ್ಯವಿರುತ್ತದೆ.",
+        "request": "ನಿಗದಿತ ಶುಲ್ಕದೊಂದಿಗೆ ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಸಲ್ಲಿಸಿದ ವಿಭಾಗ 6 ರ ಅಡಿಯ ನಿಮ್ಮ ಅರ್ಜಿ.",
+        "directClock": "ಸ್ವೀಕೃತಿಯಿಂದ ಉತ್ತರಿಸಲು CPIO ಗೆ 30 ದಿನಗಳಿವೆ.",
+        "directReply": "CPIO ಕಾನೂನುಬದ್ಧ ಕಾಲಮಿತಿಯೊಳಗೆ ಉತ್ತರಿಸುತ್ತಾರೆ.",
+        "directSatisfied": "ನೀವು ಕೋರಿದ ಮಾಹಿತಿ ಸಿಕ್ಕಿದೆ; ವಿನಂತಿಯು ಇಲ್ಲಿ ಮುಕ್ತಾಯವಾಗುತ್ತದೆ.",
+        "transferClock": "ತಪ್ಪು ಕಡೆ ಸಲ್ಲಿಸಿದ ವಿನಂತಿಯನ್ನು 5 ದಿನಗಳೊಳಗೆ ರವಾನಿಸಬೇಕು.",
+        "transfer": "ವಿಭಾಗ 6(3) ವಿನಂತಿಯನ್ನು ದಾಖಲೆಯನ್ನು ಹೊಂದಿರುವ ಪ್ರಾಧಿಕಾರಕ್ಕೆ ವರ್ಗಾಯಿಸುತ್ತದೆ.",
+        "transferReplyClock": "ಸ್ವೀಕರಿಸುವ ಪ್ರಾಧಿಕಾರಕ್ಕೆ ರವಾನೆಯ ದಿನಾಂಕದಿಂದ ಎಣಿಸಿದ ತನ್ನದೇ 30 ದಿನಗಳ ಅವಧಿ ದೊರೆಯುತ್ತದೆ.",
+        "transferReply": "ರವಾನಿಸಲಾದ ವಿನಂತಿಯನ್ನು ಪಡೆದ ಪ್ರಾಧಿಕಾರ ಉತ್ತರಿಸುತ್ತದೆ.",
+        "transferNotSatisfied": "ಉತ್ತರ ಅಪೂರ್ಣವಾಗಿದೆ, ನಿರಾಕರಿಸಲಾಗಿದೆ, ಅಥವಾ ವಿಷಯಕ್ಕೆ ಸಂಬಂಧಿಸಿಲ್ಲ.",
+        "firstAppealClock": "ಉತ್ತರದಿಂದ 30 ದಿನಗಳೊಳಗೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು.",
+        "transferNoReplyClock": "ವಿನಂತಿ ರವಾನಿಸಲಾದ ಪ್ರಾಧಿಕಾರದಲ್ಲಿ 30 ದಿನಗಳು ಕಳೆಯುತ್ತವೆ.",
+        "transferNoReply": "ರವಾನೆಯ ನಂತರದ ಮೌನವನ್ನು ಕಲ್ಪಿತ ನಿರಾಕರಣೆ ಎಂದು ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ.",
+        "directNoReplyClock": "CPIO ಯಿಂದ ಯಾವುದೇ ಉತ್ತರ ಬಾರದೆ 30 ದಿನಗಳು ಕಳೆಯುತ್ತವೆ.",
+        "directNoReply": "ಯಾವುದೇ ಉತ್ತರ ಇಲ್ಲ; ಕಾಯ್ದೆಯು ಇದನ್ನು ನಿರಾಕರಣೆ ಎಂದು ಪರಿಗಣಿಸುತ್ತದೆ.",
+        "deemedRefusal": "ಎರಡೂ ವಿಧದ ಮೌನವು ಅದೇ ಎರಡು ಪರಿಹಾರಗಳಿಗೆ ದಾರಿ ತೆರೆಯುತ್ತದೆ.",
+        "deemedAppealClock": "ಕಲ್ಪಿತ ನಿರಾಕರಣೆಯ ವಿರುದ್ಧ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಲು 30 ದಿನಗಳು.",
+        "noTimeLimit": "ವಿಭಾಗ 18 ರ ದೂರಿಗೆ ಸಲ್ಲಿಕೆ ಕಾಲಮಿತಿ ಇಲ್ಲ.",
+        "complaint": "ಆಯೋಗವು ಅಧಿಕಾರಿಗೆ ದಂಡ ವಿಧಿಸಬಹುದು; ಆದರೆ ಮಾಹಿತಿಯನ್ನು ಬಿಡುಗಡೆ ಮಾಡಲು ಆದೇಶಿಸಬಲ್ಲದು ಮೇಲ್ಮನವಿ ಮಾತ್ರ.",
+        "firstAppeal": "CPIO ಗಿಂತ ಹಿರಿಯ ಅಧಿಕಾರಿಯಾದ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರವು ಇದನ್ನು ವಿಚಾರಣೆ ನಡೆಸುತ್ತದೆ.",
+        "decisionClock": "ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರವು 30 ದಿನಗಳಲ್ಲಿ ಅಥವಾ ಕಾರಣಗಳೊಂದಿಗೆ 45 ದಿನಗಳಲ್ಲಿ ತೀರ್ಮಾನಿಸಬೇಕು.",
+        "decision": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರವು ತನ್ನ ಆದೇಶ ಹೊರಡಿಸುತ್ತದೆ.",
+        "appealSatisfied": "ಮೇಲ್ಮನವಿ ಯಶಸ್ವಿಯಾಗುತ್ತದೆ ಮತ್ತು ಮಾಹಿತಿ ಬಿಡುಗಡೆಗೊಳ್ಳುತ್ತದೆ.",
+        "appealNotSatisfied": "ಆದೇಶವು ಇನ್ನೂ ನೀವು ಕೋರಿದ ಮಾಹಿತಿಯನ್ನು ತಡೆಹಿಡಿಯುತ್ತದೆ.",
+        "secondAppealClock": "ಮೇಲ್ಮನವಿ ಆದೇಶದಿಂದ 90 ದಿನಗಳೊಳಗೆ ಆಯೋಗವನ್ನು ಸಂಪರ್ಕಿಸಬಹುದು.",
+        "noDecisionClock": "ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರದಿಂದ ಆದೇಶವಿಲ್ಲದೆ 45 ದಿನಗಳು ಕಳೆಯುತ್ತವೆ.",
+        "noDecision": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿಗೆ ಯಾವುದೇ ತೀರ್ಮಾನ ಆಗುವುದಿಲ್ಲ.",
+        "noDecisionSecondAppealClock": "ತೀರ್ಮಾನ ಬಾಕಿಯಾಗಿದ್ದ ದಿನಾಂಕದಿಂದ 90 ದಿನಗಳನ್ನು ಎಣಿಸಲಾಗುತ್ತದೆ.",
+        "secondAppeal": "ಕೇಂದ್ರ ಅಥವಾ ರಾಜ್ಯ ಮಾಹಿತಿ ಆಯೋಗವು ತೀರ್ಮಾನಿಸುವ ಕೊನೆಯ ಕಾನೂನುಬದ್ಧ ಹಂತ."
+      }
+    }
+  },
+  "secondAppeal": {
+    "commission": "ಕೇಂದ್ರ ಮಾಹಿತಿ ಆಯೋಗ",
+    "title": "ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ",
+    "subtitle": "ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿಗಳನ್ನು RTI ಆನ್‌ಲೈನ್ ಪೋರ್ಟಲ್ ಅಲ್ಲ, ಕೇಂದ್ರ ಮಾಹಿತಿ ಆಯೋಗ ನಿರ್ವಹಿಸುತ್ತದೆ.",
+    "leavingTitle": "ನೀವು RTI ಆನ್‌ಲೈನ್‌ನಿಂದ ನಿರ್ಗಮಿಸುತ್ತಿದ್ದೀರಿ",
+    "leavingDescription": "RTI ಆನ್‌ಲೈನ್ RTI ಅರ್ಜಿಗಳು ಮತ್ತು ಪ್ರಥಮ ಮೇಲ್ಮನವಿಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ. ಕೇಂದ್ರ ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿಗಳನ್ನು CIC ಸ್ವತಂತ್ರವಾಗಿ ಸ್ವೀಕರಿಸಿ ತೀರ್ಮಾನಿಸುತ್ತದೆ.",
+    "whenTitle": "ನೀವು ಯಾವಾಗ ಸಲ್ಲಿಸಬಹುದು",
+    "documentsTitle": "ಇವುಗಳನ್ನು ಸಿದ್ಧವಾಗಿಡಿ",
+    "eligibleDecision": "ನಿಮ್ಮ ಪ್ರಥಮ ಮೇಲ್ಮನವಿಯ ತೀರ್ಮಾನ ಸಿಕ್ಕಿದೆ ಮತ್ತು ಅದರಿಂದ ನಿಮಗೆ ತೃಪ್ತಿಯಿಲ್ಲ.",
+    "eligibleNoDecision": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿದ 45 ದಿನಗಳೊಳಗೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರದ ತೀರ್ಮಾನ ಬಂದಿಲ್ಲ.",
+    "eligibleTime": "ತೀರ್ಮಾನದ ದಿನಾಂಕದಿಂದ—ಅಥವಾ ತೀರ್ಮಾನವಾಗಬೇಕಿದ್ದ ದಿನಾಂಕದಿಂದ—90 ದಿನಗಳೊಳಗೆ ಸಲ್ಲಿಸಿ. ಸಮರ್ಪಕ ಕಾರಣವಿದ್ದರೆ ಆಯೋಗವು ವಿಳಂಬದ ಸಲ್ಲಿಕೆಯನ್ನು ಪರಿಗಣಿಸಬಹುದು.",
+    "documentRequest": "CPIO ಗೆ ಸಲ್ಲಿಸಿದ ಮೂಲ RTI ಅರ್ಜಿಯ ಪ್ರತಿ.",
+    "documentCpioReply": "ಉತ್ತರ ಸಿಕ್ಕಿದ್ದರೆ, CPIO ಉತ್ತರದ ಪ್ರತಿ.",
+    "documentFirstAppeal": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಮತ್ತು ಸಿಕ್ಕಿದ್ದರೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರದ ಆದೇಶದ ಪ್ರತಿ.",
+    "documentOther": "ಮೇಲ್ಮನವಿಯಲ್ಲಿ ಅವಲಂಬಿಸಿರುವ ಇತರ ದಾಖಲೆಗಳು ಹಾಗೂ ದಾಖಲೆಗಳ ಸೂಚ್ಯಂಕ.",
+    "feeNote": "CIC ಮುಂದೆ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿಗೆ ಶುಲ್ಕ ಇರುವುದಿಲ್ಲ. ರಾಜ್ಯ ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಕ್ಕೆ ಸಂಬಂಧಿಸಿದರೆ, ಸಂಬಂಧಿತ ರಾಜ್ಯ ಮಾಹಿತಿ ಆಯೋಗವನ್ನು ಬಳಸಿ.",
+    "continueToCic": "CIC ಪೋರ್ಟಲ್‌ಗೆ ಮುಂದುವರಿಯಿರಿ"
+  },
+  "login": {
+    "welcome": "ಮರಳಿ ಸ್ವಾಗತ",
+    "subtitle": "ವಿನಂತಿಗಳನ್ನು ಸಲ್ಲಿಸಲು, ಮೇಲ್ಮನವಿಗಳನ್ನು ದಾಖಲಿಸಲು ಮತ್ತು ನಿಮ್ಮ RTI ಅರ್ಜಿಗಳನ್ನು ಗಮನಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+    "demoAccount": "ಡೆಮೊ ಖಾತೆ",
+    "username": "ಬಳಕೆದಾರ ಹೆಸರು",
+    "password": "ಗುಪ್ತಪದ",
+    "enterUsername": "ನಿಮ್ಮ ಬಳಕೆದಾರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ",
+    "enterPassword": "ನಿಮ್ಮ ಗುಪ್ತಪದವನ್ನು ನಮೂದಿಸಿ",
+    "forgotPassword": "ಗುಪ್ತಪದ ಮರೆತಿರುವಿರಾ?",
+    "securityCheck": "ಭದ್ರತಾ ಪರಿಶೀಲನೆ",
+    "enterCaptcha": "ಕ್ಯಾಪ್ಚಾ ನಮೂದಿಸಿ",
+    "refreshSecurity": "ಭದ್ರತಾ ಪರಿಶೀಲನೆಯನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "signIn": "ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    "orContinue": "ಅಥವಾ ಇದರೊಂದಿಗೆ ಮುಂದುವರಿಯಿರಿ",
+    "signInDigiLocker": "DigiLocker ಮೂಲಕ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    "prototypeNote": "ಈ ಮಾದರಿಯು ಕೇವಲ ನಕಲಿ ಖಾತೆ ಮಾಹಿತಿಯನ್ನು ಬಳಸುತ್ತದೆ.",
+    "secureSession": "ಸುರಕ್ಷಿತ ಡೆಮೊ ಸೆಷನ್",
+    "securityMismatch": "ಭದ್ರತಾ ಪರಿಶೀಲನೆ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "showPassword": "ಗುಪ್ತಪದ ತೋರಿಸಿ",
+    "hidePassword": "ಗುಪ್ತಪದ ಮರೆಮಾಡಿ",
+    "invalidCredentials": "ಕೆಳಗೆ ತೋರಿಸಿರುವ ಡೆಮೊ ವಿವರಗಳನ್ನು ಅಥವಾ ನೀವು ರಚಿಸಿದ ಖಾತೆಯನ್ನು ಬಳಸಿ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+    "unavailable": "ಸೈನ್ ಇನ್ ಸೇವೆಯನ್ನು ತಲುಪಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "newHere": "RTI ಆನ್‌ಲೈನ್‌ಗೆ ಹೊಸಬರೇ?",
+    "createAccount": "ಖಾತೆ ರಚಿಸಿ"
+  },
+  "signup": {
+    "title": "Create your account",
+    "subtitle": "Register once to file RTI requests, track replies, and keep every application in one place.",
+    "stepLabel": "Step {{current}} of {{total}}",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "As it appears on your official records",
+    "email": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "mobile": "Mobile Number",
+    "mobilePlaceholder": "10-digit number",
+    "username": "Username",
+    "usernamePlaceholder": "Choose a username",
+    "usernameHint": "4 to 20 characters: lowercase letters, digits, dots or underscores.",
+    "password": "Password",
+    "passwordPlaceholder": "Create a password",
+    "confirmPassword": "Confirm Password",
+    "confirmPlaceholder": "Re-enter your password",
+    "strengthWeak": "Weak",
+    "strengthFair": "Fair",
+    "strengthStrong": "Strong",
+    "terms": "I confirm these details are correct and accept the portal terms of use.",
+    "createAccount": "Create Account",
+    "verifyTitle": "Verify your details",
+    "verifySubtitle": "Enter the one-time code to activate your account.",
+    "codeSentTo": "Verification code sent to",
+    "demoCode": "Demo code",
+    "enterCode": "Enter the 6-digit code",
+    "digitLabel": "Digit {{position}} of 6",
+    "resendIn": "You can request a new code in {{seconds}}",
+    "resendCode": "Send a new code",
+    "changeDetails": "Change details",
+    "verifyAndCreate": "Verify and Create Account",
+    "alreadyRegistered": "Already registered?",
+    "usernameTaken": "That username is already registered. Please choose another.",
+    "emailTaken": "An account already exists with that email address.",
+    "unavailable": "We could not create your account. Please try again.",
+    "errors": {
+      "fullName": "Please enter your full name.",
+      "email": "Please enter a valid email address.",
+      "mobile": "Please enter a valid 10-digit mobile number.",
+      "username": "Use 4 to 20 characters: lowercase letters, digits, dots or underscores.",
+      "password": "Use at least 8 characters, including a letter and a number.",
+      "confirmPassword": "Passwords do not match.",
+      "captcha": "The security check does not match. Please try again.",
+      "terms": "Please accept the terms of use to continue.",
+      "otpIncomplete": "Enter all six digits of the code.",
+      "otpMismatch": "That code is not correct. Check the code and try again."
+    }
+  },
+  "status": {
+    "title": "View RTI Request Status",
+    "subtitle": "Check the progress of an RTI application or appeal without signing in.",
+    "lookupTitle": "Request Lookup",
+    "lookupDescription": "Enter the registration number and email address submitted with your RTI request.",
+    "registrationNumber": "Registration Number",
+    "emailAddress": "Email Address",
+    "captcha": "Captcha",
+    "enterCaptcha": "Enter captcha",
+    "refreshCaptcha": "Refresh captcha",
+    "checkStatus": "Check Status",
+    "requestDetails": "Request Details",
+    "lastUpdated": "The status below was last updated on {{date}}.",
+    "printApplication": "Print Application",
+    "applicant": "Applicant",
+    "publicAuthority": "Public Authority",
+    "dateSubmitted": "Date Submitted",
+    "informationRequested": "Information Requested",
+    "currentStatus": "Current Status",
+    "nextAction": "Next Action",
+    "latestUpdate": "Latest update",
+    "latestUpdateText": "Your application is currently marked as {{status}}. {{nextAction}}.",
+    "errorRegistration": "Enter your registration number.",
+    "errorEmail": "Enter the email address used for this request.",
+    "errorCaptcha": "Captcha does not match. Please try again.",
+    "errorLookup": "No request matches those details. Check the registration number and email address."
+  },
+  "requestForm": {
+    "title": "ಆನ್‌ಲೈನ್ RTI ವಿನಂತಿ ನಮೂನೆ",
+    "mandatoryNote": "ನಕ್ಷತ್ರ ಚಿಹ್ನೆ ({{asterisk}}) ಇರುವ ಎಲ್ಲ ಕಡ್ಡಾಯ ಕ್ಷೇತ್ರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
+    "profileFilled": "ನಿಮ್ಮ ಅರ್ಜಿದಾರರ ಪ್ರೊಫೈಲ್‌ನಿಂದ ವೈಯಕ್ತಿಕ ವಿವರಗಳನ್ನು ತುಂಬಲಾಗಿದೆ. ಅಗತ್ಯವಿದ್ದರೆ ಈ ವಿನಂತಿಗೆ ಅವುಗಳನ್ನು ಬದಲಾಯಿಸಬಹುದು.",
+    "filingTo": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳ ಡೈರೆಕ್ಟರಿಯಿಂದ ಆಯ್ಕೆಮಾಡಿದ {{authority}} ಗೆ ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ. ಕೆಳಗೆ ಬದಲಾಯಿಸಬಹುದು.",
+    "authorityDetails": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರದ ವಿವರಗಳು",
+    "personalDetails": "RTI ಅರ್ಜಿದಾರರ ವೈಯಕ್ತಿಕ ವಿವರಗಳು",
+    "requestDetails": "ವಿನಂತಿಯ ವಿವರಗಳು",
+    "ministry": "ಸಚಿವಾಲಯ/ಇಲಾಖೆ/ಶ್ರೇಷ್ಠ ಸಂಸ್ಥೆ",
+    "selectAuthority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "searchMinistry": "ಸಚಿವಾಲಯ/ಇಲಾಖೆ ಹುಡುಕಿ",
+    "searchAuthority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ ಹುಡುಕಿ",
+    "loadingDirectory": "ಡೈರೆಕ್ಟರಿ ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "directoryError": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳ ಡೈರೆಕ್ಟರಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "noMatches": "ಹೊಂದುವ ಆಯ್ಕೆ ಸಿಗಲಿಲ್ಲ.",
+    "firstMatches": "ಮೊದಲ 100 ಹೊಂದಾಣಿಕೆಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ. ಪಟ್ಟಿಯನ್ನು ಕಿರಿದಾಗಿಸಲು ಟೈಪ್ ಮಾಡುವುದನ್ನು ಮುಂದುವರಿಸಿ.",
+    "email": "ಇಮೇಲ್ ID",
+    "enterEmail": "ಇಮೇಲ್ ID ನಮೂದಿಸಿ",
+    "mobile": "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ",
+    "enterMobile": "10 ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ",
+    "confirmEmail": "ಇಮೇಲ್ ID ದೃಢೀಕರಿಸಿ",
+    "reenterEmail": "ಇಮೇಲ್ ID ಮರುನಮೂದಿಸಿ",
+    "name": "ಹೆಸರು",
+    "enterName": "ಪೂರ್ಣ ಹೆಸರು ನಮೂದಿಸಿ",
+    "gender": "ಲಿಂಗ",
+    "male": "ಪುರುಷ",
+    "female": "ಮಹಿಳೆ",
+    "thirdGender": "ತೃತೀಯ ಲಿಂಗ",
+    "address": "ವಿಳಾಸ",
+    "line": "ಸಾಲು {{number}}",
+    "pinCode": "PIN ಕೋಡ್",
+    "enterPin": "6 ಅಂಕಿಯ PIN ಕೋಡ್ ನಮೂದಿಸಿ",
+    "country": "ದೇಶ",
+    "state": "ರಾಜ್ಯ / ಕೇಂದ್ರಾಡಳಿತ ಪ್ರದೇಶ",
+    "selectState": "ರಾಜ್ಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "statesGroup": "ರಾಜ್ಯಗಳು",
+    "unionTerritoriesGroup": "ಕೇಂದ್ರಾಡಳಿತ ಪ್ರದೇಶಗಳು",
+    "areaType": "ಪ್ರದೇಶದ ವಿಧ",
+    "rural": "ಗ್ರಾಮೀಣ",
+    "urban": "ನಗರ",
+    "educationalStatus": "ಶೈಕ್ಷಣಿಕ ಸ್ಥಿತಿ",
+    "literate": "ಸಾಕ್ಷರ",
+    "illiterate": "ನಿರಕ್ಷರ",
+    "citizenship": "ಪೌರತ್ವ",
+    "india": "ಭಾರತ",
+    "indian": "ಭಾರತೀಯ",
+    "other": "ಇತರೆ",
+    "bplQuestion": "ಅರ್ಜಿದಾರರು ಬಡತನ ರೇಖೆಗಿಂತ ಕೆಳಗಿದ್ದಾರೆಯೇ?",
+    "yes": "ಹೌದು",
+    "no": "ಇಲ್ಲ",
+    "bplProof": "BPL ಪುರಾವೆಯನ್ನು ಲಗತ್ತಾಗಿ ಒದಗಿಸಬಹುದು.",
+    "bplCard": "BPL ಕಾರ್ಡ್ ಸಂಖ್ಯೆ",
+    "issueYear": "ನೀಡಿದ ವರ್ಷ",
+    "issuingAuthority": "ನೀಡಿದ ಪ್ರಾಧಿಕಾರ",
+    "noFeeBpl": "BPL ಅರ್ಜಿದಾರರಿಗೆ RTI ಶುಲ್ಕ ಅಗತ್ಯವಿಲ್ಲ.",
+    "feeRequired": "ನೀವು ₹10 RTI ಶುಲ್ಕವನ್ನು ಪಾವತಿಸಬೇಕು.",
+    "requestText": "RTI ವಿನಂತಿ ಅರ್ಜಿಯ ಪಠ್ಯ",
+    "requestTextNote": "ಸೂಚನೆ: RTI ವಿನಂತಿ ಪಠ್ಯದಲ್ಲಿ ಅಕ್ಷರಗಳು, ಅಂಕಿಗಳು ಮತ್ತು ಪಟ್ಟಿ ಮಾಡಲಾದ ವಿಶೇಷ ಅಕ್ಷರಗಳಿಗೆ ಮಾತ್ರ ಅವಕಾಶವಿದೆ.",
+    "requestTextPlaceholder": "3,000 ಅಕ್ಷರಗಳವರೆಗೆ RTI ವಿನಂತಿಯ ಪಠ್ಯವನ್ನು ನಮೂದಿಸಿ",
+    "supportingDocument": "ಪೋಷಕ ದಾಖಲೆ",
+    "pdfLimit": "PDF ಮಾತ್ರ, 1 MB ವರೆಗೆ",
+    "bplUpload": "ಅನ್ವಯಿಸಿದರೆ BPL ಸ್ಥಿತಿಯ ಪುರಾವೆಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
+    "securityCode": "ಭದ್ರತಾ ಕೋಡ್ ನಮೂದಿಸಿ",
+    "enterCode": "ಕೋಡ್ ನಮೂದಿಸಿ",
+    "refreshSecurity": "ಭದ್ರತಾ ಕೋಡ್ ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "paymentHelp": "ಪಾವತಿ ವಿಫಲವಾಗಿದೆಯೇ ಅಥವಾ ಸ್ಥಿತಿ ನವೀಕರಿಸಿಲ್ಲವೇ? ನಿಮ್ಮ ಪಾವತಿಯನ್ನು ಹೊಂದಾಣಿಕೆ ಮಾಡಿ.",
+    "submit": "ಸಲ್ಲಿಸಿ",
+    "makePayment": "ಪಾವತಿ ಮಾಡಿ",
+    "reset": "ಮರುಹೊಂದಿಸಿ",
+    "errorEmailMismatch": "ಇಮೇಲ್ ವಿಳಾಸಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ.",
+    "errorSecurity": "ಭದ್ರತಾ ಕೋಡ್ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "errorAuthority": "ಡೈರೆಕ್ಟರಿಯಿಂದ ಸಚಿವಾಲಯ/ಇಲಾಖೆ ಮತ್ತು ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ."
+  },
+  "requestReview": {
+    "title": "ನಿಮ್ಮ RTI ವಿನಂತಿಯನ್ನು ಪರಿಶೀಲಿಸಿ",
+    "subtitle": "{{nextStep}} ಗೆ ಮೊದಲು ಕೆಳಗಿನ ವಿವರಗಳನ್ನು ದೃಢೀಕರಿಸಿ.",
+    "authority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ",
+    "applicant": "ಅರ್ಜಿದಾರರ ವಿವರಗಳು",
+    "request": "ವಿನಂತಿಯ ವಿವರಗಳು",
+    "edit": "ತಿದ್ದು",
+    "ministry": "ಸಚಿವಾಲಯ / ಇಲಾಖೆ",
+    "publicAuthority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ",
+    "fullName": "ಪೂರ್ಣ ಹೆಸರು",
+    "email": "ಇಮೇಲ್ ವಿಳಾಸ",
+    "mobile": "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ",
+    "gender": "ಲಿಂಗ",
+    "address": "ವಿಳಾಸ",
+    "location": "ರಾಜ್ಯ, PIN ಕೋಡ್ ಮತ್ತು ದೇಶ",
+    "areaType": "ಪ್ರದೇಶದ ವಿಧ",
+    "educationalStatus": "ಶೈಕ್ಷಣಿಕ ಸ್ಥಿತಿ",
+    "citizenship": "ಪೌರತ್ವ",
+    "bplStatus": "BPL ಸ್ಥಿತಿ",
+    "bplApplicant": "BPL ಅರ್ಜಿದಾರ",
+    "notBplApplicant": "BPL ಅರ್ಜಿದಾರರಲ್ಲ",
+    "fee": "RTI ಶುಲ್ಕ",
+    "feeRequired": "₹10.00 ಪಾವತಿಸಬೇಕು",
+    "noFee": "ಶುಲ್ಕ ಅಗತ್ಯವಿಲ್ಲ",
+    "bplCard": "BPL ಕಾರ್ಡ್ ಸಂಖ್ಯೆ",
+    "bplDocument": "ಪೋಷಕ ದಾಖಲೆ",
+    "subject": "ವಿನಂತಿಯ ವಿಷಯ",
+    "requestText": "RTI ವಿನಂತಿಯ ಪಠ್ಯ",
+    "reviewRequest": "ವಿನಂತಿ ಪರಿಶೀಲಿಸಿ",
+    "submitRequest": "ವಿನಂತಿ ಸಲ್ಲಿಸಿ",
+    "continueToPayment": "ಪಾವತಿಗೆ ಮುಂದುವರಿಯಿರಿ",
+    "paymentNote": "ಮುಂದಿನ ಪರದೆಯಲ್ಲಿ ನಕಲಿ ಪಾವತಿ ಫಲಿತಾಂಶವನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತೀರಿ.",
+    "submitNote": "ನಿಮ್ಮ BPL ವಿನಂತಿಯು ಪಾವತಿಯಿಲ್ಲದೆ ಸಲ್ಲಿಕೆಯಾಗುತ್ತದೆ.",
+    "backToForm": "ನಮೂನೆಗೆ ಹಿಂದಿರುಗಿ"
+  },
+  "formDraft": {
+    "restored": "ಉಳಿಸಿದ ಕರಡನ್ನು ಈ ಸಾಧನದಲ್ಲಿ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ.",
+    "saving": "ಕರಡು ಉಳಿಸಲಾಗುತ್ತಿದೆ…",
+    "saved": "ಈಗಷ್ಟೇ ಉಳಿಸಲಾಗಿದೆ",
+    "discard": "ಕರಡು ತ್ಯಜಿಸಿ",
+    "attachment": "ಗೌಪ್ಯತೆಗಾಗಿ, ಲಗತ್ತುಗಳನ್ನು ಈ ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುವುದಿಲ್ಲ. ದಯವಿಟ್ಟು ಫೈಲ್ ಅನ್ನು ಮತ್ತೆ ಸೇರಿಸಿ."
+  },
+  "formGuidance": {
+    "authority": "ದಾಖಲೆಗಳನ್ನು ಹೊಂದಿರುವ ಕಚೇರಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ. ಖಚಿತವಿಲ್ಲದಿದ್ದರೆ, ವ್ಯಕ್ತಿಯ ಹೆಸರಿನಿಂದಲ್ಲದೆ ಇಲಾಖೆ ಅಥವಾ ವಿಷಯದ ಮೂಲಕ ಹುಡುಕಿ.",
+    "bpl": "ಮಾನ್ಯ BPL ಪುರಾವೆಯನ್ನು ನೀಡಲು ಸಾಧ್ಯವಾದರೆ ಮಾತ್ರ ಹೌದು ಆಯ್ಕೆಮಾಡಿ. BPL ಅರ್ಜಿದಾರರು RTI ಶುಲ್ಕ ಪಾವತಿಸುವುದಿಲ್ಲ.",
+    "requestText": "ಈಗಿರುವ ದಾಖಲೆಗಳು ಅಥವಾ ದಸ್ತಾವೇಜುಗಳನ್ನು ಕೇಳಿ. ಅವಧಿ, ಸ್ಥಳ ಮತ್ತು ಬೇಕಾದ ನಿರ್ದಿಷ್ಟ ಮಾಹಿತಿಯನ್ನು ತಿಳಿಸಿ; ವಿವರಿಸಲು ಅಥವಾ ಉತ್ತರ ಸೃಷ್ಟಿಸಲು ಪ್ರಾಧಿಕಾರವನ್ನು ಕೇಳಬೇಡಿ.",
+    "appealGround": "ನೀವು ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸುತ್ತಿರುವುದಕ್ಕೆ ಹತ್ತಿರದ ಕಾರಣವನ್ನು ಆಯ್ಕೆಮಾಡಿ. ನಂತರ ಮೂಲ ಉತ್ತರದಲ್ಲಿ ಏನು ವಿಳಂಬವಾಯಿತು, ನಿರಾಕರಿಸಲಾಯಿತು, ಅಪೂರ್ಣವಾಗಿತ್ತು ಅಥವಾ ತಪ್ಪಾಗಿತ್ತು ಎಂಬುದನ್ನು ಸಂಕ್ಷಿಪ್ತವಾಗಿ ವಿವರಿಸಿ."
+  },
+  "aiRewrite": {
+    "action": "AI ಯಿಂದ ಮರುಬರೆಯಿರಿ",
+    "rewriting": "ಮರುಬರೆಯಲಾಗುತ್ತಿದೆ...",
+    "helper": "ಒಂದು ಸರಳ ಕರಡಿನಿಂದ ಆರಂಭಿಸಿ. AI ಪದಗಳನ್ನು ಹೆಚ್ಚು ಸ್ಪಷ್ಟ ಮತ್ತು ಔಪಚಾರಿಕವಾಗಿಸುತ್ತದೆ.",
+    "suggestion": "ಸೂಚಿತ ಮರುಬರಹ",
+    "review": "ಬಳಸುವ ಮೊದಲು ಸೂಚಿಸಿದ ಪದಗಳನ್ನು ಪರಿಶೀಲಿಸಿ. ನೀವು ಈ ಮರುಬರಹವನ್ನು ಆಯ್ಕೆಮಾಡುವವರೆಗೆ ನಿಮ್ಮ ಮೂಲ ಕರಡು ಬದಲಾಗುವುದಿಲ್ಲ.",
+    "useRewrite": "ಮರುಬರಹ ಬಳಸಿ",
+    "keepOriginal": "ಮೂಲವನ್ನು ಉಳಿಸಿ",
+    "empty": "ಮೊದಲು ಒಂದು ಸರಳ ಕರಡು ಬರೆಯಿರಿ, ನಂತರ ಅದನ್ನು ಪರಿಷ್ಕರಿಸಲು AI ಬಳಸಿ.",
+    "error": "ಈ ಕರಡನ್ನು ಮರುಬರೆಯಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+  },
+  "firstAppeal": {
+    "title": "ಆನ್‌ಲೈನ್ RTI ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ನಮೂನೆ",
+    "lookupDescription": "ನೀವು ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಲು ಬಯಸುವ ಮೂಲ ಆನ್‌ಲೈನ್ RTI ವಿನಂತಿಯ ನೋಂದಣಿ ಸಂಖ್ಯೆ ಮತ್ತು ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ.",
+    "registrationNumber": "RTI ವಿನಂತಿ ನೋಂದಣಿ ಸಂಖ್ಯೆ",
+    "helpRegistration": "ನೋಂದಣಿ ಸಂಖ್ಯೆಯ ಸಹಾಯ",
+    "emailPrompt": "ಇಮೇಲ್ ID ನಮೂದಿಸಿ",
+    "securityCode": "ಭದ್ರತಾ ಕೋಡ್ ನಮೂದಿಸಿ",
+    "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "submit": "ಸಲ್ಲಿಸಿ",
+    "reset": "ಮರುಹೊಂದಿಸಿ",
+    "errorRegistration": "ಮೂಲ ವಿನಂತಿಯ ನೋಂದಣಿ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.",
+    "errorEmail": "ಆ ವಿನಂತಿಗೆ ಬಳಸಿದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ.",
+    "errorSecurity": "ಭದ್ರತಾ ಕೋಡ್ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "errorLookup": "ಈ ವಿವರಗಳಿಗೆ ಹೊಂದುವ ಆನ್‌ಲೈನ್ RTI ವಿನಂತಿ ಸಿಗಲಿಲ್ಲ. ನೋಂದಣಿ ಸಂಖ್ಯೆ ಮತ್ತು ಅದಕ್ಕೆ ಬಳಸಿದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ಪರಿಶೀಲಿಸಿ.",
+    "mandatoryNote": "ಸೂಚನೆ: * ಗುರುತಿಸಿರುವ ಕ್ಷೇತ್ರಗಳು ಕಡ್ಡಾಯ.",
+    "appealingAgainst": "{{id}} — {{subject}} ವಿರುದ್ಧ ಮೇಲ್ಮನವಿ.",
+    "publicAuthorityDetails": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರದ ವಿವರಗಳು",
+    "appellantDetails": "ಮೇಲ್ಮನವಿದಾರರ ವೈಯಕ್ತಿಕ ವಿವರಗಳು",
+    "appealDetails": "ಮೇಲ್ಮನವಿಯ ವಿವರಗಳು",
+    "requestDate": "ವಿನಂತಿ ನೋಂದಣಿ ದಿನಾಂಕ",
+    "smsHint": "SMS ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸ್ವೀಕರಿಸಲು",
+    "ground": "ಮೇಲ್ಮನವಿಯ ಆಧಾರ",
+    "select": "-- ಆಯ್ಕೆಮಾಡಿ --",
+    "refused": "ಕೋರಿದ ಮಾಹಿತಿಗೆ ಪ್ರವೇಶ ನಿರಾಕರಿಸಲಾಗಿದೆ",
+    "noResponse": "ಕಾಲಮಿತಿಯೊಳಗೆ ಉತ್ತರ ಬಂದಿಲ್ಲ",
+    "unreasonableFee": "ಪಾವತಿಸಬೇಕಾದ ಶುಲ್ಕದ ಮೊತ್ತವು ಅಸಮಂಜಸವಾಗಿದೆ",
+    "incompleteInfo": "ಅಪೂರ್ಣ, ತಪ್ಪು ದಾರಿಗೆಳೆಯುವ ಅಥವಾ ಸುಳ್ಳು ಮಾಹಿತಿ ಒದಗಿಸಲಾಗಿದೆ",
+    "otherGround": "ಬೇರೆ ಯಾವುದೇ ಆಧಾರ",
+    "appealTextHint": "500 ಅಕ್ಷರಗಳವರೆಗೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪಠ್ಯವನ್ನು ನಮೂದಿಸಿ.",
+    "appealTextNote": "ಸೂಚನೆ: ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪಠ್ಯದಲ್ಲಿ ಅಕ್ಷರಗಳು, ಅಂಕಿಗಳು ಮತ್ತು ಪಟ್ಟಿ ಮಾಡಲಾದ ವಿಶೇಷ ಅಕ್ಷರಗಳಿಗೆ ಮಾತ್ರ ಅವಕಾಶವಿದೆ.",
+    "appealText": "RTI ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಅರ್ಜಿಯ ಪಠ್ಯ"
+  },
+  "payment": {
+    "title": "ಪಾವತಿ ಹೊಂದಾಣಿಕೆ",
+    "subtitle": "ವಿಫಲವಾದ RTI ವಿನಂತಿ ಪಾವತಿಗಳ ಹೊಂದಾಣಿಕೆ. ಹಣ ಕಡಿತಗೊಂಡರೂ ನೋಂದಣಿ ಸಂಖ್ಯೆ ಸಿಗದ ಶುಲ್ಕವನ್ನು ಪತ್ತೆಹಚ್ಚಿ.",
+    "locateTitle": "ನಿಮ್ಮ ಪಾವತಿಯನ್ನು ಪತ್ತೆಹಚ್ಚಿ",
+    "locateDescription": "RTI ವಿನಂತಿ ಅಥವಾ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಲು ಹಿಂದೆ ಬಳಸಿದ ಇಮೇಲ್ ID ಮತ್ತು ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.",
+    "mandatory": "* ಗುರುತಿಸಿರುವ ಕ್ಷೇತ್ರಗಳು ಕಡ್ಡಾಯ.",
+    "mobileOptional": "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ (ಐಚ್ಛಿಕ)",
+    "allCaseInsensitive": "ಎಲ್ಲ ಅಕ್ಷರಗಳು ದೊಡ್ಡ/ಸಣ್ಣ ಅಕ್ಷರ ಭೇದವಿಲ್ಲದವು.",
+    "locate": "ಪಾವತಿ ಪತ್ತೆಹಚ್ಚಿ",
+    "newLookup": "ಹೊಸ ಹುಡುಕಾಟ",
+    "transactionId": "ವಹಿವಾಟು ID",
+    "dateTime": "ದಿನಾಂಕ ಮತ್ತು ಸಮಯ",
+    "amount": "ಮೊತ್ತ",
+    "paymentMethod": "ಪಾವತಿ ವಿಧಾನ",
+    "paidBy": "ಪಾವತಿಸಿದವರು",
+    "publicAuthority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ",
+    "paidFor": "ಯಾವುದಕ್ಕಾಗಿ ಪಾವತಿಸಲಾಗಿದೆ",
+    "refundReference": "ಮರುಪಾವತಿ ಉಲ್ಲೇಖ",
+    "meaning": "ಇದರ ಅರ್ಥವೇನು?",
+    "returnHome": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ",
+    "statusUpdated": "ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+    "checkLatest": "ಇತ್ತೀಚಿನ ಸ್ಥಿತಿ ಪರಿಶೀಲಿಸಿ",
+    "contactHelpdesk": "ಪಾವತಿ ನಿರಂತರವಾಗಿ ವಿಫಲವಾಗುತ್ತಿದೆಯೇ ಅಥವಾ ಸ್ಥಿತಿ ನವೀಕರಿಸುತ್ತಿಲ್ಲವೇ?",
+    "contactLink": "ಸಹಾಯ ಕೇಂದ್ರವನ್ನು ಸಂಪರ್ಕಿಸಿ",
+    "errorEmail": "ಈ ಪಾವತಿಗೆ ಬಳಸಿದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ.",
+    "errorCaptcha": "ಕ್ಯಾಪ್ಚಾ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "errorMobile": "ಇದು ಪಾವತಿಗೆ ಬಳಸಿದ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಗೆ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ. ಖಚಿತವಿಲ್ಲದಿದ್ದರೆ ಖಾಲಿ ಬಿಡಿ.",
+    "errorLookup": "ಈ ವಿವರಗಳಿಗೆ ಹೊಂದುವ ವಿಫಲ ಪಾವತಿ ಸಿಗಲಿಲ್ಲ. ಇಮೇಲ್ ವಿಳಾಸ ಪರಿಶೀಲಿಸಿ, ಅಥವಾ ಮೊತ್ತ ಕಡಿತಗೊಂಡಿದ್ದರೆ ಸಹಾಯ ಕೇಂದ್ರವನ್ನು ಸಂಪರ್ಕಿಸಿ."
+  },
+  "history": {
+    "title": "RTI ವಿನಂತಿಗಳ ಇತಿಹಾಸ",
+    "subtitle": "{{name}} ಸಲ್ಲಿಸಿದ ಪ್ರತಿಯೊಂದು RTI ಅರ್ಜಿಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಗಮನಿಸಿ.",
+    "totalRequests": "ಒಟ್ಟು ವಿನಂತಿಗಳು",
+    "pending": "ಬಾಕಿ ಇದೆ",
+    "replies": "ಉತ್ತರಗಳು ಸಿಕ್ಕಿವೆ",
+    "appeals": "ಮೇಲ್ಮನವಿಗಳು",
+    "allRequests": "ಎಲ್ಲ ವಿನಂತಿಗಳು",
+    "searchAndFilter": "ವಿನಂತಿಯ ಮೂಲಕ ಹುಡುಕಿ, ನಂತರ ಇತ್ತೀಚಿನ ಅರ್ಜಿ ಸ್ಥಿತಿಯ ಮೂಲಕ ಶೋಧಿಸಿ.",
+    "searchLabel": "ವಿನಂತಿಗಳ ಇತಿಹಾಸ ಹುಡುಕಿ",
+    "searchPlaceholder": "ವಿನಂತಿ ID, ವಿಷಯ ಅಥವಾ ಪ್ರಾಧಿಕಾರದ ಮೂಲಕ ಹುಡುಕಿ",
+    "filterLabel": "ಸ್ಥಿತಿಯ ಮೂಲಕ ವಿನಂತಿಗಳನ್ನು ಶೋಧಿಸಿ",
+    "allStatuses": "ಎಲ್ಲ ಸ್ಥಿತಿಗಳು",
+    "requestId": "ವಿನಂತಿ ID",
+    "subjectAuthority": "ವಿಷಯ / ಪ್ರಾಧಿಕಾರ",
+    "submitted": "ಸಲ್ಲಿಸಲಾಗಿದೆ",
+    "status": "ಸ್ಥಿತಿ",
+    "nextAction": "ಮುಂದಿನ ಕ್ರಮ",
+    "updated": "{{date}} ರಂದು ನವೀಕರಿಸಲಾಗಿದೆ",
+    "noMatches": "ನಿಮ್ಮ ಶೋಧಕಗಳಿಗೆ ಹೊಂದುವ RTI ವಿನಂತಿಗಳಿಲ್ಲ.",
+    "page": "ಪುಟ {{page}} / {{total}}",
+    "previous": "ಹಿಂದಿನದು",
+    "next": "ಮುಂದಿನದು",
+    "emptyTitle": "ಇನ್ನೂ ಯಾವುದೇ ವಿನಂತಿ ಸಲ್ಲಿಸಿಲ್ಲ",
+    "emptyBody": "ನೀವು RTI ವಿನಂತಿಯನ್ನು ಸಲ್ಲಿಸಿದ ನಂತರ, ಅದರ ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ ಮತ್ತು ಬಾಕಿ ಇರುವ ಮುಂದಿನ ಕ್ರಮದೊಂದಿಗೆ ಅದು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.",
+    "emptyCta": "ನಿಮ್ಮ ಮೊದಲ RTI ವಿನಂತಿ ಸಲ್ಲಿಸಿ",
+    "activeRequest": "ಸಕ್ರಿಯ ವಿನಂತಿಯ ಪ್ರಗತಿ",
+    "openDetail": "ವಿವರಗಳನ್ನು ತೆರೆಯಿರಿ"
+  },
+  "profile": {
+    "subtitle": "ಅರ್ಜಿದಾರರ ಪ್ರೊಫೈಲ್ · RTI ಅರ್ಜಿಗಳಿಗೆ ಬಳಸುವ ವೈಯಕ್ತಿಕ ಮತ್ತು ಸಂಪರ್ಕ ವಿವರಗಳು",
+    "edit": "ಪ್ರೊಫೈಲ್ ತಿದ್ದು",
+    "editing": "ಪ್ರೊಫೈಲ್ ತಿದ್ದುಪಡಿಸಲಾಗುತ್ತಿದೆ",
+    "updated": "ಈ ಡೆಮೊಗಾಗಿ ನಿಮ್ಮ ಅರ್ಜಿದಾರರ ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಲಾಗಿದೆ.",
+    "basic": "ಮೂಲ ಮಾಹಿತಿ",
+    "address": "ವಿಳಾಸದ ವಿವರಗಳು",
+    "additional": "ಹೆಚ್ಚುವರಿ ಮಾಹಿತಿ",
+    "account": "ಖಾತೆ ವಿವರಗಳು",
+    "verified": "ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+    "alternatePhone": "ಪರ್ಯಾಯ ದೂರವಾಣಿ ಸಂಖ್ಯೆ",
+    "countryName": "ದೇಶದ ಹೆಸರು",
+    "notApplicable": "ಅನ್ವಯಿಸುವುದಿಲ್ಲ",
+    "notProvided": "ಒದಗಿಸಲಾಗಿಲ್ಲ",
+    "save": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+    "descriptions": {
+      "core": "RTI ಸಂವಹನಕ್ಕಾಗಿ ನಿಮ್ಮ ಮೂಲ ವಿವರಗಳು.",
+      "address": "RTI ಅರ್ಜಿಗಳಿಗಾಗಿ ನಿಮ್ಮ ವಸತಿ ಮತ್ತು ಅಂಚೆ ವಿಳಾಸ.",
+      "additional": "ನಿಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಲು ನೆರವಾಗುವ ಐಚ್ಛಿಕ ವಿವರಗಳು.",
+      "account": "ಈ RTI ಪೋರ್ಟಲ್‌ಗೆ ನಿಮ್ಮ ಸುರಕ್ಷಿತ ಪ್ರವೇಶದ ವಿವರಗಳು."
+    }
+  },
+  "notFound": {
+    "title": "ಪುಟ ಸಿಗಲಿಲ್ಲ",
+    "body": "RTI ಮಾದರಿಯಲ್ಲಿ ಈ ಮಾರ್ಗ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ.",
+    "home": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ"
+  },
+  "mockPayment": {
+    "title": "ನಕಲಿ ಪಾವತಿ ಗೇಟ್‌ವೇ",
+    "description": "ಇದು ಮಾದರಿ ಅನುಕರಣೆ. ಯಾವುದೇ ಹಣ ವಿಧಿಸಲಾಗುವುದಿಲ್ಲ ಮತ್ತು ಯಾವುದೇ ಬ್ಯಾಂಕನ್ನು ಸಂಪರ್ಕಿಸಲಾಗುವುದಿಲ್ಲ.",
+    "amount": "ಮೊತ್ತ",
+    "authority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ",
+    "applicant": "ಅರ್ಜಿದಾರ",
+    "outcomeLegend": "ಡೆಮೊ ಪಾವತಿ ಫಲಿತಾಂಶ",
+    "back": "ನಮೂನೆಗೆ ಹಿಂತಿರುಗಿ",
+    "complete": "ನಕಲಿ ಪಾವತಿ ಪೂರ್ಣಗೊಳಿಸಿ",
+    "outcomes": {
+      "confirmed": {
+        "label": "ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ",
+        "description": "ಯಶಸ್ವಿ ಪಾವತಿ ಕಾಲ್‌ಬ್ಯಾಕ್‌ನಂತೆ ತಕ್ಷಣ RTI ID ರಚಿಸುತ್ತದೆ."
+      },
+      "awaitingBank": {
+        "label": "ಬ್ಯಾಂಕ್ ದೃಢೀಕರಣ ಬಾಕಿ ಇದೆ",
+        "description": "RTI ID ಇಲ್ಲದೆ ಪಾವತಿ ಪ್ರಯತ್ನವನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ; ಪಾವತಿ ಹೊಂದಾಣಿಕೆಯಲ್ಲಿ ಪರಿಶೀಲಿಸಲು ಸಿದ್ಧವಾಗಿರುತ್ತದೆ."
+      },
+      "refunded": {
+        "label": "ಪಾವತಿ ವಿಫಲ / ಮರುಪಾವತಿ",
+        "description": "ಹಿಂದಿರುಗಿಸಿದ ಪಾವತಿ ಪ್ರಯತ್ನವನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ; RTI ವಿನಂತಿಯನ್ನು ರಚಿಸುವುದಿಲ್ಲ."
+      }
+    }
+  },
+  "notifications": {
+    "title": "ಎಲ್ಲ ಅಧಿಸೂಚನೆಗಳು",
+    "subtitle": "ನೀವು ವೀಕ್ಷಿಸುವವರೆಗೆ ಓದದ ನವೀಕರಣಗಳನ್ನು ಹೈಲೈಟ್ ಮಾಡಲಾಗುತ್ತದೆ.",
+    "filterLabel": "ಅಧಿಸೂಚನೆಗಳನ್ನು ಶೋಧಿಸಿ",
+    "all": "ಎಲ್ಲ",
+    "unread": "ಓದದವು",
+    "read": "ಓದಿದವು",
+    "markAllRead": "ಎಲ್ಲವನ್ನೂ ಓದಿದಂತೆ ಗುರುತಿಸಿ",
+    "newBadge": "ಹೊಸದು",
+    "readBadge": "ಓದಲಾಗಿದೆ",
+    "markRead": "ಓದಿದಂತೆ ಗುರುತಿಸಿ",
+    "markNamedRead": "{{title}} ಅನ್ನು ಓದಿದಂತೆ ಗುರುತಿಸಿ",
+    "unreadDot": "ಓದದ ಅಧಿಸೂಚನೆ",
+    "viewRequest": "ವಿನಂತಿ ವೀಕ್ಷಿಸಿ",
+    "viewResponse": "ಉತ್ತರ ವೀಕ್ಷಿಸಿ",
+    "fileFirstAppeal": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ"
+  },
+  "contact": {
+    "title": "ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ",
+    "intro": "RTI ಆನ್‌ಲೈನ್ ಪೋರ್ಟಲ್ ಕುರಿತು ಯಾವುದೇ ಪ್ರಶ್ನೆಗಳಿಗೆ ನೆರವಾಗಲು ನಾವು ಇಲ್ಲಿದ್ದೇವೆ. ನಿಮ್ಮ ಅಗತ್ಯಕ್ಕೆ ಸೂಕ್ತ ಸಂಪರ್ಕವನ್ನು ಬಳಸಿ.",
+    "supportTitle": "ತಾಂತ್ರಿಕ ಬೆಂಬಲ ಮತ್ತು ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳು",
+    "supportBody": "ತಾಂತ್ರಿಕ ಸಮಸ್ಯೆಗಳು, ಪಾವತಿ ಪ್ರಶ್ನೆಗಳು ಅಥವಾ RTI ಆನ್‌ಲೈನ್ ಪೋರ್ಟಲ್ ಬಳಕೆಯ ಸಾಮಾನ್ಯ ಸಹಾಯಕ್ಕಾಗಿ.",
+    "emailLabel": "ಇಮೇಲ್ ವಿಳಾಸ",
+    "helplineLabel": "ಸಹಾಯವಾಣಿ ಸಂಖ್ಯೆ",
+    "officialTitle": "ಅಧಿಕೃತ ಸಂಪರ್ಕ",
+    "officialBody": "ಅಧಿಕೃತ ಪತ್ರವ್ಯವಹಾರ ಅಥವಾ ಇತ್ಯರ್ಥವಾಗದ ತಾಂತ್ರಿಕ ಸಮಸ್ಯೆಗಳ ಮುಂದಿನ ಕ್ರಮಕ್ಕಾಗಿ.",
+    "noteLabel": "ಸೂಚನೆ:",
+    "noteBefore": "ಮೇಲಿನ ಇಮೇಲ್ ವಿಳಾಸಗಳಿಗೆ RTI ಅರ್ಜಿಗಳನ್ನು ಸಲ್ಲಿಸಬೇಡಿ. ಅವು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ತಾಂತ್ರಿಕ ಬೆಂಬಲ ಮತ್ತು ಪೋರ್ಟಲ್-ಸಂಬಂಧಿತ ಸಹಾಯಕ್ಕಾಗಿ ಮಾತ್ರ. RTI ಅರ್ಜಿ ಸಲ್ಲಿಸಲು ಪೋರ್ಟಲ್‌ನ ",
+    "noteLink": "ವಿನಂತಿ ಸಲ್ಲಿಸಿ",
+    "noteAfter": " ಸೌಲಭ್ಯವನ್ನು ಬಳಸಿ."
+  },
+  "digilocker": {
+    "badge": "ಸುರಕ್ಷಿತ ಡೆಮೊ ದೃಢೀಕರಣ",
+    "title": "DigiLocker ಪ್ರವೇಶವನ್ನು ದೃಢೀಕರಿಸಿ",
+    "titleComplete": "ದೃಢೀಕರಣ ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "description": "ನಿಮ್ಮ ಅರ್ಜಿದಾರರ ಪ್ರೊಫೈಲ್ ಹೊಂದಿಸಲು DigiLocker ಆಯ್ಕೆಮಾಡಿದ ಪ್ರೊಫೈಲ್ ವಿವರಗಳನ್ನು RTI ಆನ್‌ಲೈನ್‌ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳುತ್ತದೆ.",
+    "descriptionComplete": "ನಿಮ್ಮ ನಕಲಿ DigiLocker ಪ್ರೊಫೈಲ್ ಅನ್ನು RTI ಆನ್‌ಲೈನ್‌ನೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿ ಹಂಚಿಕೊಳ್ಳಲಾಗಿದೆ. ನಿಮ್ಮ ಅರ್ಜಿದಾರರ ಪ್ರೊಫೈಲ್‌ಗೆ ಕರೆದೊಯ್ಯಲಾಗುತ್ತಿದೆ…",
+    "completeHeading": "RTI ಆನ್‌ಲೈನ್ ಈಗ ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ವಿವರಗಳನ್ನು ಬಳಸಬಹುದು.",
+    "redirecting": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌ಗೆ ಕರೆದೊಯ್ಯಲಾಗುತ್ತಿದೆ…",
+    "connectionLabel": "ದೃಢೀಕರಣ ಸಂಪರ್ಕ",
+    "selectedDocuments": "ನೀವು ಆಯ್ಕೆಮಾಡಿದ ದಾಖಲೆಗಳು",
+    "applicantProfile": "ಅರ್ಜಿದಾರರ ಪ್ರೊಫೈಲ್",
+    "fetching": "ನೀವು ಆಯ್ಕೆಮಾಡಿದ ವಿವರಗಳನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ಪಡೆಯಲಾಗುತ್ತಿದೆ…",
+    "sharedTitle": "RTI ಆನ್‌ಲೈನ್ ಕೋರಿದ ವಿವರಗಳು",
+    "sharedSubtitle": "ಈ ನಕಲಿ ಪ್ರೊಫೈಲ್ ವಿವರಗಳನ್ನು ಮಾತ್ರ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.",
+    "detailCount": "{{count}} ವಿವರಗಳು",
+    "disclaimer": "ಇದು ಮಾದರಿ ಅನುಕರಣೆ. ಯಾವುದೇ ನೈಜ DigiLocker ಖಾತೆ, ದಾಖಲೆ ಅಥವಾ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲಾಗುವುದಿಲ್ಲ ಅಥವಾ ಹಂಚಿಕೊಳ್ಳಲಾಗುವುದಿಲ್ಲ.",
+    "authorizing": "ದೃಢೀಕರಿಸಲಾಗುತ್ತಿದೆ…",
+    "authorize": "ದೃಢೀಕರಿಸಿ ಮತ್ತು ಮುಂದುವರಿಯಿರಿ",
+    "fields": {
+      "fullName": "ಪೂರ್ಣ ಹೆಸರು",
+      "dateOfBirth": "ಜನ್ಮ ದಿನಾಂಕ",
+      "email": "ಇಮೇಲ್ ವಿಳಾಸ",
+      "mobile": "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ",
+      "address": "ವಿಳಾಸ"
+    }
+  },
+  "success": {
+    "requestTitle": "ನಿಮ್ಮ RTI ವಿನಂತಿ ಯಶಸ್ವಿಯಾಗಿ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
+    "requestSubtitle": "ಭವಿಷ್ಯದ ಉಲ್ಲೇಖಕ್ಕಾಗಿ ನೋಂದಣಿ ವಿವರಗಳನ್ನು ಬರೆದುಕೊಳ್ಳಿ. ನಿಮ್ಮ ನೋಂದಾಯಿತ ವಿಳಾಸಕ್ಕೆ ದೃಢೀಕರಣ ಇಮೇಲ್ ಕಳುಹಿಸಲಾಗಿದೆ.",
+    "appealTitle": "ನಿಮ್ಮ RTI ಮೇಲ್ಮನವಿ ಯಶಸ್ವಿಯಾಗಿ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
+    "appealSubtitle": "ಭವಿಷ್ಯದ ಉಲ್ಲೇಖಕ್ಕಾಗಿ ನೋಂದಣಿ ವಿವರಗಳನ್ನು ಬರೆದುಕೊಳ್ಳಿ.",
+    "registrationDetails": "ನೋಂದಣಿ ವಿವರಗಳು",
+    "registrationNumber": "ನೋಂದಣಿ ಸಂಖ್ಯೆ",
+    "name": "ಹೆಸರು",
+    "dateOfFiling": "ಸಲ್ಲಿಸಿದ ದಿನಾಂಕ",
+    "filedWith": "ಯಾರೊಂದಿಗೆ ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ",
+    "appealAgainst": "ವಿನಂತಿಯ ವಿರುದ್ಧ ಮೇಲ್ಮನವಿ",
+    "contactDetails": "ಸಂಪರ್ಕ ವಿವರಗಳು",
+    "phone": "ದೂರವಾಣಿ ಸಂಖ್ಯೆ",
+    "email": "ಇಮೇಲ್ ID",
+    "statusLabel": "ಸ್ಥಿತಿ: {{status}}",
+    "copy": "ನೋಂದಣಿ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ",
+    "copied": "ನೋಂದಣಿ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಲಾಗಿದೆ",
+    "copiedShort": "ನಕಲಿಸಲಾಗಿದೆ",
+    "save": "ಉಳಿಸಿ",
+    "printRequest": "ನೋಂದಣಿ ವಿವರಗಳನ್ನು ಮುದ್ರಿಸಿ",
+    "printAppeal": "ಮೇಲ್ಮನವಿ ವಿವರಗಳನ್ನು ಮುದ್ರಿಸಿ",
+    "returnDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+    "receiptRequest": "RTI ವಿನಂತಿ ನೋಂದಣಿ ವಿವರಗಳು",
+    "receiptAppeal": "RTI ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ನೋಂದಣಿ ವಿವರಗಳು"
+  },
+  "faq": {
+    "title": "ಪದೇ ಪದೇ ಕೇಳಲಾಗುವ ಪ್ರಶ್ನೆಗಳು",
+    "subtitle": "ಮಾಹಿತಿ ಹಕ್ಕು ವಿನಂತಿಗಳನ್ನು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಸಲ್ಲಿಸುವ ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರಗಳನ್ನು ಕಂಡುಕೊಳ್ಳಿ.",
+    "searchLabel": "FAQ ಗಳನ್ನು ಹುಡುಕಿ",
+    "searchPlaceholder": "FAQ ಗಳನ್ನು ಹುಡುಕಿ...",
+    "resultsOne": "“{{query}}” ಗೆ {{count}} ಫಲಿತಾಂಶ ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "resultsOther": "“{{query}}” ಗೆ {{count}} ಫಲಿತಾಂಶಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "noResultsTitle": "ಯಾವುದೇ FAQ ಸಿಗಲಿಲ್ಲ",
+    "noResultsBody": "ಪಾವತಿ, ಮೇಲ್ಮನವಿ, ಸ್ಥಿತಿ, ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ, OTP ಅಥವಾ ಪೋಷಕ ದಾಖಲೆಯ ಮೂಲಕ ಹುಡುಕಲು ಪ್ರಯತ್ನಿಸಿ.",
+    "needHelp": "ಸಹಾಯ ಬೇಕೇ?",
+    "needHelpBody": "ನೀವು ಹುಡುಕುತ್ತಿರುವ ಉತ್ತರ ಸಿಗದಿದ್ದರೆ, ನಮ್ಮ ಬೆಂಬಲ ಕೇಂದ್ರವನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    "contactSupport": "ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ",
+    "userManual": "ಬಳಕೆದಾರ ಕೈಪಿಡಿ",
+    "userManualBody": "RTI ಆನ್‌ಲೈನ್ ಪೋರ್ಟಲ್ ಬಳಸಲು ಸಮಗ್ರ ಮಾರ್ಗದರ್ಶಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
+    "downloadPdf": "PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+    "sections": {
+      "filing": {
+        "title": "ವಿನಂತಿಯ ವ್ಯಾಪ್ತಿ ಮತ್ತು ಸಲ್ಲಿಕೆ",
+        "items": [
+          {
+            "q": "To which Public Authority can I file a request through this portal?",
+            "a": "An applicant who desires to obtain information under the RTI Act, 2005 can make a request through this RTI Online Portal to the Central Ministries/Departments and other Central Public Authorities mentioned in ONLINE RTI request form."
+          },
+          {
+            "q": "How do I write my application for seeking the information as per RTI Act 2005?",
+            "a": "The text of the application may be written in the prescribed column of the RTI request form. At present, the text of the application is confined up to 3000 characters only. In case, the text of an application contains more than 3000 characters, it can be uploaded as a PDF attachment in the \"Supporting Document\" column of the form."
+          },
+          {
+            "q": "What will happen to my application if I select a wrong Public Authority in the RTI request form?",
+            "a": "In case the RTI application is not meant for the Public authority which has been selected by the applicant, the \"Nodal Officer\" of the said public authority would transfer the application electronically to the \"Nodal Officer\" of the concerned Central Public authority, if aligned to this portal and physically to that Central Public authority which is not aligned to this portal, under section 6(3) of the RTI Act. It may be noted that RTI applications filed through this portal for the state public authorities, including NCT of Delhi, would be returned, without any refund of fee"
+          },
+          {
+            "q": "Can I file RTI application for state public authorities through this portal?",
+            "a": "No. This Portal is exclusively meant for Public Authorities under Central Govt. only."
+          },
+          {
+            "q": "Is it mandatory to create user account on RTI online web portal?",
+            "a": "No. You can directly file your RTI on \"Submit Request\" tab."
+          }
+        ]
+      },
+      "fees": {
+        "title": "ಶುಲ್ಕಗಳು ಮತ್ತು ಪಾವತಿ",
+        "items": [
+          {
+            "q": "How do I make the payment for RTI fee?",
+            "a": "After filling the first page of the RTI request form, a non-BPL applicant has to click on \"Make Payment\" button for payment of the prescribed RTI fee. The applicant can pay the prescribed RTI fee through the following modes: (i) Internet banking through SBI payment gateway and its associated banks. (ii) Using ATM-cum-Debit card of State Bank of India. (iii) Credit/Debit card of Master/Visa. (iv) UPI It may be noted that no RTI fee is required to be paid by a citizen who is below poverty line, as per RTI Rules, 2012. However, the BPL applicant must attach a copy of the certificate issued by the appropriate government in this regard, along with the application."
+          },
+          {
+            "q": "Will I be informed about the additional fee (if any) is required to pay?",
+            "a": "In case additional fee representing the cost is required for providing information, the CPIO will intimate the same, which can be viewed by the applicant through \"View Status\" option in the RTI Online Portal and an e-mail alert or SMS or both will also be sent to the applicant for the same. For payment of additional fee online, the applicant needs to use the option 'View Status' in the RTI Online Portal and on providing the registration number of the request, option for \"Make Payment\" will be available."
+          },
+          {
+            "q": "What should I do if amount is deducted from my account but registration number is not generated?",
+            "a": "Use \"Payment Reconciliation\" feature Please do not attempt to make payment repeatedly or try to submit request once again. Kindly wait for the 24 to 48 working hours as registration number will be generated after reconciliation. If it is not generated within stipulated time frame then kindly send an e-mail at helprtionline-dopt[at]nic[dot]in with your transaction details. However, in cases of unsuccessful RTI payment requests, if the requester wishes to check the payment status before 48 hours, it can be verified using the \"Payment Reconciliation\" feature."
+          },
+          {
+            "q": "What if the Registration Number is not received on my Email or Mobile No. even after 48 working Hours?",
+            "a": "Registration Number are generated after reconciliation of bank scrolls for cases whose numbers are not generated instantly after the payment. This procedure may take 24 to 48 working hours. If someones still does not receive the Registration Number, They may contact their respective bank for refund of amount."
+          },
+          {
+            "q": "What are the reasons for my RTI payment failing?",
+            "a": "The major reasons for failure are due to Business declines, Business Decline are as under: 1. Customer has set e-Commerce flag as Disabled for Debit / Credit Card. 2. Customer either closed the internet browser or not proceeded further with the transaction resulting into session timeout. 3. Wrong OTP or no OTP entered by customer. 4. Wrong details of cards entered by customers like Card No, CVV, expiry date. 5. Insufficient balance in customer's account. 6. Customer cancelled the transaction and reinitiated with different mode of payment (say from Debit card to UPI etc.). 7. Customer received collect request for payment in UPI app, but not completed the payment within time limit."
+          }
+        ]
+      },
+      "appeals": {
+        "title": "ಮೇಲ್ಮನವಿಗಳು",
+        "items": [
+          {
+            "q": "How do I file an appeal with First Appellate Authority?",
+            "a": "For making an appeal to the first Appellate Authority, the applicant has to select the option \"Submit First Appeal\" in the RTI Online Portal and fill up the form that will appear. The registration number and e-mail ID of the original application is required for filing the first appeal."
+          },
+          {
+            "q": "Do I need to make any payment for filing an appeal?",
+            "a": "As per RTI Act, no fee has to be paid for first appeal."
+          },
+          {
+            "q": "What should I do when portal is not allowing me to file the first appeal?",
+            "a": "This may happen under following two situation: 1) When your RTI application has been physically transferred to other public authority, which is not aligned to this portal. In such a case, you are required to file your appeal in physical mode to the concerned public authority. 2) Another case can be if your RTI application has not been replied to by CPIO and 30 days period has not lapsed. In such a case, you may file first appeal only after completion of stipulated time period of 30 days."
+          },
+          {
+            "q": "Can I file online first appeal for any RTI application filed physically in the first place ?",
+            "a": "No,Online first appeal can only be filed against previously filed online RTI application."
+          },
+          {
+            "q": "If the RTI application is filed manually , then is it possible to file 1st appeal on line?",
+            "a": "Manual applications can be lodged into RTI Online portal by CPIOs and can be disposed off by CPIO online. In this context, if applicant provides email id/Mobile No. in the application form and CPIO lodges this RTI application in the portal , then the actions taken by CPIO will be conveyed to applicant automatically through e-mail and Mobile SMS. Then applicant can file 1st appeal with the help of registration number conveyed ."
+          }
+        ]
+      },
+      "status": {
+        "title": "ಸ್ಥಿತಿ, ರಸೀದಿಗಳು ಮತ್ತು ಖಾತೆ ಇತಿಹಾಸ",
+        "items": [
+          {
+            "q": "Do I get any receipt for online filing of RTI application?",
+            "a": "On submission of an application, a unique registration number will be issued, which may be referred by the applicant for any future reference. It may be noted that the application filed through this RTI Online Portal will reach electronically to the \"Nodal Officer\" of the said Ministry/Department and \"Not\" to the CPIO of the concerned Ministry/Department. The Nodal Officer will transmit the RTI application electronically to the concerned CPIO."
+          },
+          {
+            "q": "Do I get any SMS from RTI Online Portal?",
+            "a": "Though optional, the mobile number can be provided by the applicant/ appellant in order to receive SMS alerts."
+          },
+          {
+            "q": "What can I do if I forgot my login credentials?",
+            "a": "You can go to View History column to see your past RTI requests/appeals."
+          },
+          {
+            "q": "How much time RTI request/appeal retain at this portal?",
+            "a": "In the View History/View Status citizen can see RTI Cases retained for a period of 3 years."
+          },
+          {
+            "q": "Why RTI application filed by me is not reflecting in my user account history?",
+            "a": "If you have opted to file RTI or First Appeal directly i.e without logging into your user account, then in such cases you will not be able to see the filed RTI or Appeal in your registered account's history. However you can always check its status in \"View Status\" with the provided Reg. Nos."
+          },
+          {
+            "q": "Why I have received multiple RTI registration numbers, even though I have filed single RTI application ?",
+            "a": "This is the case where in your RTI application has been forwarded to multiple CPIOs since the information sought lies with more than one PIO."
+          },
+          {
+            "q": "How can I View Status/Reply of my RTI Application or First Appeal?",
+            "a": "Status/Reply of the RTI Application or First appeal filed online can be viewed by the applicant by clicking on \"View Status\"."
+          },
+          {
+            "q": "Why this OTP feature is introduced in view status option?",
+            "a": "RTI Application may contain personal information of the Applicant and if any third person gets the registration number and email id, then the person can view this personal information. So, in order to protect personal information of the applicant, according to cyber security norms, this OTP validating feature has been introduced. In view status option while OTPs are promptly dispatched from the NIC email domain, delays may occasionally occur due to high traffic on either NIC server or external email services like Gmail or Yahoo. Importantly, OTPs do not expire until they are used, meaning users can access the status of their applications as soon as the OTP arrives."
+          }
+        ]
+      },
+      "help": {
+        "title": "ದಾಖಲೆಗಳು, ಸಹಾಯ ಮತ್ತು ಸಮಸ್ಯೆ ಪರಿಹಾರ",
+        "items": [
+          {
+            "q": "How to upload a supporting document if an alert comes as \"SUPPORTING DOCUMENTS REQUIRED FROM APPLICANT\"?",
+            "a": "When a Public Authority request for supporting document, an alert is sent to the applicant to his/her Mobile or Email Id. In such situation, the applicant is requested to visit the RTI Online Website and enter the details in 'View Status'. Once the detail is entered, the current status of the RTI application is shown along with the option for uploading the supporting document."
+          },
+          {
+            "q": "What queries can be raised with Helpline Email helprtionline-dopt(at)nic(dot)in ?",
+            "a": "Helpline mail id is exclusively meant for queries or problem being faced while filing the online RTI through this portal. Please do not send mail to this helpline for any other matter or asking for any other details. The reply is limited to RTI online portal of Central Government only."
+          },
+          {
+            "q": "What should I do when my browser show certificate error while opening RTI online portal?",
+            "a": "You should ignore the certificate error and proceed forward. Kindly select, Mozilla Firefox - I understand the risk add exception. Google Chrome - Proceed Anyway. Internet Explorer - Continue to this website"
+          }
+        ]
+      }
+    }
+  },
+  "authorities": {
+    "errorTitle": "ಪ್ರಾಧಿಕಾರದ ಡೈರೆಕ್ಟರಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+    "errorBody": "ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "loading": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "title": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರವನ್ನು ಹುಡುಕಿ",
+    "intro": "RTI ವಿನಂತಿಯು ಒಂದು ನಿರ್ದಿಷ್ಟ ಸರ್ಕಾರಿ ಕಚೇರಿಗೆ ಹೋಗುತ್ತದೆ. ಈ ಡೈರೆಕ್ಟರಿಯು ನೀವು ಸಲ್ಲಿಸಬಹುದಾದ ಎಲ್ಲಾ {{total}} ಕಚೇರಿಗಳನ್ನು ಅವು ಸೇರಿದ ಸಚಿವಾಲಯ ಅಥವಾ ಇಲಾಖೆಯ ಅಡಿಯಲ್ಲಿ ಗುಂಪುಮಾಡಿ ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ.",
+    "step": "ಹಂತ {{step}} · {{title}}",
+    "steps": {
+      "search": {
+        "title": "ಹುಡುಕಿ",
+        "body": "ಕಚೇರಿ ಏನು ಮಾಡುತ್ತದೆ ಎಂದು ಟೈಪ್ ಮಾಡಿ — “ಪಾಸ್‌ಪೋರ್ಟ್”, “ರೈಲ್ವೆ”, “ಆದಾಯ ತೆರಿಗೆ”. ಅದರ ಸಚಿವಾಲಯ ನಿಮಗೆ ತಿಳಿದಿರಬೇಕಾಗಿಲ್ಲ."
+      },
+      "group": {
+        "title": "ಗುಂಪನ್ನು ತೆರೆಯಿರಿ",
+        "body": "ಹುಡುಕಾಟದಲ್ಲಿ ಸಿಗಲಿಲ್ಲವೇ? ಕೆಳಗಿನ ಸಚಿವಾಲಯಗಳನ್ನು ನೋಡಿ; ಅದರಲ್ಲಿರುವ ಎಲ್ಲ ಕಚೇರಿಗಳನ್ನು ನೋಡಲು ಒಂದನ್ನು ತೆರೆಯಿರಿ."
+      },
+      "file": {
+        "title": "ಸಲ್ಲಿಸಿ",
+        "body": "ನಿಖರ ಕಚೇರಿಯ ಪಕ್ಕದಲ್ಲಿರುವ <b>RTI ಸಲ್ಲಿಸಿ</b> ಆಯ್ಕೆಮಾಡಿ; ನಂತರ ಮುಂದುವರಿಯಲು ಸೈನ್ ಇನ್ ಮಾಡಿ."
+      }
+    },
+    "searchSectionLabel": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳನ್ನು ಹುಡುಕಿ ಮತ್ತು ಶೋಧಿಸಿ",
+    "searchPlaceholder": "ಪ್ರಾಧಿಕಾರ, ಕಚೇರಿ, ಸಂಸ್ಥೆ ಅಥವಾ ಇಲಾಖೆಯನ್ನು ಹುಡುಕಿ...",
+    "clearSearch": "ಹುಡುಕಾಟ ತೆರವುಗೊಳಿಸಿ",
+    "sortLabel": "ಫಲಿತಾಂಶಗಳನ್ನು ವಿಂಗಡಿಸಿ",
+    "sortAz": "A ಯಿಂದ Z",
+    "sortZa": "Z ಯಿಂದ A",
+    "browseTitle": "ಅಥವಾ ಹೆಸರಿನ ಮೂಲಕ ನೋಡಿ",
+    "browseHintSearching": "ಅಕ್ಷರದ ಮೂಲಕ ನೋಡಲು ಹುಡುಕಾಟ ಪೆಟ್ಟಿಗೆಯನ್ನು ತೆರವುಗೊಳಿಸಿ.",
+    "browseHint": "ಅಕ್ಷರಗಳು ಮುಖ್ಯ ಪದವನ್ನು ಬಳಸುತ್ತವೆ; ಆದ್ದರಿಂದ ರೈಲ್ವೆ ಸಚಿವಾಲಯವು R ಅಡಿಯಲ್ಲಿ ಇರುತ್ತದೆ. ಬೂದು ಅಕ್ಷರಗಳ ಅಡಿಯಲ್ಲಿ ಪಟ್ಟಿ ಇಲ್ಲ.",
+    "startOver": "ಮತ್ತೆ ಆರಂಭಿಸಿ",
+    "letterGroupLabel": "ಅಕ್ಷರದ ಮೂಲಕ ಪ್ರಾಧಿಕಾರ ಗುಂಪುಗಳನ್ನು ನೋಡಿ",
+    "all": "ಎಲ್ಲ",
+    "letterLabel": "{{letter}} ದಿಂದ ಆರಂಭವಾಗುವ ಪ್ರಾಧಿಕಾರಗಳನ್ನು ತೋರಿಸಿ",
+    "foundOffices_one": "{{groupText}} ಅಡಿಯಲ್ಲಿ “{{query}}” ಗೆ ಹೊಂದುವ <b>{{total}}</b> ಕಚೇರಿ ಸಿಕ್ಕಿದೆ.",
+    "foundOffices_other": "{{groupText}} ಅಡಿಯಲ್ಲಿ “{{query}}” ಗೆ ಹೊಂದುವ <b>{{total}}</b> ಕಚೇರಿಗಳು ಸಿಕ್ಕಿವೆ.",
+    "matchedGroups_one": "{{count}} ಗುಂಪು",
+    "matchedGroups_other": "{{count}} ಗುಂಪುಗಳು",
+    "noOfficeMatches": "“{{query}}” ಗೆ ಹೊಂದುವ ಕಚೇರಿ ಇಲ್ಲ.",
+    "browseCount_one": "{{offices}} ಕಚೇರಿಗಳನ್ನು ಒಳಗೊಂಡ <b>{{total}}</b> ಗುಂಪು.",
+    "browseCount_other": "{{offices}} ಕಚೇರಿಗಳನ್ನು ಒಳಗೊಂಡ <b>{{total}}</b> ಗುಂಪುಗಳು.",
+    "browseCountLetter_one": "{{letter}} ಅಡಿಯಲ್ಲಿ {{offices}} ಕಚೇರಿಗಳನ್ನು ಒಳಗೊಂಡ <b>{{total}}</b> ಗುಂಪು.",
+    "browseCountLetter_other": "{{letter}} ಅಡಿಯಲ್ಲಿ {{offices}} ಕಚೇರಿಗಳನ್ನು ಒಳಗೊಂಡ <b>{{total}}</b> ಗುಂಪುಗಳು.",
+    "showingRange": "{{total}} ರಲ್ಲಿ {{from}}–{{to}} ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "fileRti": "RTI ಸಲ್ಲಿಸಿ",
+    "file": "ಸಲ್ಲಿಸಿ",
+    "nothingMatches": "“{{query}}” ಗೆ ಯಾವುದೂ ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ",
+    "nothingMatchesBody": "ಕಚೇರಿಯ ಪೂರ್ಣ ಹೆಸರಿಗಿಂತ ಚಿಕ್ಕ ಪದ ಅಥವಾ ವಿಷಯವನ್ನು ಪ್ರಯತ್ನಿಸಿ — “rail” ಹುಡುಕಾಟವು “railway board north” ಗಿಂತ ಹೆಚ್ಚು ಫಲಿತಾಂಶಗಳನ್ನು ನೀಡುತ್ತದೆ.",
+    "clearAndBrowse": "ಹುಡುಕಾಟ ತೆರವುಗೊಳಿಸಿ ಮತ್ತು ಬದಲಿಗೆ ನೋಡಿ",
+    "badgeAuthority": "ಪ್ರಾಧಿಕಾರ",
+    "badgeMinistry": "ಸಚಿವಾಲಯ",
+    "officeCount_one": "{{total}} ಕಚೇರಿ",
+    "officeCount_other": "{{total}} ಕಚೇರಿಗಳು",
+    "noSubOffices": "ಉಪ-ಕಚೇರಿಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿಲ್ಲ — RTI ನೇರವಾಗಿ ಈ ಪ್ರಾಧಿಕಾರಕ್ಕೆ ಹೋಗುತ್ತದೆ.",
+    "includes": "{{names}} ಒಳಗೊಂಡಿದೆ.",
+    "includesMore": "{{names}} ಮತ್ತು ಇನ್ನೂ {{more}} ಒಳಗೊಂಡಿದೆ.",
+    "officesListed": "{{total}} ಕಚೇರಿಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಲಾಗಿದೆ.",
+    "viewDetails": "ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
+    "viewAllOffices": "ಎಲ್ಲ {{total}} ಕಚೇರಿಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
+    "fileToDepartment": "ಒಳಗಿನ ಇಲಾಖೆಗೆ ಸಲ್ಲಿಸಿ",
+    "noGroupsUnder": "“{{letter}}” ಅಡಿಯಲ್ಲಿ ಯಾವುದೇ ಗುಂಪುಗಳಿಲ್ಲ",
+    "showEveryGroup": "ಎಲ್ಲ ಗುಂಪುಗಳನ್ನು ತೋರಿಸಿ",
+    "backToAll": "ಎಲ್ಲ ಪ್ರಾಧಿಕಾರಗಳಿಗೆ ಹಿಂದಿರುಗಿ",
+    "groupIntro_one": "ಇಲ್ಲಿ {{total}} ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ ಪಟ್ಟಿ ಮಾಡಲಾಗಿದೆ. ನಿಮ್ಮ ಪ್ರಶ್ನೆಗೆ ಸಂಬಂಧಿಸಿದ ಕಚೇರಿಯನ್ನು ಹುಡುಕಿ; ಅದರ ಪಕ್ಕದಲ್ಲಿರುವ <b>RTI ಸಲ್ಲಿಸಿ</b> ಆಯ್ಕೆಮಾಡಿ.",
+    "groupIntro_other": "ಇಲ್ಲಿ {{total}} ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಲಾಗಿದೆ. ನಿಮ್ಮ ಪ್ರಶ್ನೆಗೆ ಸಂಬಂಧಿಸಿದ ಕಚೇರಿಯನ್ನು ಹುಡುಕಿ; ಅದರ ಪಕ್ಕದಲ್ಲಿರುವ <b>RTI ಸಲ್ಲಿಸಿ</b> ಆಯ್ಕೆಮಾಡಿ.",
+    "ministryNotice": "RTI ಯನ್ನು ನೇರವಾಗಿ ಸಚಿವಾಲಯಕ್ಕೆ ಸಲ್ಲಿಸಲಾಗುವುದಿಲ್ಲ. ಕೆಳಗೆ ಅದರ ಯಾವುದಾದರೂ ಇಲಾಖೆ ಅಥವಾ ಕಚೇರಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "findInside": "{{name}} ಒಳಗೆ ಕಚೇರಿಯನ್ನು ಹುಡುಕಿ...",
+    "matchingOffices_one": "ಕೆಳಗೆ {{count}} ಹೊಂದುವ ಕಚೇರಿಯನ್ನು ಹೈಲೈಟ್ ಮಾಡಲಾಗಿದೆ.",
+    "matchingOffices_other": "ಕೆಳಗೆ {{count}} ಹೊಂದುವ ಕಚೇರಿಗಳನ್ನು ಹೈಲೈಟ್ ಮಾಡಲಾಗಿದೆ.",
+    "nothingMatchesInside": "ಇಲ್ಲಿ “{{query}}” ಗೆ ಯಾವುದೂ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ",
+    "showEveryOffice": "ಎಲ್ಲ ಕಚೇರಿಗಳನ್ನು ತೋರಿಸಿ",
+    "canFileHere": "ನೀವು ಈ ಕಚೇರಿಗೆ RTI ಸಲ್ಲಿಸಬಹುದು",
+    "ofTotal": "{{total}} ರಲ್ಲಿ {{shown}}",
+    "officesShown_one": "ಕೆಳಗೆ {{label}} ಕಚೇರಿಯನ್ನು ತೋರಿಸಲಾಗಿದೆ",
+    "officesShown_other": "ಕೆಳಗೆ {{label}} ಕಚೇರಿಗಳನ್ನು ತೋರಿಸಲಾಗಿದೆ",
+    "pagination": "ಡೈರೆಕ್ಟರಿ ಪುಟೀಕರಣ",
+    "previousPage": "ಹಿಂದಿನ ಪುಟ",
+    "nextPage": "ಮುಂದಿನ ಪುಟ"
+  },
+  "requestDetail": {
+    "viewDetails": "{{id}} ವಿನಂತಿಯ ಪೂರ್ಣ ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
+    "noText": "ಈ ವಿನಂತಿಯ ಸಂಪೂರ್ಣ ಪಠ್ಯವನ್ನು ದಾಖಲಿಸಲಾಗಿಲ್ಲ. ಇನ್ನು ಮುಂದೆ ಸಲ್ಲಿಸುವ ವಿನಂತಿಗಳಲ್ಲಿ ಅದನ್ನು ಉಳಿಸಲಾಗುತ್ತದೆ.",
+    "lastUpdated": "ಕೊನೆಯ ನವೀಕರಣ",
+    "copyId": "ನೋಂದಣಿ ಸಂಖ್ಯೆಯನ್ನು ನಕಲಿಸಿ",
+    "copied": "ನಕಲಿಸಲಾಗಿದೆ",
+    "backToHistory": "ವಿನಂತಿಗಳ ಇತಿಹಾಸಕ್ಕೆ ಹಿಂದಿರುಗಿ",
+    "title": "RTI ವಿನಂತಿಯ ವಿವರಗಳು",
+    "application": "ಅರ್ಜಿಯ ವಿವರಗಳು",
+    "authority": "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರ",
+    "submitted": "ಸಲ್ಲಿಸಿದ ದಿನಾಂಕ",
+    "currentStatus": "ಪ್ರಸ್ತುತ ಸ್ಥಿತಿ",
+    "requestText": "ಕೋರಿದ ಮಾಹಿತಿ",
+    "paymentAndDocuments": "ಪಾವತಿ ಮತ್ತು ದಾಖಲೆಗಳು",
+    "paymentStatus": "ಪಾವತಿ / ಶುಲ್ಕ ಸ್ಥಿತಿ",
+    "paymentPending": "ಪಾವತಿ ಪರಿಶೀಲನೆ ಬಾಕಿ ಇದೆ",
+    "paymentVerified": "RTI ಶುಲ್ಕ ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+    "bplExempt": "BPL ಶುಲ್ಕ ವಿನಾಯಿತಿ ಅನ್ವಯಿಸಲಾಗಿದೆ",
+    "notApplicable": "ಅನ್ವಯಿಸುವುದಿಲ್ಲ",
+    "document": "ಪೋಷಕ ದಾಖಲೆ",
+    "noDocument": "ಯಾವುದೇ ಪೋಷಕ ದಾಖಲೆ ಲಗತ್ತಿಸಿಲ್ಲ",
+    "nextSteps": "ಮುಂದಿನ ಹಂತ",
+    "applicantOnly": "ಈ ವಿನಂತಿ ದಾಖಲೆಯು ಸೈನ್ ಇನ್ ಮಾಡಿದ ಅರ್ಜಿದಾರರಿಗೆ ಮಾತ್ರ ಗೋಚರಿಸುತ್ತದೆ.",
+    "newRequest": "ಇನ್ನೊಂದು ವಿನಂತಿ ಸಲ್ಲಿಸಿ"
+  },
+  "timeline": {
+    "title": "ವಿನಂತಿಯ ಪ್ರಗತಿ",
+    "current": "ಪ್ರಸ್ತುತ ಹಂತ",
+    "submitted": {
+      "title": "ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ",
+      "description": "ನಿಮ್ಮ RTI ಅರ್ಜಿಯನ್ನು ಪೋರ್ಟಲ್ ಸ್ವೀಕರಿಸಿದೆ."
+    },
+    "verification": {
+      "title": "ಶುಲ್ಕ / ಅರ್ಹತೆ ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+      "description": "ಅರ್ಜಿಯ ಶುಲ್ಕವನ್ನು ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
+      "bplDescription": "ನಿಮ್ಮ BPL ಶುಲ್ಕ ವಿನಾಯಿತಿಯನ್ನು ದಾಖಲಿಸಲಾಗಿದೆ."
+    },
+    "assigned": {
+      "title": "CPIO ಗೆ ನಿಯೋಜಿಸಲಾಗಿದೆ",
+      "description": "ಜವಾಬ್ದಾರಿಯುತ ಸಾರ್ವಜನಿಕ ಮಾಹಿತಿ ಅಧಿಕಾರಿ ವಿನಂತಿಯನ್ನು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ."
+    },
+    "reply": {
+      "title": "ಉತ್ತರ ಸಿಕ್ಕಿದೆ",
+      "description": "ಪ್ರಾಧಿಕಾರದ ಉತ್ತರವನ್ನು ದಾಖಲಿಸಿದಾಗ ಅದು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ."
+    },
+    "appeal": {
+      "title": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ",
+      "description": "ಉತ್ತರ ವಿಳಂಬವಾದರೆ ಅಥವಾ ತೃಪ್ತಿಕರವಾಗಿಲ್ಲದಿದ್ದರೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಲಭ್ಯವಾಗುತ್ತದೆ."
+    }
+  },
+  "deadline": {
+    "daysLeft_one": "{{count}} ದಿನ ಬಾಕಿ",
+    "daysLeft_other": "{{count}} ದಿನಗಳು ಬಾಕಿ",
+    "dueToday": "ಇಂದು ಅಂತಿಮ ದಿನ",
+    "overdue_one": "{{count}} ದಿನ ಮೀರಿದೆ",
+    "overdue_other": "{{count}} ದಿನಗಳು ಮೀರಿವೆ",
+    "windowClosed_one": "ಅವಕಾಶ {{count}} ದಿನದ ಹಿಂದೆ ಮುಕ್ತಾಯವಾಯಿತು",
+    "windowClosed_other": "ಅವಕಾಶ {{count}} ದಿನಗಳ ಹಿಂದೆ ಮುಕ್ತಾಯವಾಯಿತು",
+    "heading": "ಕಾನೂನುಬದ್ಧ ಕಾಲಮಿತಿ",
+    "pioReply": "ಸಾರ್ವಜನಿಕ ಮಾಹಿತಿ ಅಧಿಕಾರಿಯು {{date}} ರೊಳಗೆ ಉತ್ತರಿಸಬೇಕು — ಈ ವಿನಂತಿ ಸಲ್ಲಿಸಿದ ದಿನದಿಂದ 30 ದಿನಗಳು.",
+    "pioReplyLapsed": "30 ದಿನಗಳ ಮಿತಿ {{date}} ರಂದು ಮುಗಿದಿದೆ; ಯಾವುದೇ ಉತ್ತರ ದಾಖಲಿಸಲಾಗಿಲ್ಲ.",
+    "appealWindow": "ಈ ಉತ್ತರದ ವಿರುದ್ಧ {{date}} ರೊಳಗೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು — ತೀರ್ಮಾನದಿಂದ 30 ದಿನಗಳು.",
+    "appealWindowClosed": "ಈ ಉತ್ತರದ ವಿರುದ್ಧ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸುವ 30 ದಿನಗಳ ಅವಕಾಶ {{date}} ರಂದು ಮುಗಿದಿದೆ. ಸಮರ್ಪಕ ಕಾರಣದಿಂದ ತಡೆಯಲ್ಪಟ್ಟಿದ್ದರೆ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರವು ತಡವಾದ ಮೇಲ್ಮನವಿಯನ್ನೂ ಪರಿಗಣಿಸಬಹುದು.",
+    "faaDecision": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರವು {{date}} ರೊಳಗೆ ಈ ಮೇಲ್ಮನವಿಯನ್ನು ತೀರ್ಮಾನಿಸಬೇಕು — ಸಲ್ಲಿಸಿದ ದಿನದಿಂದ 30 ದಿನಗಳು.",
+    "faaDecisionOverdue": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಪ್ರಾಧಿಕಾರದ 30 ದಿನಗಳು {{date}} ರಂದು ಮುಗಿದಿವೆ. ಒಟ್ಟಾರೆಯಾಗಿ 45 ದಿನಗಳವರೆಗೆ ತೆಗೆದುಕೊಳ್ಳಬಹುದು, ಆದರೆ ಲಿಖಿತ ಕಾರಣಗಳಿದ್ದಾಗ ಮಾತ್ರ.",
+    "faaDecisionLapsed": "45 ದಿನಗಳ ಅಂತಿಮ ಮಿತಿ {{date}} ರಂದು ಮುಗಿದಿದೆ. ಈಗ ನೀವು ಇದನ್ನು ಕೇಂದ್ರ ಅಥವಾ ರಾಜ್ಯ ಮಾಹಿತಿ ಆಯೋಗಕ್ಕೆ ತೆಗೆದುಕೊಂಡು ಹೋಗಬಹುದು.",
+    "rightsTitle": "ಈ ವಿಳಂಬದಿಂದ ನಿಮಗೆ ದೊರೆಯುವ ಹಕ್ಕುಗಳು",
+    "rightsFree": "ಶುಲ್ಕ ಪಟ್ಟಿಯಲ್ಲಿ ಏನೇ ಇದ್ದರೂ, ಈಗ ಮಾಹಿತಿಯನ್ನು ಉಚಿತವಾಗಿ ಒದಗಿಸಬೇಕು.",
+    "rightsDeemed": "ಕಾಲಮಿತಿಯೊಳಗೆ ಉತ್ತರ ಬಾರದೇ ಇರುವುದು ನಿರಾಕರಣೆಯೆಂದು ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ; ಆದ್ದರಿಂದ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದಾದ ತೀರ್ಮಾನವಿದೆ.",
+    "rightsAppeal": "ನೀವು ಈಗ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು.",
+    "fileAppeal": "ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ",
+    "section": "ವಿಭಾಗ {{section}}, RTI ಕಾಯ್ದೆ 2005",
+    "otherLimitsTitle": "ಕಾಯ್ದೆಯ ಇತರೆ ಕಾಲಮಿತಿಗಳು",
+    "otherLimitsNote": "ಇವು ವಿನಂತಿಯನ್ನು ಹೇಗೆ ಸಲ್ಲಿಸಲಾಯಿತು ಎಂಬುದರ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿವೆ; ಈ ಪೋರ್ಟಲ್ ಅದನ್ನು ದಾಖಲಿಸುವುದಿಲ್ಲ. ಆದ್ದರಿಂದ ಎಣಿಕೆಗಿಂತ ಉಲ್ಲೇಖಕ್ಕಾಗಿ ತೋರಿಸಲಾಗುತ್ತದೆ.",
+    "refLifeOrLiberty": "ವ್ಯಕ್ತಿಯ ಜೀವನ ಅಥವಾ ಸ್ವಾತಂತ್ರ್ಯಕ್ಕೆ ಸಂಬಂಧಿಸಿದೆ",
+    "refApioReply": "ಸಹಾಯಕ ಸಾರ್ವಜನಿಕ ಮಾಹಿತಿ ಅಧಿಕಾರಿಯ ಮೂಲಕ ಸಲ್ಲಿಸಲಾಗಿದೆ",
+    "refThirdParty": "ಮೂರನೇ ವ್ಯಕ್ತಿಯ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿದೆ",
+    "refSecondAppeal": "ಮಾಹಿತಿ ಆಯೋಗಕ್ಕೆ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ",
+    "gateWaiting_one": "ಇನ್ನೂ ಅಲ್ಲ. ಸಾರ್ವಜನಿಕ ಮಾಹಿತಿ ಅಧಿಕಾರಿಯು {{date}} ರೊಳಗೆ ಉತ್ತರಿಸಬೇಕು; ಅದಕ್ಕೆ {{count}} ದಿನ ಬಾಕಿ ಇದೆ. {{unlocksOn}} ರಿಂದ ಅಥವಾ ಉತ್ತರ ಬಂದ ತಕ್ಷಣ — ಯಾವುದು ಮೊದಲು ಆಗುತ್ತದೆಯೋ — ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು.",
+    "gateWaiting_other": "ಇನ್ನೂ ಅಲ್ಲ. ಸಾರ್ವಜನಿಕ ಮಾಹಿತಿ ಅಧಿಕಾರಿಯು {{date}} ರೊಳಗೆ ಉತ್ತರಿಸಬೇಕು; ಅದಕ್ಕೆ {{count}} ದಿನಗಳು ಬಾಕಿ ಇವೆ. {{unlocksOn}} ರಿಂದ ಅಥವಾ ಉತ್ತರ ಬಂದ ತಕ್ಷಣ — ಯಾವುದು ಮೊದಲು ಆಗುತ್ತದೆಯೋ — ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು.",
+    "gateWaitingToday": "ಇನ್ನೂ ಅಲ್ಲ. ಸಾರ್ವಜನಿಕ ಮಾಹಿತಿ ಅಧಿಕಾರಿಯು {{date}} ಮುಗಿಯುವ ಮೊದಲು ಉತ್ತರಿಸಬೇಕು. {{unlocksOn}} ರಿಂದ ಅಥವಾ ಉತ್ತರ ಬಂದ ತಕ್ಷಣ ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು.",
+    "gateAppealRow": "ಆ ನೋಂದಣಿ ಸಂಖ್ಯೆಯು ಪ್ರಥಮ ಮೇಲ್ಮನವಿಗೆ ಸೇರಿದೆ. ಒಂದು ಮೇಲ್ಮನವಿಯ ವಿರುದ್ಧ ಮತ್ತೊಂದು ಪ್ರಥಮ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ — ಮೂಲ RTI ವಿನಂತಿಯ ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ.",
+    "gateAlreadyAppealed": "ಈ ವಿನಂತಿಯ ವಿರುದ್ಧ ಮೇಲ್ಮನವಿ ಈಗಾಗಲೇ ಸಲ್ಲಿಸಲಾಗಿದೆ. ಅದರ ತೀರ್ಮಾನದಿಂದ ತೃಪ್ತಿಯಿಲ್ಲದಿದ್ದರೆ ಮುಂದಿನ ಹಂತ ಮಾಹಿತಿ ಆಯೋಗಕ್ಕೆ ದ್ವಿತೀಯ ಮೇಲ್ಮನವಿ.",
+    "lapsedMetric": "ಕಾಲಮಿತಿ ಮುಗಿದಿದೆ"
+  }
+}

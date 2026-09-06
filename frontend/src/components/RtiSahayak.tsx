@@ -1,4 +1,5 @@
-import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
 import { IconTooltip } from "@/components/IconTooltip"
@@ -13,9 +14,12 @@ import {
   type LocalizedText,
 } from "@/services/rti-sahayak"
 import {
+  requestVoiceToggle,
   VOICE_MESSAGE_EVENT,
+  VOICE_STATUS_EVENT,
   VOICE_TRANSCRIPT_EVENT,
   type VoiceMessageEventDetail,
+  type VoiceStatusEventDetail,
   type VoiceTranscriptEventDetail,
 } from "@/services/voice-conversation"
 
@@ -31,10 +35,13 @@ type ChatMessage = {
   sourceLanguage: PortalLanguage
   authoritySuggestions?: AuthoritySuggestion[]
   source?: "gpt-5.6-luna" | "gemini-live" | "local"
+  /** A Gemini Live reply that is still receiving word-level transcription updates. */
+  isStreaming?: boolean
 }
 
 type ChatCopy = {
   name: string
+  voiceAssistant: string
   welcome: string
   subtitle: string
   privacyWarning: string
@@ -62,6 +69,7 @@ type ChatCopy = {
 const chatCopy: Record<PortalLanguage, ChatCopy> = {
   en: {
     name: "RTI Sahayak",
+    voiceAssistant: "Voice assistant",
     welcome:
       "Namaste! I am RTI Sahayak. I can answer general questions about filing an RTI, fees, appeals, Public Authorities, and using View Status.",
     subtitle: "General RTI guidance - no personal data",
@@ -94,6 +102,7 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
   },
   hi: {
     name: "आरटीआई सहायक",
+    voiceAssistant: "वॉइस सहायक",
     welcome:
       "नमस्ते! मैं आरटीआई सहायक हूँ। मैं आरटीआई आवेदन, शुल्क, अपील, लोक प्राधिकरण और स्थिति देखने से जुड़े सामान्य प्रश्नों में आपकी सहायता कर सकता हूँ।",
     subtitle: "सामान्य आरटीआई मार्गदर्शन - कोई व्यक्तिगत जानकारी नहीं",
@@ -124,21 +133,87 @@ const chatCopy: Record<PortalLanguage, ChatCopy> = {
       "मैं अपनी स्थिति कैसे देख सकता हूँ?",
     ],
   },
+  te: {
+    name: "RTI సహాయక్",
+    voiceAssistant: "వాయిస్ సహాయకుడు",
+    welcome:
+      "నమస్కారం! నేను RTI సహాయక్. RTI దరఖాస్తు దాఖలు, రుసుములు, అప్పీలు, ప్రజా అధికారాలు మరియు స్థితిని వీక్షించడం గురించి సాధారణ ప్రశ్నలకు సమాధానం ఇవ్వగలను.",
+    subtitle: "సాధారణ RTI మార్గదర్శకం – వ్యక్తిగత సమాచారం లేదు",
+    privacyWarning: "సంప్రదింపు వివరాలు, గుర్తింపు వివరాలు, దరఖాస్తు సంఖ్యలు, OTPలు, పాస్‌వర్డ్‌లు, చెల్లింపు వివరాలు లేదా పత్రాలను ఎప్పుడూ పంచుకోకండి.",
+    privacyNotice:
+      "ఆ సందేశం పంపబడలేదు. మీ గోప్యత కోసం, పేర్లు, సంప్రదింపు వివరాలు, ఆధార్/PAN, నమోదు సంఖ్యలు, OTPలు, పాస్‌వర్డ్‌లు, చెల్లింపు వివరాలు లేదా పత్రాలను పంచుకోకండి.",
+    authorityTitle: "సాధ్యమైన దాఖలు కార్యాలయాలు",
+    backToTop: "పైకి వెళ్ళండి",
+    relatedOffices: "సంబంధిత కార్యాలయాలు",
+    whySuggested: "ఈ సూచనకు కారణం",
+    confirmAuthority: "ప్రజా అధికారాల జాబితాలో నిర్ధారించండి",
+    fileRti: "RTI దాఖలు చేయండి",
+    preparing: "RTI సహాయక్ సమాధానాన్ని సిద్ధం చేస్తోంది...",
+    askLabel: "RTI సహాయక్‌ను అడగండి",
+    placeholder: "సమస్యను సాధారణ పదాల్లో వివరించండి...",
+    sendMessage: "సందేశాన్ని పంపండి",
+    browseFaqs: "అధికారిక FAQలను చూడండి",
+    clearChat: "చాట్‌ను క్లియర్ చేయండి",
+    closeChat: "RTI సహాయక్‌ను మూసివేయండి",
+    openChat: "RTI సహాయక్‌ను తెరవండి",
+    translating: "ఈ సంభాషణను తెలుగులోకి అనువదిస్తోంది...",
+    translationFailed: "కొన్ని పాత సందేశాలను అనువదించలేకపోయాం; అవి వ్రాయబడిన విధంగానే చూపబడతాయి.",
+    guidedFiling: "RTI సహాయక్‌తో RTI దరఖాస్తును సిద్ధం చేయండి",
+    suggestions: [
+      "పాస్‌పోర్ట్ సమస్యను ఏ శాఖ నిర్వహిస్తుంది?",
+      "RTI రుసుము ఎంత?",
+      "నేను మొదటి అప్పీల్‌ను ఎలా దాఖలు చేయాలి?",
+      "నా స్థితిని ఎలా తనిఖీ చేయాలి?",
+    ],
+  },
+  kn: {
+    name: "RTI ಸಹಾಯಕ",
+    voiceAssistant: "ಧ್ವನಿ ಸಹಾಯಕ",
+    welcome:
+      "ನಮಸ್ಕಾರ! ನಾನು RTI ಸಹಾಯಕ. RTI ಅರ್ಜಿ ಸಲ್ಲಿಕೆ, ಶುಲ್ಕಗಳು, ಮೇಲ್ಮನವಿಗಳು, ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳು ಮತ್ತು ಸ್ಥಿತಿಯನ್ನು ನೋಡುವ ಬಗ್ಗೆ ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರಿಸಬಹುದು.",
+    subtitle: "ಸಾಮಾನ್ಯ RTI ಮಾರ್ಗದರ್ಶನ – ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ ಇಲ್ಲ",
+    privacyWarning: "ಸಂಪರ್ಕ ವಿವರಗಳು, ಗುರುತಿನ ವಿವರಗಳು, ಅರ್ಜಿ ಸಂಖ್ಯೆಗಳು, OTPಗಳು, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು ಅಥವಾ ದಾಖಲೆಗಳನ್ನು ಎಂದಿಗೂ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ.",
+    privacyNotice:
+      "ಆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲಾಗಿಲ್ಲ. ನಿಮ್ಮ ಗೌಪ್ಯತೆಗಾಗಿ, ಹೆಸರುಗಳು, ಸಂಪರ್ಕ ವಿವರಗಳು, ಆಧಾರ್/PAN, ನೋಂದಣಿ ಸಂಖ್ಯೆಗಳು, OTPಗಳು, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು ಅಥವಾ ದಾಖಲೆಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಬೇಡಿ.",
+    authorityTitle: "ಸಂಭಾವ್ಯ ಅರ್ಜಿ ಸಲ್ಲಿಕೆ ಕಚೇರಿಗಳು",
+    backToTop: "ಮೇಲಕ್ಕೆ ಹೋಗಿ",
+    relatedOffices: "ಸಂಬಂಧಿತ ಕಚೇರಿಗಳು",
+    whySuggested: "ಈ ಸಲಹೆಗೆ ಕಾರಣ",
+    confirmAuthority: "ಸಾರ್ವಜನಿಕ ಪ್ರಾಧಿಕಾರಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ದೃಢೀಕರಿಸಿ",
+    fileRti: "RTI ಸಲ್ಲಿಸಿ",
+    preparing: "RTI ಸಹಾಯಕ ಉತ್ತರವನ್ನು ಸಿದ್ಧಪಡಿಸುತ್ತಿದೆ...",
+    askLabel: "RTI ಸಹಾಯಕನನ್ನು ಕೇಳಿ",
+    placeholder: "ಸಮಸ್ಯೆಯನ್ನು ಸಾಮಾನ್ಯ ಪದಗಳಲ್ಲಿ ವಿವರಿಸಿ...",
+    sendMessage: "ಸಂದೇಶ ಕಳುಹಿಸಿ",
+    browseFaqs: "ಅಧಿಕೃತ FAQಗಳನ್ನು ನೋಡಿ",
+    clearChat: "ಚಾಟ್ ತೆರವುಗೊಳಿಸಿ",
+    closeChat: "RTI ಸಹಾಯಕನನ್ನು ಮುಚ್ಚಿ",
+    openChat: "RTI ಸಹಾಯಕನನ್ನು ತೆರೆಯಿರಿ",
+    translating: "ಈ ಸಂಭಾಷಣೆಯನ್ನು ಕನ್ನಡಕ್ಕೆ ಅನುವಾದಿಸಲಾಗುತ್ತಿದೆ...",
+    translationFailed: "ಕೆಲವು ಹಿಂದಿನ ಸಂದೇಶಗಳನ್ನು ಅನುವಾದಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ; ಅವುಗಳನ್ನು ಬರೆದಂತೆಯೇ ತೋರಿಸಲಾಗುತ್ತಿದೆ.",
+    guidedFiling: "RTI ಸಹಾಯಕನೊಂದಿಗೆ RTI ಅರ್ಜಿಯನ್ನು ಸಿದ್ಧಪಡಿಸಿ",
+    suggestions: [
+      "ಪಾಸ್‌ಪೋರ್ಟ್ ಸಮಸ್ಯೆಯನ್ನು ಯಾವ ಇಲಾಖೆ ನಿರ್ವಹಿಸುತ್ತದೆ?",
+      "RTI ಶುಲ್ಕ ಎಷ್ಟು?",
+      "ನಾನು ಮೊದಲ ಮೇಲ್ಮನವಿಯನ್ನು ಹೇಗೆ ಸಲ್ಲಿಸಬೇಕು?",
+      "ನನ್ನ ಸ್ಥಿತಿಯನ್ನು ಹೇಗೆ ಪರಿಶೀಲಿಸಬಹುದು?",
+    ],
+  },
 }
 
 function createWelcomeMessage(language: PortalLanguage): ChatMessage {
   return {
     id: "welcome",
     role: "assistant",
-    // Portal copy, so both languages are already written and no translation is ever needed.
-    text: { en: chatCopy.en.welcome, hi: chatCopy.hi.welcome },
+    // Portal copy, so each supported language is already written and never needs a model call.
+    text: { en: chatCopy.en.welcome, hi: chatCopy.hi.welcome, te: chatCopy.te.welcome, kn: chatCopy.kn.welcome },
     sourceLanguage: language,
     source: "local",
   }
 }
 
 function localize(language: PortalLanguage, text: string): LocalizedText {
-  return language === "hi" ? { hi: text } : { en: text }
+  return { [language]: text }
 }
 
 function getMessageText(message: ChatMessage, language: PortalLanguage) {
@@ -155,27 +230,10 @@ function needsTranslation(
   failedTranslations: ReadonlySet<string>
 ) {
   return (
-    message.text[language] === undefined && !failedTranslations.has(getTranslationKey(message, language))
+    !message.isStreaming
+    && message.text[language] === undefined
+    && !failedTranslations.has(getTranslationKey(message, language))
   )
-}
-
-/**
- * Tailwind's sm breakpoint. Below it the panel already takes the full screen width, so the
- * launcher drops its label for a circle rather than a pill wide enough to hold "आरटीआई सहायक".
- */
-const COMPACT_LAUNCHER_QUERY = "(max-width: 639.98px)"
-
-// Subscribed to rather than stored in state: the width can change between the first render and
-// an effect running, and a media query is exactly the external source useSyncExternalStore is for.
-function subscribeToCompactLauncher(onChange: () => void) {
-  const query = window.matchMedia(COMPACT_LAUNCHER_QUERY)
-  query.addEventListener("change", onChange)
-
-  return () => query.removeEventListener("change", onChange)
-}
-
-function getIsCompactLauncher() {
-  return window.matchMedia(COMPACT_LAUNCHER_QUERY).matches
 }
 
 function createMessageId() {
@@ -329,15 +387,115 @@ function AuthorityMatches({
   )
 }
 
+function VoiceWaveform({
+  compact = false,
+  prefersReducedMotion,
+  status,
+}: {
+  compact?: boolean
+  prefersReducedMotion: boolean | null
+  status: VoiceStatusEventDetail["status"]
+}) {
+  if (status === "connecting") {
+    return (
+      <motion.span
+        animate={prefersReducedMotion ? undefined : { rotate: 360 }}
+        aria-hidden="true"
+        className={`material-symbols-outlined ${compact ? "text-base" : "text-lg"}`}
+        style={prefersReducedMotion ? undefined : { willChange: "transform" }}
+        transition={prefersReducedMotion ? undefined : { duration: 1.1, ease: "linear", repeat: Infinity }}
+      >
+        progress_activity
+      </motion.span>
+    )
+  }
+
+  if (status === "permissionRequired" || status === "unavailable") {
+    return <span aria-hidden="true" className={`material-symbols-outlined ${compact ? "text-base" : "text-lg"}`}>mic_off</span>
+  }
+
+  const levels = status === "answering"
+    ? [[0.45, 0.85, 0.55], [0.8, 0.4, 0.9], [0.5, 1, 0.45], [0.75, 0.45, 0.8]]
+    : [[0.45, 0.9, 0.55], [0.75, 0.4, 0.8], [0.5, 1, 0.45], [0.7, 0.45, 0.9]]
+
+  return (
+    <span aria-hidden="true" className={`flex items-center justify-center gap-0.5 ${compact ? "h-4" : "h-5"}`}>
+      {levels.map((scaleY, index) => (
+        <motion.span
+          animate={prefersReducedMotion ? { scaleY: 1 } : { scaleY }}
+          className={`rounded-full bg-current ${compact ? "h-3 w-0.5" : "h-4 w-1"}`}
+          key={index}
+          style={prefersReducedMotion ? undefined : { willChange: "transform" }}
+          transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.08, duration: status === "answering" ? 0.48 : 0.62, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" }}
+        />
+      ))}
+    </span>
+  )
+}
+
+function VoiceFeedback({
+  inChat = false,
+  label,
+  prefersReducedMotion,
+  status,
+}: {
+  inChat?: boolean
+  label: string | null
+  prefersReducedMotion: boolean | null
+  status: VoiceStatusEventDetail["status"]
+}) {
+  const isListening = status === "listening"
+  const isVoiceActive = status === "connecting" || isListening || status === "answering"
+
+  return (
+    <AnimatePresence initial={false} mode="wait">
+      {status !== "idle" && label && (
+        <motion.div
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          aria-live="polite"
+          className={inChat
+            ? "mr-5 flex w-fit max-w-[calc(100%-1.25rem)] items-center gap-2.5 rounded-2xl rounded-bl-sm border border-primary/20 bg-background/95 px-3 py-2 text-left shadow-sm shadow-primary/10 supports-backdrop-filter:backdrop-blur-xl"
+            : "mb-2 flex max-w-[min(34rem,calc(100vw-2.5rem))] items-center gap-2.5 rounded-2xl border border-primary/20 bg-background/95 px-3 py-2 text-left shadow-lg shadow-primary/10 supports-backdrop-filter:backdrop-blur-xl"}
+          exit={{ opacity: 0, scale: 0.98, y: 6 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.98, y: 6 }}
+          key={status}
+          style={prefersReducedMotion ? undefined : { willChange: "transform, opacity" }}
+          transition={prefersReducedMotion ? { duration: 0 } : { bounce: 0.04, type: "spring", visualDuration: 0.22 }}
+        >
+          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            {isListening && !prefersReducedMotion && [0, 0.75].map((delay) => (
+              <motion.span
+                animate={{ opacity: [0.55, 0], scale: [1, 1.9] }}
+                className="absolute inset-0 rounded-full border border-primary/45"
+                key={delay}
+                style={{ willChange: "transform, opacity" }}
+                transition={{ delay, duration: 1.5, ease: "easeOut", repeat: Infinity }}
+              />
+            ))}
+            <VoiceWaveform prefersReducedMotion={prefersReducedMotion} status={status} />
+          </span>
+          <span className="min-w-0 flex-1 text-xs font-medium leading-4 text-foreground">{label}</span>
+          {isVoiceActive && <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-primary" />}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 export function RtiSahayak() {
   const { language } = usePortalLanguage()
   const navigate = useNavigate()
+  const prefersReducedMotion = useReducedMotion()
   const copy = chatCopy[language]
   const [isOpen, setIsOpen] = useState(false)
   const [hasScrolledDown, setHasScrolledDown] = useState(false)
-  const isCompact = useSyncExternalStore(subscribeToCompactLauncher, getIsCompactLauncher)
   const [draft, setDraft] = useState("")
   const [isSending, setIsSending] = useState(false)
+  const [voiceStatus, setVoiceStatus] = useState<VoiceStatusEventDetail>({
+    isActive: false,
+    label: null,
+    status: "idle",
+  })
   const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage(language)])
   const [hasPrivacyNotice, setHasPrivacyNotice] = useState(false)
   /** Messages whose translation was already tried and failed - retrying would loop forever. */
@@ -427,7 +585,7 @@ export function RtiSahayak() {
     if (list) {
       list.scrollTop = list.scrollHeight
     }
-  }, [messages, isSending, isTranslating, isOpen])
+  }, [messages, isSending, isTranslating, isOpen, voiceStatus.status])
 
   // Keep the launcher clear of the site footer as it enters the viewport, and reveal the
   // back-to-top button once the page has moved about a screenful.
@@ -548,22 +706,48 @@ export function RtiSahayak() {
     })
   })
 
-  const handleVoiceTranscript = useEffectEvent(({ role, text, language: transcriptLanguage }: VoiceTranscriptEventDetail) => {
+  const handleVoiceTranscript = useEffectEvent(({
+    id,
+    isDiscarded,
+    isFinal = true,
+    role,
+    text,
+    language: transcriptLanguage,
+  }: VoiceTranscriptEventDetail) => {
     const transcript = text.trim()
-    if (!transcript) return
+    if (!transcript && !isDiscarded) return
 
     setIsOpen(true)
     setHasPrivacyNotice(false)
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: createMessageId(),
-        role,
-        text: localize(transcriptLanguage, transcript),
-        sourceLanguage: transcriptLanguage,
-        source: role === "assistant" ? "gemini-live" : undefined,
-      },
-    ])
+    setMessages((currentMessages) => {
+      if (role === "assistant" && id) {
+        if (isDiscarded) return currentMessages.filter((message) => message.id !== id)
+
+        const streamedMessage: ChatMessage = {
+          id,
+          role,
+          text: localize(transcriptLanguage, transcript),
+          sourceLanguage: transcriptLanguage,
+          source: "gemini-live",
+          isStreaming: !isFinal,
+        }
+        const existingIndex = currentMessages.findIndex((message) => message.id === id)
+        if (existingIndex === -1) return [...currentMessages, streamedMessage]
+
+        return currentMessages.map((message) => message.id === id ? streamedMessage : message)
+      }
+
+      return [
+        ...currentMessages,
+        {
+          id: createMessageId(),
+          role,
+          text: localize(transcriptLanguage, transcript),
+          sourceLanguage: transcriptLanguage,
+          source: role === "assistant" ? "gemini-live" : undefined,
+        },
+      ]
+    })
   })
 
   // Voice requests deliberately pass through sendMessage so their transcript, history, privacy
@@ -575,12 +759,17 @@ export function RtiSahayak() {
     const onVoiceTranscript = (event: Event) => {
       handleVoiceTranscript((event as CustomEvent<VoiceTranscriptEventDetail>).detail)
     }
+    const onVoiceStatus = (event: Event) => {
+      setVoiceStatus((event as CustomEvent<VoiceStatusEventDetail>).detail)
+    }
 
     window.addEventListener(VOICE_MESSAGE_EVENT, onVoiceMessage)
     window.addEventListener(VOICE_TRANSCRIPT_EVENT, onVoiceTranscript)
+    window.addEventListener(VOICE_STATUS_EVENT, onVoiceStatus)
     return () => {
       window.removeEventListener(VOICE_MESSAGE_EVENT, onVoiceMessage)
       window.removeEventListener(VOICE_TRANSCRIPT_EVENT, onVoiceTranscript)
+      window.removeEventListener(VOICE_STATUS_EVENT, onVoiceStatus)
     }
   }, [])
 
@@ -594,21 +783,40 @@ export function RtiSahayak() {
     safetyIdentifier.current = createSafetyIdentifier()
   }
 
-  const toggleChat = () => setIsOpen((open) => !open)
-  const launcherLabel = isOpen ? copy.closeChat : copy.openChat
-  const launcherIcon = <span aria-hidden="true" className="material-symbols-outlined">support_agent</span>
-  const launcherClassName = isOpen
-    ? "rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary"
-    : "rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:supports-backdrop-filter:backdrop-blur-sm"
+  const submitFromComposer = () => {
+    setIsOpen(true)
+    void sendMessage(draft)
+  }
+
+  const toggleVoiceFromComposer = () => {
+    setIsOpen(true)
+    requestVoiceToggle()
+  }
+
+  const closeComposer = () => {
+    if (voiceStatus.isActive) requestVoiceToggle()
+    setIsOpen(false)
+  }
+
+  const voiceLabel = voiceStatus.label ?? copy.voiceAssistant
 
   return (
-    // items-end keeps the launcher pinned to the right edge; without it the button drifts
-    // left to the start of the container once the much wider panel opens above it.
+    // items-end keeps the chat panel and its persistent composer aligned to the right edge.
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end" ref={launcherRef}>
-      {isOpen && (
+      <AnimatePresence initial={false} mode="wait">
+      {isOpen ? (
+        <motion.div
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="flex flex-col items-end"
+          exit={{ opacity: 0, scale: 0.98, y: 12 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.98, y: 12 }}
+          key="rti-sahayak-composer"
+          style={{ willChange: "transform, opacity" }}
+          transition={prefersReducedMotion ? { duration: 0 } : { bounce: 0.06, type: "spring", visualDuration: 0.32 }}
+        >
         <section
           aria-label={copy.name + " chat"}
-          className="mb-3 flex h-[min(42rem,calc(100svh/var(--app-scale)-6rem))] w-[calc(100vw-2.5rem)] max-w-[27rem] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:w-[27rem]"
+          className="mb-3 flex h-[min(42rem,calc(100svh/var(--app-scale)-7.5rem))] w-[calc(100vw-2.5rem)] max-w-[34rem] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:w-[34rem]"
         >
           <header className="flex items-start gap-2.5 bg-primary px-3.5 py-2.5 text-primary-foreground">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
@@ -624,7 +832,7 @@ export function RtiSahayak() {
                 <Button
                   aria-label={copy.closeChat}
                   className="shrink-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeComposer}
                   size="icon-sm"
                   variant="ghost"
                 />
@@ -641,7 +849,7 @@ export function RtiSahayak() {
           </div>
 
           <div className="border-b border-border bg-background px-3.5 py-2">
-            <Link className="group flex w-full items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-2 text-primary transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2" onClick={() => setIsOpen(false)} to="/file-with-sahayak">
+            <Link className="group flex w-full items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-2 text-primary transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2" onClick={closeComposer} to="/file-with-sahayak">
               <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"><span className="material-symbols-outlined text-sm">auto_awesome</span></span>
               <span className="min-w-0 flex-1 text-xs font-semibold leading-4">{copy.guidedFiling}</span>
               <span aria-hidden="true" className="material-symbols-outlined shrink-0 text-base transition-transform group-hover:translate-x-0.5">arrow_forward</span>
@@ -657,11 +865,22 @@ export function RtiSahayak() {
                 {message.role === "assistant"
                   ? <FormattedMessage content={getMessageText(message, language)} />
                   : getMessageText(message, language)}
+                {message.role === "assistant" && message.isStreaming && (
+                  <motion.span
+                    animate={prefersReducedMotion ? { opacity: 1 } : { opacity: [0.35, 1, 0.35] }}
+                    aria-hidden="true"
+                    className="ml-1 inline-flex align-middle text-primary"
+                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 1, ease: "easeInOut", repeat: Infinity }}
+                  >
+                    <span aria-hidden="true" className="material-symbols-outlined text-sm">more_horiz</span>
+                  </motion.span>
+                )}
                 {message.role === "assistant" && message.authoritySuggestions && (
                   <AuthorityMatches copy={copy} onFileRti={startRequestFor} suggestions={message.authoritySuggestions} />
                 )}
               </div>
             ))}
+            <VoiceFeedback inChat label={voiceStatus.label} prefersReducedMotion={prefersReducedMotion} status={voiceStatus.status} />
             {isTranslating && (
               <div className="flex w-fit items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground shadow-sm">
                 <span aria-hidden="true" className="material-symbols-outlined animate-spin text-base">progress_activity</span>
@@ -705,89 +924,125 @@ export function RtiSahayak() {
               </p>
             )}
 
-            <form
-              className="flex items-end gap-2"
-              onSubmit={(event) => {
-                event.preventDefault()
-                void sendMessage(draft)
-              }}
-            >
-              <label className="sr-only" htmlFor="rti-sahayak-message">{copy.askLabel}</label>
-              <textarea
-                className="max-h-32 min-h-10 flex-1 resize-none overflow-y-auto rounded-lg border border-input bg-background px-3 py-2 text-sm leading-5 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
-                disabled={isSending}
-                id="rti-sahayak-message"
-                maxLength={700}
-                onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={(event) => {
-                  // Enter sends, Shift+Enter starts a new line. isComposing guards Indic and
-                  // other IME input, where Enter is how a candidate word gets committed.
-                  if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
-                    return
-                  }
-
-                  event.preventDefault()
-                  void sendMessage(draft)
-                }}
-                placeholder={copy.placeholder}
-                ref={draftRef}
-                rows={1}
-                value={draft}
-              />
-              <IconTooltip label={copy.sendMessage} render={<Button aria-label={copy.sendMessage} disabled={!draft.trim() || isSending} size="icon" type="submit" />}>
-                <span aria-hidden="true" className="material-symbols-outlined">send</span>
-              </IconTooltip>
-            </form>
-
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
               <Link className="rounded-md px-2 py-1 font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" to="/faq">{copy.browseFaqs}</Link>
               <button className="rounded-md px-2 py-1 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" onClick={clearConversation} type="button">{copy.clearChat}</button>
             </div>
           </div>
         </section>
-      )}
 
-      {!isOpen && hasScrolledDown ? (
+      <form
+        aria-label={copy.name}
+        className="flex w-[calc(100vw-2.5rem)] max-w-[34rem] items-end gap-1.5 rounded-2xl border border-border bg-background p-1.5 shadow-xl shadow-black/10 sm:w-[34rem]"
+        onSubmit={(event) => {
+          event.preventDefault()
+          submitFromComposer()
+        }}
+      >
+        <span aria-hidden="true" className="mb-1.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <span className="material-symbols-outlined text-lg">support_agent</span>
+        </span>
+        <label className="sr-only" htmlFor="rti-sahayak-message">{copy.askLabel}</label>
+        <textarea
+          className="max-h-28 min-h-10 flex-1 resize-none overflow-y-auto bg-transparent px-1 py-2 text-sm leading-5 outline-none placeholder:text-muted-foreground focus-visible:outline-none"
+          disabled={isSending}
+          id="rti-sahayak-message"
+          maxLength={700}
+          onChange={(event) => setDraft(event.target.value)}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={(event) => {
+            // Enter sends, Shift+Enter starts a new line. isComposing guards Indic and other
+            // IME input, where Enter is how a candidate word gets committed.
+            if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return
+            event.preventDefault()
+            submitFromComposer()
+          }}
+          placeholder={copy.placeholder}
+          ref={draftRef}
+          rows={1}
+          value={draft}
+        />
         <IconTooltip
-          label={copy.backToTop}
+          label={voiceLabel}
           render={
             <Button
-              aria-label={copy.backToTop}
-              className="mb-3 size-12 rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
-              onClick={scrollToTop}
-              size="icon-lg"
+              aria-label={voiceLabel}
+              aria-pressed={voiceStatus.isActive}
+              className={voiceStatus.isActive ? "mb-0.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90" : "mb-0.5 rounded-xl"}
+              onClick={toggleVoiceFromComposer}
+              size="icon"
+              type="button"
+              variant={voiceStatus.isActive ? "default" : "ghost"}
             />
           }
-          side="left"
         >
-          <span aria-hidden="true" className="material-symbols-outlined">arrow_upward</span>
-        </IconTooltip>
-      ) : null}
-
-      {isCompact ? (
-        // size-12 rather than the pill's height alone, so the collapsed launcher and the
-        // back-to-top button stacked above it are the same circle.
-        <IconTooltip
-          label={launcherLabel}
-          render={<Button aria-expanded={isOpen} aria-label={launcherLabel} className={`size-12 ${launcherClassName}`} onClick={toggleChat} size="icon-lg" />}
-          side="left"
-        >
-          {launcherIcon}
-        </IconTooltip>
-      ) : (
-        <Button
-          aria-expanded={isOpen}
-          aria-label={launcherLabel}
-          className={`group/sahayak h-12 w-12 justify-start gap-0 overflow-hidden rounded-full px-0 transition-[width] duration-200 ease-out hover:w-[9.25rem] focus-visible:w-[9.25rem] motion-reduce:transition-none ${launcherClassName}`}
-          onClick={toggleChat}
-          size="lg"
-        >
-          <span className="flex size-12 shrink-0 items-center justify-center">{launcherIcon}</span>
-          <span className="max-w-0 overflow-hidden whitespace-nowrap pr-0 opacity-0 transition-[max-width,opacity,padding] duration-200 ease-out group-hover/sahayak:max-w-28 group-hover/sahayak:pr-3 group-hover/sahayak:opacity-100 group-focus-visible/sahayak:max-w-28 group-focus-visible/sahayak:pr-3 group-focus-visible/sahayak:opacity-100 motion-reduce:transition-none">
-            {copy.name}
+          <span className="relative flex size-5 items-center justify-center">
+            {voiceStatus.status === "listening" && !prefersReducedMotion && (
+              <motion.span
+                animate={{ opacity: [0.5, 0], scale: [1, 1.6] }}
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full border border-current"
+                style={{ willChange: "transform, opacity" }}
+                transition={{ duration: 1.25, ease: "easeOut", repeat: Infinity }}
+              />
+            )}
+            {voiceStatus.isActive
+              ? <VoiceWaveform compact prefersReducedMotion={prefersReducedMotion} status={voiceStatus.status} />
+              : <span aria-hidden="true" className="material-symbols-outlined">mic</span>}
           </span>
-        </Button>
+        </IconTooltip>
+        <IconTooltip
+          label={copy.sendMessage}
+          render={<Button aria-label={copy.sendMessage} className="mb-0.5 rounded-xl" disabled={!draft.trim() || isSending} size="icon" type="submit" />}
+        >
+          <span aria-hidden="true" className="material-symbols-outlined">send</span>
+        </IconTooltip>
+      </form>
+        </motion.div>
+      ) : (
+        <motion.div
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="flex flex-col items-end"
+          exit={{ opacity: 0, scale: 0.96, y: 8 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.96, y: 8 }}
+          key="rti-sahayak-launcher"
+          style={{ willChange: "transform, opacity" }}
+          transition={prefersReducedMotion ? { duration: 0 } : { bounce: 0.04, type: "spring", visualDuration: 0.24 }}
+        >
+          {hasScrolledDown ? (
+            <IconTooltip
+              label={copy.backToTop}
+              render={
+                <Button
+                  aria-label={copy.backToTop}
+                  className="mb-3 size-12 rounded-full border-primary-foreground/25 bg-primary/55 text-primary-foreground shadow-lg shadow-primary/20 supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+                  onClick={scrollToTop}
+                  size="icon-lg"
+                />
+              }
+              side="left"
+            >
+              <span aria-hidden="true" className="material-symbols-outlined">arrow_upward</span>
+            </IconTooltip>
+          ) : null}
+
+          <Button
+            aria-expanded={false}
+            aria-label={copy.openChat}
+            className="group/sahayak h-12 w-12 justify-start gap-0 overflow-hidden rounded-full border-primary-foreground/25 bg-primary/55 px-0 text-primary-foreground shadow-lg shadow-primary/20 transition-[width,background-color,box-shadow] duration-200 ease-out hover:w-[9.25rem] hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 focus-visible:w-[9.25rem] motion-reduce:transition-none supports-backdrop-filter:backdrop-blur-xl supports-backdrop-filter:backdrop-saturate-150"
+            onClick={() => setIsOpen(true)}
+            size="lg"
+          >
+            <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center">
+              <span className="material-symbols-outlined">support_agent</span>
+            </span>
+            <span className="max-w-0 overflow-hidden whitespace-nowrap pr-0 opacity-0 transition-[max-width,opacity,padding] duration-200 ease-out group-hover/sahayak:max-w-28 group-hover/sahayak:pr-3 group-hover/sahayak:opacity-100 group-focus-visible/sahayak:max-w-28 group-focus-visible/sahayak:pr-3 group-focus-visible/sahayak:opacity-100 motion-reduce:transition-none">
+              {copy.name}
+            </span>
+          </Button>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   )
 }

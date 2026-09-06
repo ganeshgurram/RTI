@@ -1,5 +1,5 @@
 export type RtiDraftType = "request" | "first-appeal"
-export type RtiDraftLanguage = "en" | "hi"
+export type RtiDraftLanguage = "en" | "hi" | "te" | "kn"
 
 type RewriteDraftOptions = {
   draft: string

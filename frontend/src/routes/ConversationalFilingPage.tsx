@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "@/auth/AuthContext"
 import { Button } from "@/components/ui/button"
 import type { RequestReviewDraft } from "@/data/request-review"
-import { usePortalLanguage, type PortalLanguage } from "@/i18n"
+import { usePortalLanguage } from "@/i18n"
 import { MaterialIcon } from "@/routes/stitch-shell"
 import type { AuthoritySuggestion } from "@/services/authority-recommendations"
 import { prepareAuthorityDraft, prepareRtiFiling, type FilingPreparation } from "@/services/rti-sahayak"
@@ -37,7 +37,7 @@ type FilingCopy = {
   step: string
 }
 
-const copy: Record<PortalLanguage, FilingCopy> = {
+const copy: Record<"en" | "hi", FilingCopy> = {
   en: {
     title: "File with RTI Sahayak",
     subtitle: "Describe the information you need in plain language. RTI Sahayak suggests an authority and prepares an editable draft.",
@@ -134,7 +134,7 @@ type WorkflowCopy = {
   changeAuthority: string
 }
 
-const workflowCopy: Record<PortalLanguage, WorkflowCopy> = {
+const workflowCopy: Record<"en" | "hi", WorkflowCopy> = {
   en: {
     steps: ["Describe the issue", "Choose public authority", "Review RTI draft"],
     selectAuthorityTitle: "Choose the Public Authority",
@@ -162,8 +162,8 @@ export function ConversationalFilingPage() {
   const { user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const text = copy[language]
-  const workflow = workflowCopy[language]
+  const text = copy[language === "hi" ? "hi" : "en"]
+  const workflow = workflowCopy[language === "hi" ? "hi" : "en"]
   const initialState = (location.state as { initialDescription?: string; initialAuthorityId?: string } | null) ?? {}
   const initial = initialState.initialDescription ?? ""
   const initialAuthorityId = initialState.initialAuthorityId

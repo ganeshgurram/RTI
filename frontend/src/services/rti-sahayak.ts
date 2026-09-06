@@ -5,7 +5,7 @@ import {
 } from "@/services/authority-recommendations"
 
 export type ChatRole = "assistant" | "user"
-export type RtiSahayakLanguage = "en" | "hi"
+export type RtiSahayakLanguage = "en" | "hi" | "te" | "kn"
 
 export type ChatHistoryMessage = {
   role: ChatRole
