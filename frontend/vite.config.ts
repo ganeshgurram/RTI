@@ -48,9 +48,9 @@ export default defineConfig(({ mode }) => {
   const workspaceEnv = loadEnv(mode, path.resolve(import.meta.dirname, ".."), "")
   for (const variableName of ["OPENROUTER_API_KEY", "OPENAI_API_KEY"]) {
     const apiKey =
-      process.env[variableName] ??
       frontendEnv[variableName] ??
-      workspaceEnv[variableName]
+      workspaceEnv[variableName] ??
+      process.env[variableName]
 
     if (apiKey) {
       process.env[variableName] = apiKey

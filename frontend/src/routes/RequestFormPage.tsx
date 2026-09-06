@@ -187,6 +187,7 @@ export function RequestFormPage({
   const [hasDirectoryError, setHasDirectoryError] = useState(false)
   const [selectedMinistry, setSelectedMinistry] = useState(draft?.ministry ?? formDraft.value("ministry", authority?.ministryName ?? ""))
   const [selectedAuthority, setSelectedAuthority] = useState(draft?.authority ?? formDraft.value("authority", authority?.name ?? ""))
+  const [subject, setSubject] = useState(draft?.subject ?? formDraft.value("subject", ""))
   const [requestText, setRequestText] = useState(draft?.requestText ?? formDraft.value("requestText", ""))
   const [formResetKey, setFormResetKey] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
@@ -274,6 +275,7 @@ export function RequestFormPage({
 
     const submittedText = String(formData.get("requestText") ?? "")
     const value = (name: string) => String(formData.get(name) ?? "").trim()
+    const submittedSubject = value("subject")
     const document = formData.get("supportingDocument")
     const requestDraft: RequestReviewDraft = {
       applicantEmail: email,
@@ -281,9 +283,7 @@ export function RequestFormPage({
       applicantPhone: `+91 ${value("mobile")}`,
       authority: selectedAuthorityOption.label,
       requestText: submittedText,
-      // A guided filing can supply a carefully reviewed one-line subject. Keep it until the
-      // applicant changes the request itself; after an edit, derive a fresh truthful subject.
-      subject: submittedText.trim() === draft?.requestText.trim() ? draft.subject : deriveSubject(submittedText),
+      subject: submittedSubject || deriveSubject(submittedText),
       ministry: selectedMinistry,
       isBplApplicant,
       citizenship: value("citizenship"),
@@ -317,6 +317,7 @@ export function RequestFormPage({
     setIsBplApplicant(false)
     setSelectedMinistry(authority?.ministryName ?? "")
     setSelectedAuthority(authority?.name ?? "")
+    setSubject("")
     setRequestText("")
     setFormResetKey((current) => current + 1)
   }
@@ -461,6 +462,10 @@ export function RequestFormPage({
             </div>
           </div>
           <div className="space-y-4 border-t border-border pt-5">
+            <div className="space-y-1.5">
+              <label className={labelClassName} htmlFor="request-subject">{t("requestReview.subject")}<Required /></label>
+              <input className={inputClassName} id="request-subject" maxLength={120} name="subject" onChange={(event) => setSubject(event.target.value)} placeholder="Enter a concise subject" required type="text" value={subject} />
+            </div>
             <label className={labelClassName} htmlFor="request-text">{t("requestForm.requestText")}<Required /></label>
             <p className="rounded-lg border border-primary-fixed-dim bg-primary-fixed/30 px-3 py-2 text-label-sm text-surface-tint">{t("requestForm.requestTextNote")}</p>
             <FormGuidance>{t("formGuidance.requestText")}</FormGuidance>

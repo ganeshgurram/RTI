@@ -7,7 +7,7 @@ import type { RequestReviewDraft } from "@/data/request-review"
 import { usePortalLanguage, type PortalLanguage } from "@/i18n"
 import { MaterialIcon } from "@/routes/stitch-shell"
 import type { AuthoritySuggestion } from "@/services/authority-recommendations"
-import { prepareRtiFiling, type FilingPreparation } from "@/services/rti-sahayak"
+import { prepareAuthorityDraft, prepareRtiFiling, type FilingPreparation } from "@/services/rti-sahayak"
 
 type FilingCopy = {
   title: string
@@ -45,7 +45,7 @@ const copy: Record<PortalLanguage, FilingCopy> = {
     describeHint: "Use general facts only. Do not include your name, contact details, application number, OTP, payment details, or documents.",
     placeholder: "For example: I need records of passport appointment waiting times at Kochi PSK during 2026.",
     privacy: "Only the issue, possible authority, and request draft are handled here. Personal details stay in your profile or the secure form.",
-    prepare: "Find authority and prepare draft",
+    prepare: "Search public authority and prepare draft",
     preparing: "Preparing your filing…",
     confirmTitle: "Review the prepared filing",
     confirmHint: "Check the authority and edit the subject or request before moving to the official form.",
@@ -123,21 +123,63 @@ function AuthorityChoice({
   )
 }
 
+type WorkflowCopy = {
+  steps: readonly [string, string, string]
+  selectAuthorityTitle: string
+  selectAuthorityHint: string
+  prepareDraft: string
+  draftTitle: string
+  draftHint: string
+  selectedAuthority: string
+  changeAuthority: string
+}
+
+const workflowCopy: Record<PortalLanguage, WorkflowCopy> = {
+  en: {
+    steps: ["Describe the issue", "Choose public authority", "Review RTI draft"],
+    selectAuthorityTitle: "Choose the Public Authority",
+    selectAuthorityHint: "Select the authority most likely to hold the records. You can change it before preparing the draft.",
+    prepareDraft: "Prepare RTI draft",
+    draftTitle: "Review the RTI draft",
+    draftHint: "The draft is addressed to the selected Public Authority. Edit it if needed before continuing to the official form.",
+    selectedAuthority: "Selected Public Authority",
+    changeAuthority: "Change Public Authority",
+  },
+  hi: {
+    steps: ["समस्या बताएं", "लोक प्राधिकरण चुनें", "आरटीआई मसौदा देखें"],
+    selectAuthorityTitle: "लोक प्राधिकरण चुनें",
+    selectAuthorityHint: "उस प्राधिकरण को चुनें जिसके पास अभिलेख होने की संभावना है। मसौदा बनाने से पहले आप इसे बदल सकते हैं।",
+    prepareDraft: "आरटीआई मसौदा तैयार करें",
+    draftTitle: "आरटीआई मसौदे की समीक्षा करें",
+    draftHint: "मसौदा चुने गए लोक प्राधिकरण को संबोधित है। आधिकारिक फॉर्म में जाने से पहले आवश्यकता होने पर इसे संपादित करें।",
+    selectedAuthority: "चुना गया लोक प्राधिकरण",
+    changeAuthority: "लोक प्राधिकरण बदलें",
+  },
+}
+
 export function ConversationalFilingPage() {
   const { language } = usePortalLanguage()
   const { user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const text = copy[language]
-  const initial = (location.state as { initialDescription?: string } | null)?.initialDescription ?? ""
+  const workflow = workflowCopy[language]
+  const initialState = (location.state as { initialDescription?: string; initialAuthorityId?: string } | null) ?? {}
+  const initial = initialState.initialDescription ?? ""
+  const initialAuthorityId = initialState.initialAuthorityId
   const [description, setDescription] = useState(initial)
   const [prepared, setPrepared] = useState<FilingPreparation | null>(null)
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [selected, setSelected] = useState(0)
   const [subject, setSubject] = useState("")
   const [requestText, setRequestText] = useState("")
   const [error, setError] = useState("")
   const [isPreparing, setIsPreparing] = useState(false)
-  const [identifier] = useState(() => `rti-sahayak-${crypto.randomUUID()}`)
+  const [isDrafting, setIsDrafting] = useState(false)
+  const [identifier] = useState(() => "rti-sahayak-" + crypto.randomUUID())
+
+  const authoritySuggestions = prepared?.authoritySuggestions ?? []
+  const selectedAuthority = authoritySuggestions[selected]
 
   const prepare = async () => {
     if (description.trim().length < 12) {
@@ -147,13 +189,16 @@ export function ConversationalFilingPage() {
 
     setError("")
     setIsPreparing(true)
-
     try {
       const result = await prepareRtiFiling({ description, language, safetyIdentifier: identifier })
       setPrepared(result)
-      setSelected(result.selectedAuthorityIndex)
-      setSubject(result.subject)
-      setRequestText(result.requestText)
+      const preferredAuthorityIndex = initialAuthorityId
+        ? result.authoritySuggestions.findIndex((authority) => authority.authorityId === initialAuthorityId)
+        : -1
+      setSelected(preferredAuthorityIndex >= 0 ? preferredAuthorityIndex : result.selectedAuthorityIndex)
+      setSubject("")
+      setRequestText("")
+      setStep(2)
     } catch {
       setError(text.error)
     } finally {
@@ -161,22 +206,44 @@ export function ConversationalFilingPage() {
     }
   }
 
-  const continueToForm = () => {
-    const authority = prepared?.authoritySuggestions[selected]
+  const prepareDraft = async () => {
+    if (!selectedAuthority) return
 
-    if (!authority || !subject.trim() || !requestText.trim()) {
-      return
+    setError("")
+    setIsDrafting(true)
+
+    try {
+      const draft = await prepareAuthorityDraft({
+        authority: selectedAuthority,
+        description,
+        language,
+        safetyIdentifier: identifier,
+      })
+      setSubject(draft.subject)
+      setRequestText(draft.requestText)
+      setStep(3)
+    } catch (caught) {
+      setError(
+        caught instanceof Error && caught.message !== "sensitive"
+          ? caught.message
+          : "RTI Sahayak could not prepare the draft. Please try again.",
+      )
+    } finally {
+      setIsDrafting(false)
     }
+  }
+  const continueToForm = () => {
+    if (!selectedAuthority || !subject.trim() || !requestText.trim()) return
 
     const profile = user?.profile
     const draft: RequestReviewDraft = {
       applicantEmail: profile?.email ?? "",
       applicantName: profile?.fullName ?? "",
       applicantPhone: profile?.mobile ?? "",
-      authority: authority.authorityName,
-      ministry: authority.ministryName ?? authority.authorityName,
-      subject: subject.trim(),
-      requestText: requestText.trim(),
+      authority: selectedAuthority.authorityName,
+      ministry: selectedAuthority.ministryName ?? selectedAuthority.authorityName,
+      subject,
+      requestText,
       isBplApplicant: false,
       citizenship: profile?.citizenship ?? "Indian",
       applicant: {
@@ -194,35 +261,54 @@ export function ConversationalFilingPage() {
 
     navigate("/submit-request", {
       state: {
-        authority: { name: authority.authorityName, ministryName: authority.ministryName ?? authority.authorityName },
+        authority: {
+          name: selectedAuthority.authorityName,
+          ministryName: selectedAuthority.ministryName ?? selectedAuthority.authorityName,
+        },
         reviewDraft: draft,
       },
     })
   }
 
+
+
   const restart = () => {
     setPrepared(null)
+    setStep(1)
     setSubject("")
     setRequestText("")
     setError("")
   }
-
-  const hasAuthority = Boolean(prepared?.authoritySuggestions[selected])
 
   return (
     <main className="mx-auto w-full max-w-3xl px-margin-mobile py-stack-lg md:px-margin-desktop md:py-8">
       <header className="pb-3">
         <div className="mb-stack-sm flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-primary">{text.step} {prepared ? "2" : "1"} / 2</p>
+            <p className="text-sm font-semibold text-primary">{text.step} {step} / 3</p>
             <h1 className="mt-1 font-headline-lg text-headline-lg-mobile text-primary md:text-headline-lg">{text.title}</h1>
           </div>
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary"><MaterialIcon className="text-2xl">auto_awesome</MaterialIcon></div>
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary">
+            <MaterialIcon className="text-2xl">auto_awesome</MaterialIcon>
+          </div>
         </div>
         <p className="text-body-md text-on-surface-variant">{text.subtitle}</p>
+        <ol aria-label="RTI Sahayak filing steps" className="mt-5 grid gap-2 sm:grid-cols-3">
+          {workflow.steps.map((label, index) => {
+            const currentStep = index + 1
+            const isCurrent = step === currentStep
+            const isComplete = step > currentStep
+            return (
+              <li className={"flex items-center gap-2 rounded-lg border px-3 py-2 text-sm " + (isCurrent ? "border-primary bg-primary/5 text-primary" : isComplete ? "border-primary/30 bg-primary/5 text-foreground" : "border-border text-muted-foreground")} key={label}>
+                <span className={"flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-bold " + (isCurrent || isComplete ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>{isComplete ? "✓" : currentStep}</span>
+                <span className="font-medium">{label}</span>
+              </li>
+            )
+          })}
+        </ol>
       </header>
 
-      {!prepared ? (
+      {step === 1 && (
         <section className="rounded-xl border border-border bg-card shadow-sm">
           <div className="border-b border-border p-4 sm:p-5">
             <h2 className="font-headline-md text-lg text-primary">{text.describeTitle}</h2>
@@ -233,43 +319,60 @@ export function ConversationalFilingPage() {
             <p className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm leading-5 text-on-surface-variant"><MaterialIcon className="mr-2 align-[-3px] text-base text-primary">shield</MaterialIcon>{text.privacy}</p>
             {error ? <p className="text-sm font-medium text-destructive" role="alert">{error}</p> : null}
             <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-4">
-              <Button asChild type="button" variant="outline"><Link to="/public-authorities">{text.directory}</Link></Button>
+              <Button asChild nativeButton={false} type="button" variant="outline"><Link to="/public-authorities">{text.directory}</Link></Button>
               <Button disabled={isPreparing || !description.trim()} onClick={() => void prepare()} type="button"><MaterialIcon className="text-[18px]">auto_awesome</MaterialIcon>{isPreparing ? text.preparing : text.prepare}</Button>
             </div>
           </div>
         </section>
-      ) : (
+      )}
+
+      {step === 2 && (
         <div className="space-y-4">
           <section className="rounded-xl border border-border bg-card shadow-sm">
             <div className="border-b border-border p-4 sm:p-5">
-              <h2 className="font-headline-md text-lg text-primary">{text.confirmTitle}</h2>
-              <p className="mt-2 text-sm leading-6 text-on-surface-variant">{text.confirmHint}</p>
+              <h2 className="font-headline-md text-lg text-primary">{workflow.selectAuthorityTitle}</h2>
+              <p className="mt-2 text-sm leading-6 text-on-surface-variant">{workflow.selectAuthorityHint}</p>
             </div>
             <div className="space-y-4 p-4 sm:p-5">
-              {prepared.authoritySuggestions.length ? (
+              {authoritySuggestions.length ? (
                 <fieldset>
                   <legend className="mb-3 text-sm font-semibold text-foreground">{text.authority}</legend>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {prepared.authoritySuggestions.map((authority, index) => <AuthorityChoice authority={authority} copy={text} isSelected={index === selected} key={authority.authorityId} onSelect={() => setSelected(index)} />)}
+                    {authoritySuggestions.map((authority, index) => <AuthorityChoice authority={authority} copy={text} isSelected={index === selected} key={authority.authorityId} onSelect={() => setSelected(index)} />)}
                   </div>
-                  <Button asChild className="mt-4" size="sm" type="button" variant="outline"><Link to="/public-authorities"><MaterialIcon className="text-[17px]">manage_search</MaterialIcon>{text.verifyAuthority}</Link></Button>
+                  <Button asChild className="mt-4" nativeButton={false} size="sm" type="button" variant="outline"><Link to="/public-authorities"><MaterialIcon className="text-[17px]">manage_search</MaterialIcon>{text.verifyAuthority}</Link></Button>
                 </fieldset>
-              ) : (
-                <p className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm leading-6 text-foreground">{text.noAuthority}</p>
-              )}
+              ) : <p className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm leading-6 text-foreground">{text.noAuthority}</p>}
+            </div>
+          </section>
+          {error ? <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">{error}</p> : null}
+          <div className="flex flex-wrap justify-end gap-3">
+            <Button onClick={restart} type="button" variant="outline">{text.restart}</Button>
+            {selectedAuthority ? <Button disabled={isDrafting} onClick={() => void prepareDraft()} type="button"><MaterialIcon className="text-[18px]">auto_awesome</MaterialIcon>{isDrafting ? text.preparing : workflow.prepareDraft}</Button> : <Button asChild nativeButton={false} type="button"><Link to="/public-authorities">{text.directory}</Link></Button>}
+          </div>
+        </div>
+      )}
 
+      {step === 3 && (
+        <div className="space-y-4">
+          <section className="rounded-xl border border-border bg-card shadow-sm">
+            <div className="border-b border-border p-4 sm:p-5">
+              <h2 className="font-headline-md text-lg text-primary">{workflow.draftTitle}</h2>
+              <p className="mt-2 text-sm leading-6 text-on-surface-variant">{workflow.draftHint}</p>
+            </div>
+            <div className="space-y-4 p-4 sm:p-5">
+              {selectedAuthority ? <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3"><div><p className="text-sm font-semibold text-foreground">{workflow.selectedAuthority}</p><p className="mt-1 text-sm text-on-surface-variant">{selectedAuthority.authorityName}</p>{selectedAuthority.ministryName ? <p className="mt-1 text-xs text-muted-foreground">{selectedAuthority.ministryName}</p> : null}</div><Button onClick={() => setStep(2)} size="sm" type="button" variant="outline">{workflow.changeAuthority}</Button></div> : null}
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-1.5 text-sm font-medium text-foreground"><span>{text.subject}</span><input className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm font-normal outline-none focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15" maxLength={120} onChange={(event) => setSubject(event.target.value)} value={subject} /></label>
                 <div className="rounded-lg border border-border bg-muted/35 p-3"><p className="text-sm font-semibold text-foreground">{text.personalDetails}</p><p className="mt-1 text-sm leading-5 text-muted-foreground">{user ? text.signedIn : text.signedOut}</p></div>
               </div>
-              <label className="block space-y-1.5 text-sm font-medium text-foreground"><span>{text.requestText}</span><textarea className="min-h-56 w-full rounded-lg border border-input bg-background p-3 text-sm font-normal leading-6 outline-none focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15" maxLength={3000} onChange={(event) => setRequestText(event.target.value)} value={requestText} /></label>
+              <label className="block space-y-1.5 text-sm font-medium text-foreground"><span>{text.requestText}</span><textarea className="min-h-80 w-full rounded-lg border border-input bg-background p-3 text-sm font-normal leading-6 outline-none focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15" maxLength={3000} onChange={(event) => setRequestText(event.target.value)} value={requestText} /></label>
             </div>
           </section>
-
           <p className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-5 text-on-surface-variant"><MaterialIcon className="mr-2 align-[-3px] text-base text-primary">info</MaterialIcon>{text.noDirectSubmit}</p>
           <div className="flex flex-wrap justify-end gap-3">
             <Button onClick={restart} type="button" variant="outline">{text.restart}</Button>
-            {hasAuthority ? <Button disabled={!subject.trim() || !requestText.trim()} onClick={continueToForm} type="button"><MaterialIcon className="text-[18px]">arrow_forward</MaterialIcon>{text.continue}</Button> : <Button asChild type="button"><Link to="/public-authorities">{text.directory}</Link></Button>}
+            <Button disabled={!subject.trim() || !requestText.trim()} onClick={continueToForm} type="button"><MaterialIcon className="text-[18px]">arrow_forward</MaterialIcon>{text.continue}</Button>
           </div>
         </div>
       )}

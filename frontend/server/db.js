@@ -5,15 +5,40 @@ import { seedDatabase } from "./seed.js"
 let clientPromise
 let databasePromise
 
+function getMongoConnectionUri(uri) {
+  const directHosts = process.env.MONGODB_DIRECT_HOSTS
+    ?.split(",")
+    .map((host) => host.trim())
+    .filter(Boolean)
+    .join(",")
+
+  if (!directHosts || !uri.startsWith("mongodb+srv://")) return uri
+
+  const match = /^mongodb\+srv:\/\/([^@]+)@[^/]+(\/[^?]*)?(\?.*)?$/i.exec(uri)
+  if (!match) return uri
+
+  const [, credentials, databasePath = "/", search = ""] = match
+  const parameters = new URLSearchParams(search.slice(1))
+  parameters.set("tls", "true")
+  if (!parameters.has("authSource")) parameters.set("authSource", "admin")
+
+  const replicaSet = process.env.MONGODB_REPLICA_SET?.trim()
+  if (replicaSet) parameters.set("replicaSet", replicaSet)
+
+  return "mongodb://" + credentials + "@" + directHosts + databasePath + "?" + parameters.toString()
+}
+
 export async function getDatabase() {
   const uri = process.env.MONGODB_URI
   if (!uri) throw new Error("MONGODB_URI is not configured.")
 
   if (!clientPromise) {
-    const client = new MongoClient(uri, {
+    const client = new MongoClient(getMongoConnectionUri(uri), {
       maxPoolSize: 10,
       minPoolSize: 0,
-      serverSelectionTimeoutMS: 8_000,
+      // Atlas can take longer than a few seconds to complete its first TLS and
+      // replica-set discovery round, especially on a newly started dev server.
+      serverSelectionTimeoutMS: 30_000,
     })
     clientPromise = client.connect().catch((error) => {
       clientPromise = undefined

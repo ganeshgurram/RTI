@@ -1,10 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { IconTooltip } from "@/components/IconTooltip"
 import { Button } from "@/components/ui/button"
 import { usePortalLanguage, type PortalLanguage } from "@/i18n"
-import { useRequestGuidelines } from "@/request-guidelines/RequestGuidelinesContext"
 import type { AuthoritySuggestion } from "@/services/authority-recommendations"
 import {
   askRtiSahayak,
@@ -326,7 +325,7 @@ function AuthorityMatches({
 
 export function RtiSahayak() {
   const { language } = usePortalLanguage()
-  const { openRequestGuidelines } = useRequestGuidelines()
+  const navigate = useNavigate()
   const copy = chatCopy[language]
   const [isOpen, setIsOpen] = useState(false)
   const [hasScrolledDown, setHasScrolledDown] = useState(false)
@@ -449,16 +448,14 @@ export function RtiSahayak() {
     }
   }, [])
 
-  // The request form only accepts a ministry and authority pair it can find in its own option
-  // list, and it derives the ministry by the same walk up the directory that groups a suggestion
-  // here. A suggestion with no ministry is a top-level authority, which the form files under its
-  // own name rather than under a parent.
   const startRequestFor = (suggestion: AuthoritySuggestion) => {
+    const latestUserMessage = [...messages].reverse().find((message) => message.role === "user")
+
     setIsOpen(false)
-    openRequestGuidelines({
-      authority: {
-        name: suggestion.authorityName,
-        ministryName: suggestion.ministryName ?? suggestion.authorityName,
+    navigate("/file-with-sahayak", {
+      state: {
+        initialDescription: latestUserMessage ? getMessageText(latestUserMessage, language) : "",
+        initialAuthorityId: suggestion.authorityId,
       },
     })
   }

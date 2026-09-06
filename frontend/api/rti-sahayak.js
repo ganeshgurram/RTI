@@ -1,6 +1,10 @@
-const MAX_OUTPUT_TOKENS = 900
+const MAX_OUTPUT_TOKENS = 1400
 
-const OPENROUTER_MODEL = "openai/gpt-5.6-luna"
+const OPENROUTER_MODEL = (process.env.OPENROUTER_MODEL ?? "z-ai/glm-5.2:free").trim() || "z-ai/glm-5.2:free"
+const OPENROUTER_FREE_FALLBACK_MODELS = [
+  "minimax/minimax-m2.7:free",
+  "liquid/lfm-2.5-2.6b:free",
+]
 /**
  * One retry only. A 429 from a burst clears in a second, but a 429 from an exhausted
  * quota does not - and retrying into that just spends more of the allowance.
@@ -188,6 +192,33 @@ function getFilingInstruction({ language, authorityContext }) {
   ].filter(Boolean).join("\n\n")
 }
 
+function getAuthorityDraftInstruction({ language, authorityContext }) {
+  const outputLanguage = language === "hi" ? "clear Hindi in Devanagari script" : "clear English"
+
+  return [
+    "You are RTI Sahayak, drafting the impersonal information-request portion of an RTI application.",
+    "The applicant has selected the exact Public Authority in the official directory context below. Address the draft only to that authority. Never select, rename, or substitute another authority.",
+    "The applicant's personal details are unavailable and must never be requested, inferred, or included.",
+    "Write in " + outputLanguage + " with a formal, respectful, neutral tone suitable for an RTI application. Seek only existing records; do not make allegations, demands for explanations, legal conclusions, or claims.",
+    "Preserve the applicant's stated issue. Do not invent dates, reference numbers, places, documents, facts, outcomes, allegations, officials, or legal provisions.",
+    "Use this reference framework only as an internal guide to scope, tone, and the kinds of records that may be relevant. Write an original RTI application for the applicant's particular issue and selected authority. Do not copy, quote, closely paraphrase, or preserve the subject formula, heading, sentence wording, or sequence from the reference. Do not leave bracketed placeholders, generic slash alternatives, or instructions to the applicant in the result. If a date, reference, or application is not provided, omit that detail rather than inventing it.",
+    [
+      "Subject: Information regarding [short description of the issue/request]",
+      "",
+      "Information sought:",
+      "1. Please provide the current status of [application/request/complaint/work] submitted/related to [reference or subject], for the period from [date] to [date], if applicable.",
+      "2. Please provide certified copies of the records, file notings, correspondence, orders, reports, or other documents showing the action taken on the above matter.",
+      "3. Please provide the dates on which the matter was processed or forwarded at each stage and the designation of the officials/offices that handled it.",
+      "4. Please provide details of any decision, approval, rejection, objection, deficiency, or pending action recorded in connection with the matter.",
+      "5. If the matter is presently pending, please provide the record showing the present stage at which it is pending and the office/designation with which it is pending.",
+      "6. Please provide copies of the applicable rules, guidelines, circulars, orders, or prescribed time limits governing the processing of such matters.",
+      "7. Please provide any other records directly related to the action taken on this matter during the above-mentioned period.",
+    ].join("\n"),
+    `Return JSON only, with this exact shape: {"subject":"...","requestText":"..."}. Keep subject within 120 characters and requestText within 2800 characters. requestText must begin with one short, formal, grammatically complete sentence introducing the applicant's specific matter and the selected authority, ending with a colon. Follow it with a blank line and five to seven concise, focused numbered requests. The introductory sentence must be tailored to the issue; do not use a fixed heading, label, or boilerplate phrase. The phrase "Information sought" must not appear anywhere in requestText. Put every complete request on its own line, with a blank line between points. Do not include a salutation, closing, inline numbering, Markdown bullets, an addressee, signature, commentary, or text outside the JSON.`,
+    authorityContext,
+  ].filter(Boolean).join("\n\n")
+}
+
 export function containsSensitiveData(text) {
   return SENSITIVE_PATTERNS.some((pattern) => pattern.test(text))
 }
@@ -240,6 +271,25 @@ function getFilingConfig(body) {
   }
 
   return { description, authoritySuggestions }
+}
+
+function getAuthorityDraftConfig(body) {
+  const filing = getFilingConfig(body)
+  const selectedAuthorityIndex = body.selectedAuthorityIndex
+
+  if (
+    !filing ||
+    !Number.isInteger(selectedAuthorityIndex) ||
+    selectedAuthorityIndex < 0 ||
+    selectedAuthorityIndex >= filing.authoritySuggestions.length
+  ) {
+    return null
+  }
+
+  return {
+    description: filing.description,
+    authority: filing.authoritySuggestions[selectedAuthorityIndex],
+  }
 }
 
 /**
@@ -330,6 +380,19 @@ function extractOutput(payload) {
     .map((item) => item?.text ?? "")
     .join("")
     .trim()
+}
+
+/**
+ * Free models sometimes wrap otherwise-valid JSON in a Markdown code fence.
+ * Removing only that outer transport wrapper preserves the subject and request
+ * strings exactly as the model returned them.
+ */
+function parseDraftOutput(payload) {
+  const json = extractOutput(payload)
+    .replace(/^[\x60]{3}(?:json)?\s*/i, "")
+    .replace(/\s*[\x60]{3}$/, "")
+
+  return JSON.parse(json)
 }
 
 function getUsage(usage) {
@@ -543,6 +606,56 @@ async function prepareFiling(response, { apiKey, language, filing, safetyIdentif
   return sendJson(response, 200, { selectedAuthorityIndex: index, subject, requestText })
 }
 
+async function prepareAuthorityDraft(response, { apiKey, language, draft, safetyIdentifier, errors }) {
+  const authorityContext = buildAuthorityContext([draft.authority])
+  const result = await requestCompletion(apiKey, JSON.stringify({
+    model: OPENROUTER_MODEL,
+    models: OPENROUTER_FREE_FALLBACK_MODELS,
+    messages: [
+      { role: "system", content: getAuthorityDraftInstruction({ language, authorityContext }) },
+      { role: "user", content: draft.description },
+    ],
+    max_tokens: MAX_OUTPUT_TOKENS,
+    user: safetyIdentifier,
+  }))
+
+  if (result.failed) {
+    logUpstreamFailure(result)
+    return sendJson(response, result.isRateLimited ? 429 : 502, {
+      error: result.isRateLimited
+        ? errors.busy
+        : result.status === 401
+          ? "RTI Sahayak needs a valid OpenRouter API key to prepare the draft."
+          : errors.prepareFailed,
+    })
+  }
+
+  let prepared
+  try {
+    prepared = parseDraftOutput(result.payload)
+  } catch (error) {
+    console.warn("[RTI Sahayak] Draft response was not valid JSON", {
+      model: result.payload?.model ?? OPENROUTER_MODEL,
+      outputLength: extractOutput(result.payload).length,
+      reason: error instanceof Error ? error.message : "Unknown parse error",
+    })
+    return sendJson(response, 502, { error: errors.prepareFailed })
+  }
+
+  const subject = typeof prepared?.subject === "string" ? prepared.subject : ""
+  const requestText = typeof prepared?.requestText === "string" ? prepared.requestText : ""
+  if (!subject || subject.length > 120 || !requestText || requestText.length > 3000) {
+    console.warn("[RTI Sahayak] Draft response failed field validation", {
+      model: result.payload?.model ?? OPENROUTER_MODEL,
+      subjectLength: subject.length,
+      requestTextLength: requestText.length,
+    })
+    return sendJson(response, 502, { error: errors.prepareFailed })
+  }
+
+  return sendJson(response, 200, { subject, requestText })
+}
+
 export default async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST")
@@ -598,6 +711,26 @@ export default async function handler(request, response) {
 
     try {
       return await rewriteDraft(response, { apiKey, language, rewrite, safetyIdentifier, errors: messagesForLanguage })
+    } catch {
+      return sendJson(response, 502, { error: messagesForLanguage.unavailable })
+    }
+  }
+
+  if (body.task === "authority-draft") {
+    const draft = getAuthorityDraftConfig(body)
+
+    if (!draft) {
+      return sendJson(response, 400, { error: messagesForLanguage.prepareFailed })
+    }
+
+    try {
+      return await prepareAuthorityDraft(response, {
+        apiKey,
+        language,
+        draft,
+        safetyIdentifier,
+        errors: messagesForLanguage,
+      })
     } catch {
       return sendJson(response, 502, { error: messagesForLanguage.unavailable })
     }
