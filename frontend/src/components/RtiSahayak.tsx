@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react"
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
 import { IconTooltip } from "@/components/IconTooltip"
@@ -12,6 +12,12 @@ import {
   type ChatRole,
   type LocalizedText,
 } from "@/services/rti-sahayak"
+import {
+  VOICE_MESSAGE_EVENT,
+  VOICE_TRANSCRIPT_EVENT,
+  type VoiceMessageEventDetail,
+  type VoiceTranscriptEventDetail,
+} from "@/services/voice-conversation"
 
 type ChatMessage = {
   id: string
@@ -24,7 +30,7 @@ type ChatMessage = {
   /** What the message was originally written in - the fallback when a translation is missing. */
   sourceLanguage: PortalLanguage
   authoritySuggestions?: AuthoritySuggestion[]
-  source?: "gpt-5.6-luna" | "local"
+  source?: "gpt-5.6-luna" | "gemini-live" | "local"
 }
 
 type ChatCopy = {
@@ -465,17 +471,17 @@ export function RtiSahayak() {
     window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" })
   }
 
-  const sendMessage = async (rawMessage: string) => {
+  const sendMessage = async (rawMessage: string): Promise<string | undefined> => {
     const message = rawMessage.trim()
     if (!message || isSending) {
-      return
+      return undefined
     }
 
     setDraft("")
 
     if (containsSensitiveData(message)) {
       setHasPrivacyNotice(true)
-      return
+      return copy.privacyNotice
     }
 
     setHasPrivacyNotice(false)
@@ -505,8 +511,10 @@ export function RtiSahayak() {
 
       // Ignore a reply that belonged to a conversation the user has since cleared.
       if (conversationId !== activeConversation.current) {
-        return
+        return undefined
       }
+
+      const reply = response.reply[language] ?? response.reply.en ?? response.reply.hi ?? ""
 
       setMessages((currentMessages) => [
         ...currentMessages,
@@ -520,12 +528,61 @@ export function RtiSahayak() {
           source: response.source,
         },
       ])
+      return reply
     } finally {
       if (conversationId === activeConversation.current) {
         setIsSending(false)
       }
     }
   }
+
+  const handleVoiceMessage = useEffectEvent(({ message, onError, onReply }: VoiceMessageEventDetail) => {
+    setIsOpen(true)
+
+    void sendMessage(message).then((reply) => {
+      if (reply) {
+        onReply(reply)
+      } else {
+        onError()
+      }
+    })
+  })
+
+  const handleVoiceTranscript = useEffectEvent(({ role, text, language: transcriptLanguage }: VoiceTranscriptEventDetail) => {
+    const transcript = text.trim()
+    if (!transcript) return
+
+    setIsOpen(true)
+    setHasPrivacyNotice(false)
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        id: createMessageId(),
+        role,
+        text: localize(transcriptLanguage, transcript),
+        sourceLanguage: transcriptLanguage,
+        source: role === "assistant" ? "gemini-live" : undefined,
+      },
+    ])
+  })
+
+  // Voice requests deliberately pass through sendMessage so their transcript, history, privacy
+  // checks and assistant reply are the exact same ones shown in the chat panel.
+  useEffect(() => {
+    const onVoiceMessage = (event: Event) => {
+      handleVoiceMessage((event as CustomEvent<VoiceMessageEventDetail>).detail)
+    }
+    const onVoiceTranscript = (event: Event) => {
+      handleVoiceTranscript((event as CustomEvent<VoiceTranscriptEventDetail>).detail)
+    }
+
+    window.addEventListener(VOICE_MESSAGE_EVENT, onVoiceMessage)
+    window.addEventListener(VOICE_TRANSCRIPT_EVENT, onVoiceTranscript)
+    return () => {
+      window.removeEventListener(VOICE_MESSAGE_EVENT, onVoiceMessage)
+      window.removeEventListener(VOICE_TRANSCRIPT_EVENT, onVoiceTranscript)
+    }
+  }, [])
 
   const clearConversation = () => {
     activeConversation.current += 1
@@ -551,15 +608,15 @@ export function RtiSahayak() {
       {isOpen && (
         <section
           aria-label={copy.name + " chat"}
-          className="mb-3 flex h-[min(38rem,calc(100svh/var(--app-scale)-7.5rem))] w-[calc(100vw-2.5rem)] max-w-[25rem] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:w-[25rem]"
+          className="mb-3 flex h-[min(42rem,calc(100svh/var(--app-scale)-6rem))] w-[calc(100vw-2.5rem)] max-w-[27rem] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl sm:w-[27rem]"
         >
-          <header className="flex items-start gap-3 bg-primary px-4 py-3 text-primary-foreground">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
-              <span aria-hidden="true" className="material-symbols-outlined text-xl">support_agent</span>
+          <header className="flex items-start gap-2.5 bg-primary px-3.5 py-2.5 text-primary-foreground">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
+              <span aria-hidden="true" className="material-symbols-outlined text-lg">support_agent</span>
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-headline-md text-base font-semibold">{copy.name}</h2>
-              <p className="text-xs text-primary-foreground/75">{copy.subtitle}</p>
+              <p className="text-[11px] leading-4 text-primary-foreground/75">{copy.subtitle}</p>
             </div>
             <IconTooltip
               label={copy.closeChat}
@@ -578,23 +635,23 @@ export function RtiSahayak() {
             </IconTooltip>
           </header>
 
-          <div className="border-b border-border bg-muted/50 px-4 py-2 text-xs leading-5 text-muted-foreground">
-            <span aria-hidden="true" className="material-symbols-outlined mr-1 align-[-3px] text-sm">shield</span>
+          <div className="border-b border-border bg-muted/40 px-3.5 py-1.5 text-[11px] leading-4 text-muted-foreground">
+            <span aria-hidden="true" className="material-symbols-outlined mr-1 align-[-2px] text-sm">shield</span>
             {copy.privacyWarning}
           </div>
 
-          <div className="border-b border-border bg-background px-4 py-3">
-            <Link className="group flex w-full items-center gap-3 rounded-lg border border-primary/25 bg-primary px-3 py-2.5 text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2" onClick={() => setIsOpen(false)} to="/file-with-sahayak">
-              <span aria-hidden="true" className="flex size-7 shrink-0 items-center justify-center rounded-md bg-on-primary/15"><span className="material-symbols-outlined text-base">auto_awesome</span></span>
-              <span className="min-w-0 flex-1 text-xs font-semibold leading-5">{copy.guidedFiling}</span>
-              <span aria-hidden="true" className="material-symbols-outlined shrink-0 text-base">arrow_forward</span>
+          <div className="border-b border-border bg-background px-3.5 py-2">
+            <Link className="group flex w-full items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-2 text-primary transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2" onClick={() => setIsOpen(false)} to="/file-with-sahayak">
+              <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"><span className="material-symbols-outlined text-sm">auto_awesome</span></span>
+              <span className="min-w-0 flex-1 text-xs font-semibold leading-4">{copy.guidedFiling}</span>
+              <span aria-hidden="true" className="material-symbols-outlined shrink-0 text-base transition-transform group-hover:translate-x-0.5">arrow_forward</span>
             </Link>
           </div>
 
-          <div aria-live="polite" className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-4" ref={messageListRef}>
+          <div aria-live="polite" className="flex-1 space-y-2.5 overflow-y-auto bg-muted/20 p-3" ref={messageListRef}>
             {messages.map((message) => (
               <div
-                className={message.role === "user" ? "ml-9 whitespace-pre-wrap rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-sm leading-5 text-primary-foreground" : "mr-5 rounded-2xl rounded-bl-sm border border-border bg-background px-3 py-2 text-sm leading-5 text-foreground shadow-sm"}
+                className={message.role === "user" ? "ml-6 whitespace-pre-wrap rounded-xl rounded-br-sm bg-primary px-3 py-2 text-sm leading-5 text-primary-foreground" : "mr-2 rounded-xl rounded-bl-sm border border-border bg-background px-3 py-2 text-sm leading-5 text-foreground shadow-sm"}
                 key={message.id}
               >
                 {message.role === "assistant"
@@ -683,8 +740,8 @@ export function RtiSahayak() {
             </form>
 
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-              <Link className="font-medium text-foreground hover:underline" to="/faq">{copy.browseFaqs}</Link>
-              <button className="hover:text-foreground hover:underline" onClick={clearConversation} type="button">{copy.clearChat}</button>
+              <Link className="rounded-md px-2 py-1 font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" to="/faq">{copy.browseFaqs}</Link>
+              <button className="rounded-md px-2 py-1 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50" onClick={clearConversation} type="button">{copy.clearChat}</button>
             </div>
           </div>
         </section>

@@ -13,6 +13,12 @@ export class ApiError extends Error {
   }
 }
 
+export type VoiceSessionToken = {
+  token: string
+  expiresAt: string
+  model: string
+}
+
 /** Removes tokens saved by the pre-cookie implementation. */
 export function clearLegacyApiToken() {
   try {
@@ -54,4 +60,6 @@ export const api = {
   listNotifications: () => request<{ notifications: unknown[] }>("/api/notifications"),
   markNotificationRead: (notificationId: string) => request<void>(`/api/notifications/${encodeURIComponent(notificationId)}/read`, { method: "PATCH" }),
   markAllNotificationsRead: () => request<void>("/api/notifications/read-all", { method: "PATCH" }),
+  createVoiceSessionToken: () => request<VoiceSessionToken>("/api/voice/token", { method: "POST" }),
+  runVoiceAction: <T>(action: string, args: Record<string, unknown> = {}) => request<T>("/api/voice/actions", { method: "POST", body: JSON.stringify({ action, args }) }),
 }

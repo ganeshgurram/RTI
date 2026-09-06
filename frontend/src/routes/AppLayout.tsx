@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 
 import { RtiSahayak } from "@/components/RtiSahayak"
+import { VoiceAssistant } from "@/components/VoiceAssistant"
 import { RequestGuidelinesDialogProvider } from "@/request-guidelines/RequestGuidelinesDialog"
 import { StitchFooter, StitchTopNav } from "@/routes/stitch-shell"
 
@@ -22,6 +23,7 @@ export function AppLayout() {
           <Outlet />
         </main>
         <StitchFooter />
+        <VoiceAssistant />
         <RtiSahayak />
       </div>
     </RequestGuidelinesDialogProvider>

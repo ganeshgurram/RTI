@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { CSSProperties } from "react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
@@ -29,26 +29,51 @@ const flowchartHeight = 970
 
 function ServiceUpdateNotice() {
   const { language } = usePortalLanguage()
+  const messageViewportRef = useRef<HTMLDivElement>(null)
+  const messageMeasureRef = useRef<HTMLSpanElement>(null)
+  const [shouldMarquee, setShouldMarquee] = useState(false)
   const notice = language === "hi"
-    ? {
+      ? {
         label: "सेवा अपडेट",
-        message: "आरटीआई ऑनलाइन एक इंटरैक्टिव प्रोटोटाइप है। केवल नमूना जानकारी का उपयोग करें — अनुरोध, भुगतान और सूचनाओं की यात्राएँ सिमुलेट की गई हैं।",
+        message: "नया: आरटीआई सहायक वॉइस असिस्टेंट उपलब्ध है। माइक्रोफ़ोन दबाएँ और सामान्य आरटीआई प्रश्न पूछने के लिए ‘हे आरटीआई’ कहें।",
       }
     : {
         label: "Service update",
-        message: "RTI Online is an interactive prototype. Use sample information only — request, payment, and notification journeys are simulated.",
+        message: "New: RTI Sahayak Voice Assistant is available. Select the microphone and say “Hey RTI” to ask general RTI questions.",
       }
+
+  useLayoutEffect(() => {
+    const viewport = messageViewportRef.current
+    const message = messageMeasureRef.current
+    if (!viewport || !message) return
+
+    const measureOverflow = () => {
+      const nextShouldMarquee = message.getBoundingClientRect().width > viewport.clientWidth + 1
+      setShouldMarquee((current) => current === nextShouldMarquee ? current : nextShouldMarquee)
+    }
+
+    measureOverflow()
+    const resizeObserver = new ResizeObserver(measureOverflow)
+    resizeObserver.observe(viewport)
+
+    return () => resizeObserver.disconnect()
+  }, [notice.message])
 
   return (
     <aside aria-label={notice.label} className="bg-primary text-on-primary">
       <div className="mx-auto grid w-full max-w-container-max grid-cols-[minmax(0,1fr)] gap-y-1 px-margin-mobile py-2 text-sm leading-5 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:items-center sm:gap-x-3 md:px-margin-desktop">
         <span className="inline-flex items-center gap-1.5 font-semibold text-on-primary"><MaterialIcon className="text-base">campaign</MaterialIcon>{notice.label}</span>
         <span aria-hidden="true" className="hidden h-4 border-l border-on-primary/30 sm:inline" />
-        <div className="min-w-0 overflow-hidden text-on-primary/85">
-          <p className="service-update-message-marquee flex w-max whitespace-nowrap">
-            <span className="pr-12">{notice.message}</span>
-            <span aria-hidden="true" className="pr-12">{notice.message}</span>
-          </p>
+        <div className="relative min-w-0 overflow-hidden text-on-primary/85" ref={messageViewportRef}>
+          <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 invisible whitespace-nowrap" ref={messageMeasureRef}>{notice.message}</span>
+          {shouldMarquee ? (
+            <p className="service-update-message-marquee flex w-max whitespace-nowrap">
+              <span className="pr-12">{notice.message}</span>
+              <span aria-hidden="true" className="pr-12">{notice.message}</span>
+            </p>
+          ) : (
+            <p className="w-max whitespace-nowrap">{notice.message}</p>
+          )}
         </div>
       </div>
     </aside>

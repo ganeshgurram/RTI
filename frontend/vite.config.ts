@@ -6,18 +6,25 @@ import tailwindcss from "@tailwindcss/vite"
 import { defineConfig, loadEnv, type Plugin } from "vite"
 
 import rtiSahayakHandler from "./api/rti-sahayak.js"
+import voiceSpeechHandler from "./api/voice-speech.js"
 
-type RtiSahayakRequest = IncomingMessage & {
+type ApiRequest = IncomingMessage & {
   body?: unknown
 }
 
-function rtiSahayakDevRoute(): Plugin {
+const aiRouteHandlers = {
+  "/api/rti-sahayak": rtiSahayakHandler,
+  "/api/voice-speech": voiceSpeechHandler,
+}
+
+function aiDevRoutes(): Plugin {
   return {
-    name: "rti-sahayak-dev-route",
+    name: "ai-dev-routes",
     configureServer(server) {
-      server.middlewares.use((request: RtiSahayakRequest, response: ServerResponse, next) => {
+      server.middlewares.use((request: ApiRequest, response: ServerResponse, next) => {
         const pathname = request.url?.split("?")[0]
-        if (pathname !== "/api/rti-sahayak") {
+        const handler = pathname ? aiRouteHandlers[pathname as keyof typeof aiRouteHandlers] : undefined
+        if (!handler) {
           next()
           return
         }
@@ -36,7 +43,7 @@ function rtiSahayakDevRoute(): Plugin {
             return
           }
 
-          void rtiSahayakHandler(request, response)
+          void handler(request, response)
         })
       })
     },
@@ -46,7 +53,13 @@ function rtiSahayakDevRoute(): Plugin {
 export default defineConfig(({ mode }) => {
   const frontendEnv = loadEnv(mode, ".", "")
   const workspaceEnv = loadEnv(mode, path.resolve(import.meta.dirname, ".."), "")
-  for (const variableName of ["OPENROUTER_API_KEY", "OPENAI_API_KEY"]) {
+  for (const variableName of [
+    "OPENROUTER_API_KEY",
+    "OPENROUTER_MODEL",
+    "OPENAI_API_KEY",
+    "VOICE_TTS_MODEL",
+    "VOICE_TTS_VOICE",
+  ]) {
     const apiKey =
       frontendEnv[variableName] ??
       workspaceEnv[variableName] ??
@@ -58,7 +71,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react(), tailwindcss(), rtiSahayakDevRoute()],
+    plugins: [react(), tailwindcss(), aiDevRoutes()],
     server: {
       proxy: {
         "/api/auth": "http://127.0.0.1:8787",
@@ -67,6 +80,7 @@ export default defineConfig(({ mode }) => {
         "/api/public": "http://127.0.0.1:8787",
         "/api/payments": "http://127.0.0.1:8787",
         "/api/notifications": "http://127.0.0.1:8787",
+        "/api/voice": "http://127.0.0.1:8787",
         "/api/health": "http://127.0.0.1:8787",
       },
     },
