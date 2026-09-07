@@ -17,6 +17,7 @@ type VoiceCopy = {
   activate: string
   deactivate: string
   connecting: string
+  waitingForWake: string
   listening: string
   answering: string
   permissionRequired: string
@@ -29,7 +30,8 @@ const voiceCopy: Record<PortalLanguage, VoiceCopy> = {
     activate: "Enable voice assistant",
     deactivate: "Stop voice assistant",
     connecting: "Starting a secure voice session...",
-    listening: "Say “Hey RTI” to begin",
+    waitingForWake: "Say “Hey RTI” to begin",
+    listening: "Listening…",
     answering: "RTI Sahayak is answering...",
     permissionRequired: "Allow microphone access to use voice assistance.",
     unavailable: "Voice assistance is unavailable right now. Please try again.",
@@ -39,7 +41,8 @@ const voiceCopy: Record<PortalLanguage, VoiceCopy> = {
     activate: "वॉइस सहायक चालू करें",
     deactivate: "वॉइस सहायक बंद करें",
     connecting: "सुरक्षित वॉइस सत्र शुरू हो रहा है...",
-    listening: "शुरू करने के लिए “हे आरटीआई” कहें",
+    waitingForWake: "शुरू करने के लिए “हे आरटीआई” कहें",
+    listening: "सुन रही हूँ…",
     answering: "आरटीआई सहायक जवाब दे रहा है...",
     permissionRequired: "वॉइस सहायक इस्तेमाल करने के लिए माइक्रोफ़ोन की अनुमति दें।",
     unavailable: "वॉइस सहायक अभी उपलब्ध नहीं है। कृपया फिर कोशिश करें।",
@@ -49,7 +52,8 @@ const voiceCopy: Record<PortalLanguage, VoiceCopy> = {
     activate: "వాయిస్ సహాయకుడిని ప్రారంభించండి",
     deactivate: "వాయిస్ సహాయకుడిని ఆపండి",
     connecting: "సురక్షిత వాయిస్ సెషన్ ప్రారంభమవుతోంది...",
-    listening: "ప్రారంభించడానికి “హే RTI” అని చెప్పండి",
+    waitingForWake: "ప్రారంభించడానికి “హే RTI” అని చెప్పండి",
+    listening: "వింటున్నాను…",
     answering: "RTI సహాయక్ సమాధానం ఇస్తోంది...",
     permissionRequired: "వాయిస్ సహాయాన్ని ఉపయోగించడానికి మైక్రోఫోన్ అనుమతిని ఇవ్వండి.",
     unavailable: "వాయిస్ సహాయం ప్రస్తుతం అందుబాటులో లేదు. దయచేసి మళ్లీ ప్రయత్నించండి.",
@@ -59,7 +63,8 @@ const voiceCopy: Record<PortalLanguage, VoiceCopy> = {
     activate: "ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
     deactivate: "ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ನಿಲ್ಲಿಸಿ",
     connecting: "ಸುರಕ್ಷಿತ ಧ್ವನಿ ಅವಧಿಯನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ...",
-    listening: "ಪ್ರಾರಂಭಿಸಲು “ಹೇ RTI” ಎಂದು ಹೇಳಿ",
+    waitingForWake: "ಪ್ರಾರಂಭಿಸಲು “ಹೇ RTI” ಎಂದು ಹೇಳಿ",
+    listening: "ಕೇಳುತ್ತಿದ್ದೇನೆ…",
     answering: "RTI ಸಹಾಯಕ ಉತ್ತರಿಸುತ್ತಿದೆ...",
     permissionRequired: "ಧ್ವನಿ ಸಹಾಯವನ್ನು ಬಳಸಲು ಮೈಕ್ರೊಫೋನ್ ಅನುಮತಿ ನೀಡಿ.",
     unavailable: "ಧ್ವನಿ ಸಹಾಯವು ಇದೀಗ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
@@ -71,6 +76,8 @@ const OUTPUT_SAMPLE_RATE = 24_000
 // Gemini still performs server-side VAD. This lightweight browser check only gives it a
 // dependable end-of-turn signal when a continuously open microphone has a noisy floor.
 const SPEECH_LEVEL_THRESHOLD = 0.012
+/** A single microphone spike should not start a conversational turn. */
+const MIN_SPEECH_CHUNKS = 2
 const END_OF_SPEECH_SILENCE_MS = 800
 const AUDIO_PRE_ROLL_CHUNKS = 4
 const PAGE_PATHS = {
@@ -223,6 +230,7 @@ export function VoiceAssistant() {
   const navigate = useNavigate()
   const copy = voiceCopy[language]
   const [isEnabled, setIsEnabled] = useState(false)
+  const [hasStartedConversation, setHasStartedConversation] = useState(false)
   const [status, setStatus] = useState<VoiceStatus>("idle")
   const sessionRef = useRef<Session | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -235,6 +243,7 @@ export function VoiceAssistant() {
   const isEnabledRef = useRef(false)
   const isStartingRef = useRef(false)
   const audioStreamOpenRef = useRef(false)
+  const speechChunkCountRef = useRef(0)
   const lastDetectedSpeechAtRef = useRef(0)
   const preRollAudioRef = useRef<string[]>([])
   const languageRef = useRef(language)
@@ -280,9 +289,11 @@ export function VoiceAssistant() {
     isStartingRef.current = false
     isEnabledRef.current = false
     audioStreamOpenRef.current = false
+    speechChunkCountRef.current = 0
     lastDetectedSpeechAtRef.current = 0
     preRollAudioRef.current = []
     setIsEnabled(false)
+    setHasStartedConversation(false)
     setStatus("idle")
     discardAssistantTranscript()
     pendingInputTranscriptRef.current = ""
@@ -527,12 +538,14 @@ export function VoiceAssistant() {
     const outputText = content.outputTranscription?.text
     if (outputText) {
       completeInputTranscript()
+      setHasStartedConversation(true)
       assistantTranscriptRef.current = appendTranscript(assistantTranscriptRef.current, outputText)
       publishAssistantTranscript()
     }
     for (const part of content.modelTurn?.parts ?? []) {
       if (part.inlineData?.data) {
         completeInputTranscript()
+        setHasStartedConversation(true)
         setStatus("answering")
         playAudioChunk(part.inlineData.data)
       }
@@ -552,6 +565,7 @@ export function VoiceAssistant() {
     }
 
     isStartingRef.current = true
+    setHasStartedConversation(false)
     setStatus("connecting")
 
     try {
@@ -686,9 +700,16 @@ export function VoiceAssistant() {
           const preRoll = preRollAudioRef.current
           preRoll.push(audio)
           if (preRoll.length > AUDIO_PRE_ROLL_CHUNKS) preRoll.shift()
-          if (!isSpeech) return
+          if (!isSpeech) {
+            speechChunkCountRef.current = 0
+            return
+          }
+
+          speechChunkCountRef.current += 1
+          if (speechChunkCountRef.current < MIN_SPEECH_CHUNKS) return
 
           audioStreamOpenRef.current = true
+          speechChunkCountRef.current = 0
           lastDetectedSpeechAtRef.current = now
           for (const chunk of preRoll) {
             activeSession.sendRealtimeInput({ audio: { data: chunk, mimeType: "audio/pcm;rate=16000" } })
@@ -706,8 +727,8 @@ export function VoiceAssistant() {
         if (now - lastDetectedSpeechAtRef.current >= END_OF_SPEECH_SILENCE_MS) {
           activeSession.sendRealtimeInput({ audioStreamEnd: true })
           audioStreamOpenRef.current = false
+          speechChunkCountRef.current = 0
           lastDetectedSpeechAtRef.current = 0
-          setStatus("answering")
         }
       }
       setStatus("listening")
@@ -730,10 +751,14 @@ export function VoiceAssistant() {
   useEffect(() => {
     publishVoiceStatus({
       isActive: isEnabled || isStartingRef.current,
-      label: status === "idle" ? null : copy[status],
+      label: status === "idle"
+        ? null
+        : status === "listening"
+          ? hasStartedConversation ? copy.listening : copy.waitingForWake
+          : copy[status],
       status,
     })
-  }, [copy, isEnabled, status])
+  }, [copy, hasStartedConversation, isEnabled, status])
 
   useEffect(() => {
     const onVoiceToggle = () => toggleVoiceAssistant()

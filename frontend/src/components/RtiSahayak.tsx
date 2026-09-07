@@ -500,72 +500,75 @@ export function RtiSahayak() {
   const [hasPrivacyNotice, setHasPrivacyNotice] = useState(false)
   /** Messages whose translation was already tried and failed - retrying would loop forever. */
   const [failedTranslations, setFailedTranslations] = useState<ReadonlySet<string>>(() => new Set())
+  const [isTranslating, setIsTranslating] = useState(false)
   const safetyIdentifier = useRef(createSafetyIdentifier())
   const activeConversation = useRef(0)
-  const isTranslatingRef = useRef(false)
+  const portalLanguageRef = useRef(language)
+  const translationRunRef = useRef(0)
   const launcherRef = useRef<HTMLDivElement>(null)
   const messageListRef = useRef<HTMLDivElement>(null)
   const draftRef = useRef<HTMLTextAreaElement>(null)
 
-  // Both derived rather than stored, so they clear themselves the moment a message is carried
-  // across, and the indicator appears the instant the language flips rather than one pass later.
-  const isTranslating = messages.some((message) => needsTranslation(message, language, failedTranslations))
   const translationFailed = messages.some(
     (message) =>
       message.text[language] === undefined && failedTranslations.has(getTranslationKey(message, language))
   )
 
-  // Switching the portal language keeps the conversation rather than clearing it, so a message
-  // the model wrote in the other language has to be carried across. This also covers a reply
-  // that lands after the switch, which was generated in the language it was asked in.
+  // Keep every new message in the exact language in which it arrived. Existing chat history is
+  // translated only when the applicant deliberately changes the portal language.
   useEffect(() => {
-    if (isTranslatingRef.current) {
+    const previousLanguage = portalLanguageRef.current
+    portalLanguageRef.current = language
+    const run = translationRunRef.current + 1
+    translationRunRef.current = run
+    if (previousLanguage === language) {
       return
     }
 
     const pending = messages.filter((message) => needsTranslation(message, language, failedTranslations))
-
     if (!pending.length) {
+      setIsTranslating(false)
       return
     }
 
-    // The target is captured rather than read later: a switch back mid-flight must still file
-    // the answer under the language it was requested in, not under whatever is selected now.
     const targetLanguage = language
-    isTranslatingRef.current = true
+    setIsTranslating(true)
 
     void (async () => {
-      const result = await translateChatMessages({
-        texts: pending.map((message) => getMessageText(message, targetLanguage)),
-        language: targetLanguage,
-        safetyIdentifier: safetyIdentifier.current,
-      })
+      let remaining = pending
 
-      // Released before the state updates below, so the pass they trigger can start the next
-      // batch. Every branch here changes state, so a pass always follows.
-      isTranslatingRef.current = false
+      while (remaining.length && translationRunRef.current === run) {
+        const result = await translateChatMessages({
+          texts: remaining.map((message) => getMessageText(message, targetLanguage)),
+          language: targetLanguage,
+          safetyIdentifier: safetyIdentifier.current,
+        })
 
-      if (result) {
-        // A batch is capped by size, so the rest is picked up when this state change re-runs.
-        const translated = new Map(
-          result.translations.map((text, index) => [pending[index].id, text] as const)
-        )
+        if (translationRunRef.current !== run) return
 
+        if (!result) {
+          setFailedTranslations((current) => {
+            const next = new Set(current)
+            remaining.forEach((message) => next.add(getTranslationKey(message, targetLanguage)))
+            return next
+          })
+          break
+        }
+
+        const batch = remaining.slice(0, result.translations.length)
+        const translated = new Map(result.translations.map((text, index) => [batch[index]?.id, text] as const))
         setMessages((currentMessages) =>
           currentMessages.map((message) => {
             const text = translated.get(message.id)
             return text ? { ...message, text: { ...message.text, [targetLanguage]: text } } : message
           })
         )
-      } else {
-        setFailedTranslations((current) => {
-          const next = new Set(current)
-          pending.forEach((message) => next.add(getTranslationKey(message, targetLanguage)))
-          return next
-        })
+        remaining = remaining.slice(batch.length)
       }
+
+      if (translationRunRef.current === run) setIsTranslating(false)
     })()
-  }, [language, messages, failedTranslations])
+  }, [language])
 
   // Grow the box to fit what has been typed instead of making the user scroll inside it.
   // Height is cleared first so the box also shrinks back when text is deleted.
