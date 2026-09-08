@@ -121,7 +121,7 @@ export function PaymentReconciliationPage() {
               {errors.lookup ? <p className="rounded-md border border-error-container bg-error-container/20 p-3 text-sm font-medium text-error" role="alert">{errors.lookup}</p> : null}
               <div className="mt-2 flex justify-center gap-stack-md border-t border-surface-container-high pt-4 md:justify-start md:pl-[calc(33.333%+1.25rem)]">
                 <button className="min-w-30 rounded-lg border border-outline-variant bg-surface-container px-6 py-2 font-label-lg text-label-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface" onClick={resetForm} type="button">{t("requestForm.reset")}</button>
-                <button className="min-w-30 rounded-lg bg-primary px-6 py-2 font-label-lg text-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><MaterialIcon className="mr-1 text-lg">search</MaterialIcon>{t("payment.locate")}</button>
+                <button className="inline-flex min-w-30 items-center justify-center gap-1 rounded-lg bg-primary px-6 py-2 font-label-lg text-label-lg text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><MaterialIcon className="text-lg">search</MaterialIcon>{t("payment.locate")}</button>
               </div>
             </form>
         </div>

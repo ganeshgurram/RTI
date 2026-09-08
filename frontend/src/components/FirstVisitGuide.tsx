@@ -95,9 +95,11 @@ export function FirstVisitGuide() {
         <ol className="mt-5 grid gap-3 md:grid-cols-3">
           {text.steps.map((step) => (
             <li className="rounded-lg border border-border bg-background/70 p-4" key={step.path}>
-              <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary"><span aria-hidden="true" className="material-symbols-outlined text-xl">{step.icon}</span></span>
-              <h3 className="mt-3 text-sm font-semibold text-on-surface">{step.title}</h3>
-              <p className="mt-1 min-h-15 text-sm leading-5 text-on-surface-variant">{step.body}</p>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-on-surface">{step.title}</h3>
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><span aria-hidden="true" className="material-symbols-outlined text-xl">{step.icon}</span></span>
+              </div>
+              <p className="mt-2 min-h-15 text-sm leading-5 text-on-surface-variant">{step.body}</p>
             </li>
           ))}
         </ol>

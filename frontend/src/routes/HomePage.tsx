@@ -495,16 +495,19 @@ export function HomePage() {
                           {t("home.lifecycle.guideCurrent")}: {t(journeyGuides[activeGuide].titleKey)}
                         </span>
                       </div>
-                      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
                         {journeyGuideOrder.map((guideId) => {
                           const guide = journeyGuides[guideId]
                           const isSelected = activeGuide === guideId
+                          const guideTitle = t(guide.titleKey)
+                          const guideDescription = t(guide.descriptionKey)
 
                           return (
                             <button
+                              aria-label={`${guideTitle}. ${guideDescription}`}
                               aria-pressed={isSelected}
                               className={[
-                                "group flex min-h-[108px] items-start gap-3 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                                "group flex min-h-[88px] flex-col gap-1.5 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                                 isSelected
                                   ? "border-primary bg-primary-fixed text-primary"
                                   : "border-outline-variant bg-surface-container-lowest text-on-surface hover:border-primary/40",
@@ -516,16 +519,16 @@ export function HomePage() {
                               }}
                               type="button"
                             >
-                              <span className={[
-                                "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
-                                isSelected ? "bg-primary text-on-primary" : "bg-surface-container-high text-primary",
-                              ].join(" ")}>
-                                <MaterialIcon className="text-base">{guide.icon}</MaterialIcon>
+                              <span className="flex min-w-0 items-center gap-2.5">
+                                <span className={[
+                                  "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
+                                  isSelected ? "bg-primary text-on-primary" : "bg-surface-container-high text-primary",
+                                ].join(" ")}>
+                                  <MaterialIcon className="text-base">{guide.icon}</MaterialIcon>
+                                </span>
+                                <span className="block text-sm font-semibold leading-tight">{guideTitle}</span>
                               </span>
-                              <span>
-                                <span className="block text-sm font-semibold leading-tight">{t(guide.titleKey)}</span>
-                                <span className="mt-1 block text-xs leading-relaxed text-on-surface-variant">{t(guide.descriptionKey)}</span>
-                              </span>
+                              <span className="ml-[42px] block text-[11px] leading-4 text-on-surface-variant">{guideDescription}</span>
                             </button>
                           )
                         })}
